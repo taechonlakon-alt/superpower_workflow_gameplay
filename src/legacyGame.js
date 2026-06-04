@@ -1,15 +1,15 @@
 import game from "./data/gameData.js";
 
 let root = null;
-const starterWorkflowSkills = ["grill", "spec", "tdd"];
+const starterWorkflowSkills = [];
 let audioContext = null;
 let soundEnabled = true;
 let state = createInitialState();
 
 function createInitialState() {
   return {
-    showHeroPopup: true,
-    screen: "step",
+    showHeroPopup: false,
+    screen: "title",
     index: 0,
     progress: 0,
     activeChaos: null,
@@ -570,6 +570,12 @@ function startMission() {
   render();
 }
 
+function startSkillDraft() {
+  state.activeSkillDetail = null;
+  state.screen = "setup";
+  render();
+}
+
 function acknowledgePhaseGoal() {
   const step = getCurrentStep();
   if (!step?.goal || state.seenPhaseGoals.includes(step.id)) return;
@@ -1053,6 +1059,16 @@ function renderSetup() {
     button.addEventListener("click", () => openSkillDetail(button.dataset.skill));
   });
   root.querySelector(".start-mission")?.addEventListener("click", startMission);
+}
+
+function renderTitle() {
+  root.innerHTML = `
+    <main class="app">
+      ${heroMarkup()}
+    </main>
+  `;
+
+  root.querySelector(".hero-start-btn")?.addEventListener("click", startSkillDraft);
 }
 
 function renderStep(step, isEmergency = false) {
@@ -1733,7 +1749,9 @@ function renderResult() {
 }
 
 function render() {
-  if (state.screen === "setup") {
+  if (state.screen === "title") {
+    renderTitle();
+  } else if (state.screen === "setup") {
     renderSetup();
   } else if (state.screen === "resolution") {
     renderResolution();

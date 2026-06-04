@@ -23,4 +23,4 @@ The production build is written to `dist/`.
 
 The project has a React entrypoint, while the proven legacy game engine is mounted through `src/components/LegacyGameHost.jsx`.
 
-The initial gameplay flow should start directly at `Brainstorm` with the starter workflow tools enabled in the background: `Grill Client`, `Spec Doc`, and `TDD`.
+The initial gameplay flow is: title/start screen, Superpower Draft skill selection, then the first `Phase Goal` before `Brainstorm` choices.

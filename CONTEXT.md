@@ -74,10 +74,11 @@ The current migration keeps the proven gameplay engine intact inside `src/legacy
 
 Start-flow invariant:
 
-- The player should start directly at `Brainstorm`.
-- `Skill Draft` / `Start Mission` setup UI must not be the initial visible flow.
-- Starter workflow tools are enabled in the background: `Grill Client`, `Spec Doc`, and `TDD`.
-- In code, `starterWorkflowSkills` should remain `["grill", "spec", "tdd"]` and initial `screen` should remain `"step"` unless a deliberate redesign changes the start flow.
+- The player should first see the title/start screen with the `เริ่มภารกิจ` button.
+- Pressing `เริ่มภารกิจ` should show the Superpower Draft skill-selection screen.
+- Pressing `Start Mission` after choosing exactly 3 skills should enter `Brainstorm`.
+- The first `Phase Goal` popup should appear only after the skill-selection screen, not as the first visible screen.
+- In code, initial `screen` should remain `"title"` and `starterWorkflowSkills` should remain `[]` unless a deliberate redesign changes the start flow.
 
 ## Current Gameplay Structure
 
