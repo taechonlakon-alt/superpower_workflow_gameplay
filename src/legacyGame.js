@@ -541,24 +541,34 @@ function continueAfterResolution() {
 }
 
 function toggleSkill(skillId) {
+  console.log("toggleSkill called with ID:", skillId);
   if (state.skills.includes(skillId)) {
     state.skills = state.skills.filter((id) => id !== skillId);
+    state.activeSkillDetail = null;
+    console.log("Skill removed. Current skills:", state.skills);
     render();
     return;
   }
 
-  if (state.skills.length >= game.maxSkills) return;
+  if (state.skills.length >= game.maxSkills) {
+    console.log("Cannot add skill. Already at max skills:", state.skills);
+    return;
+  }
   state.skills = [...state.skills, skillId];
+  state.activeSkillDetail = null;
+  console.log("Skill added. Current skills:", state.skills);
   render();
 }
 
 function openSkillDetail(skillId) {
+  console.log("openSkillDetail called with ID:", skillId);
   if (!getSkill(skillId)) return;
   state.activeSkillDetail = skillId;
   render();
 }
 
 function closeSkillDetail() {
+  console.log("closeSkillDetail called");
   state.activeSkillDetail = null;
   render();
 }
@@ -1008,11 +1018,26 @@ function renderSkillDetailPopup() {
     return;
   }
 
+  console.log("renderSkillDetailPopup opening popup for:", skill.id);
   root.insertAdjacentHTML("beforeend", skillDetailPopupMarkup(skill));
-  root.querySelector(".skill-detail-close")?.addEventListener("click", closeSkillDetail);
-  root.querySelector(".skill-detail-toggle")?.addEventListener("click", () => toggleSkill(skill.id));
+  
+  const closeBtn = root.querySelector(".skill-detail-close");
+  console.log("Found close button:", !!closeBtn);
+  closeBtn?.addEventListener("click", () => {
+    console.log("close button clicked inside popup");
+    closeSkillDetail();
+  });
+
+  const toggleBtn = root.querySelector(".skill-detail-toggle");
+  console.log("Found toggle button:", !!toggleBtn);
+  toggleBtn?.addEventListener("click", () => {
+    console.log("toggle button clicked inside popup for:", skill.id);
+    toggleSkill(skill.id);
+  });
+
   root.querySelector(".skill-detail-overlay")?.addEventListener("click", (event) => {
     if (event.target.classList.contains("skill-detail-overlay")) {
+      console.log("overlay clicked (outside popup)");
       closeSkillDetail();
     }
   });
@@ -1056,7 +1081,9 @@ function renderSetup() {
 
   bindCommonUi();
   root.querySelectorAll(".skill-card").forEach((button) => {
-    button.addEventListener("click", () => openSkillDetail(button.dataset.skill));
+    button.addEventListener("click", () => {
+      openSkillDetail(button.dataset.skill);
+    });
   });
   root.querySelector(".start-mission")?.addEventListener("click", startMission);
 }
@@ -1804,4 +1831,10 @@ export function mountLegacyGame(container) {
       root = null;
     }
   };
+}
+
+if (import.meta.hot) {
+  import.meta.hot.accept(() => {
+    window.location.reload();
+  });
 }
