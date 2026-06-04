@@ -1,5 +1,5 @@
 // SUPERPOWER WORKFLOW gameplay data. Loaded before script.js.
-window.SPW_GAME_DATA = {
+const gameData = {
   title: "SUPERPOWER WORKFLOW",
   stage: "Stage 01: Booking MVP Rush",
   intro:
