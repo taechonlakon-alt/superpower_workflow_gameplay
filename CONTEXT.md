@@ -257,7 +257,7 @@ Current Superpowers:
 - `Code Walkthrough`
 - `Real-time Risk Scanner`
 - `Scaffolds`
-- `Terraform and OpenTofu`
+- `Terraform`
 
 Removed from the core skill list:
 
@@ -280,13 +280,13 @@ Full skill detail lives in the Skill Detail popup opened by clicking a skill car
 
 The card itself should remain clickable even after 3 skills are selected so players can still inspect other skill details.
 
-## Terraform and OpenTofu Skill Rule
+## Terraform Skill Rule
 
-`Terraform and OpenTofu` is a playable Superpower selected as 1 of the 3 cards. It unlocks IaC-focused choices for Plan, Execute, and Review.
+`Terraform` is a playable Superpower selected as 1 of the 3 cards. It unlocks IaC-focused choices for Plan, Execute, and Review.
 
-This skill covers Terraform and OpenTofu testing, module patterns, CI/CD, production patterns, backend/state, variables/secrets, and direct Terraform and OpenTofu best practices.
+This skill covers Terraform testing, module patterns, CI/CD, production patterns, backend/state, variables/secrets, and direct Terraform best practices.
 
-Safety rule: Terraform and OpenTofu copy must never imply that AI should auto-run `terraform apply` or `destroy`. Infra skills are riskier than docs skills because they can involve commands that create or delete real resources. Gameplay copy should always frame this skill as plan-only, review-first, and approval-gated before any resource-changing command.
+Safety rule: Terraform copy must never imply that AI should auto-run `terraform apply` or `destroy`. Infra skills are riskier than docs skills because they can involve commands that create or delete real resources. Gameplay copy should always frame this skill as plan-only, review-first, and approval-gated before any resource-changing command.
 
 ## Skill Synergy
 
@@ -295,7 +295,7 @@ Specific combinations of skills can unlock powerful synergy options.
 Current example:
 
 - `Spec Doc + TDD` unlocks `Automated Guardrails` during Execute.
-- `Terraform and OpenTofu + Real-time Risk Scanner` unlocks `IaC Safety Gate` during Execute.
+- `Terraform + Real-time Risk Scanner` unlocks `IaC Safety Gate` during Execute.
 
 Synergy options should feel special and powerful, but still have a cost. The current `Automated Guardrails` option increases token usage while strongly reducing risk.
 
