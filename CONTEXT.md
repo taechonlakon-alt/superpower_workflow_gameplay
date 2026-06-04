@@ -36,22 +36,48 @@ The current design goal is no longer just “teach workflow clearly.” It shoul
 
 ## Technical Constraints
 
-Keep the project extremely simple:
+The project has been migrated from a static file app to a React/Vite frontend.
+Keep the runtime simple and preserve the legacy gameplay behavior while the UI is migrated incrementally.
 
 - `index.html`
-- `style.css`
-- `game-data.js`
-- `script.js`
+- `package.json`
+- `vite.config.js`
+- `src/main.jsx`
+- `src/App.jsx`
+- `src/components/LegacyGameHost.jsx`
+- `src/data/gameData.js`
+- `src/legacyGame.js`
+- `src/styles.css`
 
-No framework. No build step. No module system beyond what already works in the current file structure.
+Use React + Vite + JavaScript. Do not add TypeScript or a state library unless the legacy engine is being actively decomposed into React components and the extra structure is justified.
 
 Current file split:
 
-- `game-data.js` owns gameplay content and data: title, caps, skills, stages, choices, effects, lessons, chaos events, and emergency options.
-- `script.js` owns game engine and UI behavior: state, rendering, choice handling, reports, sounds, and interactions.
-- `index.html` must load `game-data.js` before `script.js`.
+- `src/data/gameData.js` owns gameplay content and data: title, caps, skills, stages, choices, effects, lessons, chaos events, and emergency options.
+- `src/legacyGame.js` currently owns the legacy game engine and generated UI behavior: state, rendering, choice handling, reports, sounds, and interactions.
+- `src/components/LegacyGameHost.jsx` mounts the legacy engine inside React while the UI is migrated incrementally.
+- `src/styles.css` owns the global visual system and resolves assets through Vite.
 
-The game should work by opening `index.html` directly or with Live Server.
+Run locally with:
+
+- `npm install`
+- `npm run dev`
+- `npm run build`
+
+The game no longer supports opening `index.html` directly as the primary runtime path because Vite now owns module resolution and asset bundling.
+
+## React Migration State
+
+This checkout is now a React/Vite frontend named `superpower_workflow_game`.
+
+The current migration keeps the proven gameplay engine intact inside `src/legacyGame.js` and mounts it through React. Future work should move rendering into React components phase by phase, but must preserve current gameplay behavior before deleting the legacy renderer.
+
+Start-flow invariant:
+
+- The player should start directly at `Brainstorm`.
+- `Skill Draft` / `Start Mission` setup UI must not be the initial visible flow.
+- Starter workflow tools are enabled in the background: `Grill Client`, `Spec Doc`, and `TDD`.
+- In code, `starterWorkflowSkills` should remain `["grill", "spec", "tdd"]` and initial `screen` should remain `"step"` unless a deliberate redesign changes the start flow.
 
 ## Current Gameplay Structure
 
