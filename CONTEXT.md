@@ -134,6 +134,8 @@ The main panel should show the `Brief` only. `Brief` should be a compact task st
 
 Phase issues are deterministic and must belong to the current phase. Do not use random chance to pull unrelated issues into the wrong phase.
 
+Phase issues are pressure-based, not just `progress < requiredProgress`. A normal decision can reveal the phase issue when the latest choice adds high risk (`risk >= 4`), creates heavy quality debt (`quality <= -2`), or the player has made 2 normal decisions in the same phase and still has not reached required progress. A completed phase should advance before any issue, micro-event, or random modifier can interrupt it.
+
 Current phase issue mapping uses hybrid edge cases:
 
 - `Brainstorm` -> `Brief Missing Booking Rules`, mapped to the broader vulnerable/unclear brief problem
@@ -142,6 +144,24 @@ Current phase issue mapping uses hybrid edge cases:
 - `Review` -> `Ops Asks For Booking Evidence`, mapped to the broader audit/trust/review problem
 
 The event label should name the current phase, such as `Brainstorm Issue`, so the player can connect the problem to the workflow step.
+
+## Random Modifiers
+
+The game has an always-on light randomness gimmick. It is not a Hard Mode toggle.
+
+Random modifiers are gamey resource events that can appear after a normal decision result and before the game continues back into the phase flow. They should not replace or randomize phase issues.
+
+Current rules:
+
+- roll only after normal decision results, never during setup, Phase Goal popup, emergency, or final report
+- base chance is 25%
+- maximum is 2 random modifiers per run
+- cooldown is 1 decision after a modifier triggers
+- if no modifier has appeared by `Execute`, the first Execute decision can force the first modifier
+- do not repeat the same modifier in one run
+- do not stack random modifiers on the same transition as phase completion, phase issue, or micro-event
+
+Random modifiers use normal resource effects, so they affect score through `Time`, `Token`, `Risk`, and internal `Quality`. They are still reported separately as `Random Modifiers` and must not be counted as `Problems Triggered`.
 
 ## Phase Goal And Completion
 
@@ -240,7 +260,7 @@ The game loop is:
 5. See reaction, consequence, and lesson.
 6. Continue directly to the next phase when phase progress is complete.
 7. Handle emergency if risk becomes critical.
-8. Review final report with final stats, phase learnings, Superpowers used, Problems triggered, and title badge.
+8. Review final report with final stats, phase learnings, Superpowers used, Problems triggered, Random Modifiers, and title badge.
 
 ## Superpower Draft
 
@@ -303,6 +323,18 @@ Synergy options should feel special and powerful, but still have a cost. The cur
 
 Choices should not be too obvious. Avoid labels that instantly reveal “this is wrong.”
 
+Every playable choice should have tactical meaning. The data layer hydrates these optional fields for base, skill, synergy, issue, and emergency choices:
+
+```js
+{
+  purpose: string,
+  solves: string,
+  misses: string
+}
+```
+
+Choice cards show `solves` only so the screen stays lighter while still explaining what pressure the option can answer. Decision results can show `purpose`, `solves`, and `misses` so partial choices feel useful without pretending they solve everything.
+
 Recent wording changes:
 
 - `Build From Guess` became `Prototype From Team Instinct`
@@ -361,7 +393,7 @@ Purpose:
 
 ## Emergency Phase
 
-If `Risk` reaches critical level (`>= 7`) and the emergency has not already triggered, the game interrupts the normal flow with an emergency phase.
+If `Risk` reaches critical level (`>= 8`) and the emergency has not already triggered, the game interrupts the normal flow with an emergency phase.
 
 Current emergency:
 
@@ -398,6 +430,18 @@ Score tier feedback uses five levels:
 - `86-100`: `Workflow Master`
 
 Each tier should explain what the player did well or badly and what to focus on next.
+
+Score ceilings prevent easier issue pacing from inflating grades:
+
+- `risk >= 8`: max `70`
+- `risk >= 6`: max `82`
+- token debt `1-4`: max `84`
+- token debt `5-9`: max `76`
+- token debt `10+`: max `68`
+- `quality < 6`: max `80`
+- risky choices `>= 3`: max `75`
+
+`Workflow Master` requires score `86-100`, `risk <= 3`, `quality >= 12`, no token debt, no more than 1 risky choice, and at least 3 skill/synergy uses. Final report should show score ceiling reasons when they apply.
 
 The title badge is now an archetype object, not just a string.
 

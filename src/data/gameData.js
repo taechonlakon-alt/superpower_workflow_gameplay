@@ -10,6 +10,64 @@ const gameData = {
     token: 14,
     risk: 10,
   },
+  randomModifierConfig: {
+    chance: 0.25,
+    maxPerRun: 2,
+    cooldownDecisions: 1,
+    guaranteedFirstRandomByPhase: "execute",
+  },
+  randomModifiers: [
+    {
+      id: "token_leak",
+      title: "Token Leak",
+      icon: "AI",
+      tone: "warn",
+      weight: 2,
+      copy: "AI budget รั่วจาก noise ของ run นี้",
+      tags: ["random", "token -1"],
+      effects: { time: 0, token: 1, risk: 0, quality: 0 },
+    },
+    {
+      id: "deadline_jitter",
+      title: "Deadline Jitter",
+      icon: "CLK",
+      tone: "warn",
+      weight: 2,
+      copy: "deadline ขยับเข้ามาแบบไม่ทันตั้งตัว",
+      tags: ["random", "time pressure"],
+      effects: { time: 1, token: 0, risk: 1, quality: 0 },
+    },
+    {
+      id: "risk_spike",
+      title: "Risk Spike",
+      icon: "RISK",
+      tone: "danger",
+      weight: 2,
+      copy: "hidden edge โผล่ขึ้นมาแล้วทำให้โปรเจกต์เสี่ยงขึ้น",
+      tags: ["random", "risk +1"],
+      effects: { time: 0, token: 0, risk: 1, quality: 0 },
+    },
+    {
+      id: "lucky_guardrail",
+      title: "Lucky Guardrail",
+      icon: "SHD",
+      tone: "safe",
+      weight: 2,
+      copy: "workflow ที่วางไว้ช่วยกันพลาดแบบไม่ตั้งใจ",
+      tags: ["random", "shield"],
+      effects: { time: 0, token: 0, risk: -1, quality: 1 },
+    },
+    {
+      id: "context_static",
+      title: "Context Static",
+      icon: "CTX",
+      tone: "warn",
+      weight: 1,
+      copy: "context noise ทำให้ทีมต้องเสียแรงตรวจเพิ่ม",
+      tags: ["random", "review tax"],
+      effects: { time: 1, token: 1, risk: 0, quality: 0 },
+    },
+  ],
   skills: [
     {
       id: "grill",
@@ -610,12 +668,12 @@ const gameData = {
           label: "Execute Next Planned Task",
           icon: "HND",
           tone: "mint",
-          tags: ["+30%", "task ถัดไป"],
+          tags: ["+55%", "task ถัดไป"],
           helper: "อ่าน plan เลือก task ถัดไป สรุปสิ่งที่จะทำ แล้วแก้เฉพาะไฟล์ที่เกี่ยว",
           tradeoff: "ช้ากว่า prompt ใหญ่ แต่ทีมยังคุม scope และเข้าใจสิ่งที่สร้าง",
           outcome: "ทีมเดินตาม plan ทีละ task และยังได้ความเร็วจาก AI โดยไม่เสีย control",
           lesson: "AI เป็นแรงเสริมที่ดีเมื่อมนุษย์คุม task, files และ checkpoint",
-          progress: 30,
+          progress: 55,
           effects: { time: 3, token: 1, risk: -1, quality: 2 },
         },
         {
@@ -640,12 +698,12 @@ const gameData = {
           label: "TDD Loop",
           icon: "TDD",
           tone: "blue",
-          tags: ["+45%", "focused test"],
+          tags: ["+55%", "focused test"],
           helper: "เขียน test ให้พังก่อน เขียนโค้ดให้น้อยที่สุดให้ test ผ่าน ปรับโค้ดให้ดีขึ้น รัน test ซ้ำ แล้วค่อยไป task ถัดไป",
           tradeoff: "ใช้เวลาเพิ่ม แต่จับ bug ก่อนข้ามไป task ถัดไป",
           outcome: "ทีมเห็น red -> green -> refactor -> rerun ของ task นี้ก่อนข้ามไปส่วนถัดไป",
           lesson: "TDD Loop บังคับให้ AI ทำงานทีละ task พร้อมหลักฐานว่า test ผ่านจริง ไม่ใช่แค่แอปดูดี",
-          progress: 45,
+          progress: 55,
           effects: { time: 2, token: 1, risk: -4, quality: 4 },
         },
         {
@@ -654,12 +712,12 @@ const gameData = {
           label: "Real-time Risk Scanner",
           icon: "SCAN",
           tone: "mint",
-          tags: ["+35%", "เตือนเสี่ยง"],
+          tags: ["+50%", "เตือนเสี่ยง"],
           helper: "เตือนเมื่อแก้ไฟล์เกิน scope, ไม่มี test, มี secret, หรือ data integrity เสี่ยง",
           tradeoff: "มี overhead แต่หยุดความเสี่ยงก่อนลามไป task ถัดไป",
           outcome: "ทีมเห็น warning ตั้งแต่โค้ดเริ่มเปราะ ไม่ต้องรอให้ booking flow พัง",
           lesson: "ความเร็วของ AI ต้องมีระบบเตือน scope, security และ data integrity",
-          progress: 35,
+          progress: 50,
           effects: { time: 1, token: 2, risk: -3, quality: 3 },
         },
         {
@@ -668,12 +726,12 @@ const gameData = {
           label: "Plan-Only IaC Gate",
           icon: "IAC",
           tone: "blue",
-          tags: ["+40%", "no apply"],
+          tags: ["+50%", "no apply"],
           helper: "ใช้ Terraform แบบ plan-only: fmt, validate, test และ plan แล้วหยุดก่อน apply หรือ destroy",
           tradeoff: "ช้ากว่า generate แล้ว deploy แต่กัน resource จริงพัง",
           outcome: "ทีมได้ evidence จาก plan/test โดยยังไม่สร้างหรือลบ resource จริง",
           lesson: "Infra workflow ต้องมี human approval ก่อน apply/destroy เสมอ",
-          progress: 40,
+          progress: 50,
           effects: { time: 2, token: 1, risk: -4, quality: 4 },
         },
         {
@@ -682,12 +740,12 @@ const gameData = {
           label: "Executing Plan Checklist",
           icon: "KIT",
           tone: "mint",
-          tags: ["+35%", "ครบ 7 ขั้น"],
+          tags: ["+50%", "ครบ 7 ขั้น"],
           helper: "ใช้ checklist: read plan, choose task, summarize, relevant files, focused test, summarize result, stop/ask",
           tradeoff: "ช้ากว่า copy error แต่แก้ถูกจุดและไม่ข้าม checkpoint",
           outcome: "ทีม execute จากหลักฐานแทนการโยน error ให้ AI ซ้ำ",
           lesson: "Scaffolds ทำให้ Executing Plans ไม่กลายเป็น reprompt loop",
-          progress: 35,
+          progress: 50,
           effects: { time: 2, token: 1, risk: -3, quality: 3 },
         },
       ],
@@ -698,12 +756,12 @@ const gameData = {
           label: "Automated Guardrails",
           icon: "SHD",
           tone: "blue",
-          tags: ["+80%", "ตรวจอัตโนมัติ"],
+          tags: ["+100%", "ตรวจอัตโนมัติ"],
           helper: "ใช้ Spec + TDD Loop ตรวจว่า task ตรง spec แล้วผ่านขั้น เขียน test ให้พังก่อน -> เขียนโค้ดให้น้อยที่สุดให้ test ผ่าน -> ปรับโค้ดให้ดีขึ้น -> รัน test ซ้ำ -> ไป task ถัดไป ก่อนรับงาน",
           tradeoff: "ใช้ token แลกความชัวร์ก่อนข้าม task",
           outcome: "งานเดินเร็วแต่ยังมี spec เป็นเป้า และ TDD Loop เป็นหลักฐานว่า task ผ่านจริง",
           lesson: "Spec บอกว่าต้องสร้างอะไร ส่วน TDD Loop บอกว่า task นั้นผ่านจริงก่อนเดินต่อ",
-          progress: 80,
+          progress: 100,
           effects: { time: 1, token: 3, risk: -5, quality: 5 },
         },
         {
@@ -712,12 +770,12 @@ const gameData = {
           label: "IaC Safety Gate",
           icon: "IAC",
           tone: "blue",
-          tags: ["+70%", "plan + risk"],
+          tags: ["+90%", "plan + risk"],
           helper: "รวม Terraform plan-only evidence กับ risk scanner เพื่อเช็ค drift, secret/state, destructive diff และ approval ก่อน apply/destroy",
           tradeoff: "ใช้เวลาและ token เพิ่ม แต่ปิด risk infra ที่กระทบ resource จริง",
           outcome: "ทีมเห็น destructive change, secret/state risk และ approval gate ก่อนแตะ resource จริง",
           lesson: "Terraform ที่ดีต้องมี plan, risk scan และ explicit approval ก่อน resource-changing command",
-          progress: 70,
+          progress: 90,
           effects: { time: 3, token: 2, risk: -7, quality: 6 },
         },
       ],
@@ -864,12 +922,12 @@ const gameData = {
           label: "Code Review",
           icon: "CHK",
           tone: "blue",
-          tags: ["+50%", "ตรวจจริงจัง"],
+          tags: ["+60%", "ตรวจจริงจัง"],
           helper: "ตรวจว่าทำตรง spec ไหม, acceptance criteria ครบไหม, มีไฟล์ที่แก้เกินไหม, test ครอบคลุมไหม, มี security risk ไหม, data integrity โอเคไหม, docs update ตรงไหม, มี hallucination หรือข้อมูลที่เดาเองไหม, code ซ้ำไหม, naming สื่อความหมายไหม",
           tradeoff: "ช้าแต่ลด bug หลุดและจับ over-edit ได้",
           outcome: "ทีมเจอจุดเสี่ยงก่อนส่งและแก้จาก evidence ไม่ใช่ความมั่นใจ",
           lesson: "Code Review คือด่านสุดท้ายที่ตรวจ spec, acceptance, scope, tests, security, data, docs, hallucination และคุณภาพโค้ด",
-          progress: 50,
+          progress: 60,
           effects: { time: 3, token: 1, risk: -5, quality: 5 },
         },
         {
@@ -878,12 +936,12 @@ const gameData = {
           label: "Code Walkthrough",
           icon: "WALK",
           tone: "mint",
-          tags: ["+45%", "เข้าใจโค้ด"],
+          tags: ["+50%", "เข้าใจโค้ด"],
           helper: "ให้ AI อธิบาย booking state, validation, data integrity และจุดที่อาจเดาเอง แล้วทีมถามกลับ",
           tradeoff: "ใช้ token แต่ทีมไม่ส่งงานที่ตัวเองไม่เข้าใจ",
           outcome: "ทีมพบส่วนที่ AI เขียนซับซ้อนหรือเดา requirement เกินจำเป็น และจัดให้เข้าใจง่ายขึ้น",
           lesson: "ผู้เล่นต้องเข้าใจโค้ดและข้อมูลที่ AI อ้าง ไม่ใช่เชื่อว่าเสร็จเพราะ AI บอก",
-          progress: 45,
+          progress: 50,
           effects: { time: 2, token: 2, risk: -4, quality: 4 },
         },
         {
@@ -892,12 +950,12 @@ const gameData = {
           label: "Rerun TDD Loop",
           icon: "TDD",
           tone: "mint",
-          tags: ["+40%", "ตรงสเปก"],
+          tags: ["+55%", "ตรงสเปก"],
           helper: "รัน TDD Loop evidence ซ้ำ: เขียน test ให้พังก่อน, เขียนโค้ดให้น้อยที่สุดให้ test ผ่าน, ปรับโค้ดให้ดีขึ้น, รัน test ซ้ำ, ไป task ถัดไป และครอบคลุม booking path สำคัญ",
           tradeoff: "ตรงไปตรงมา แต่ต้องยอมใช้เวลา",
           outcome: "ทีมเห็นชัดว่า loop ของงานสำคัญผ่านจริง และอะไรยังต้องแก้ก่อนส่ง",
           lesson: "TDD Loop คือหลักฐานว่างานทำงานตามที่ตกลงไว้หลัง refactor และ rerun แล้ว",
-          progress: 40,
+          progress: 55,
           effects: { time: 1, token: 1, risk: -3, quality: 3 },
         },
         {
@@ -906,12 +964,12 @@ const gameData = {
           label: "Risk Scanner Review",
           icon: "SCAN",
           tone: "blue",
-          tags: ["+45%", "risk pass"],
+          tags: ["+55%", "risk pass"],
           helper: "ตรวจ no-secret, no-test, fragile booking logic, missing validation, conflict handling และ data integrity",
           tradeoff: "มี overhead แต่ลดความเสี่ยงท้ายเกม",
           outcome: "Scanner ชี้ warning ที่ทีมยังไม่ได้มองระหว่าง smoke test",
           lesson: "ความเสี่ยงสะสมต้องถูกมองเห็นก่อนส่งงาน",
-          progress: 45,
+          progress: 55,
           effects: { time: 1, token: 2, risk: -4, quality: 4 },
         },
         {
@@ -920,12 +978,12 @@ const gameData = {
           label: "Terraform Review",
           icon: "IAC",
           tone: "blue",
-          tags: ["+45%", "infra review"],
+          tags: ["+50%", "infra review"],
           helper: "ตรวจ Terraform testing, module patterns, backend/state, variables/secrets, CI/CD และ production safety ก่อนส่ง",
           tradeoff: "ใช้เวลา review เพิ่ม แต่ลดความเสี่ยง infra change ที่แก้ยาก",
           outcome: "ทีมเห็น risk ของ module/state/CI/CD และรู้ว่าคำสั่งไหนต้อง approval ก่อนแตะ resource จริง",
           lesson: "IaC review ต้องตรวจทั้ง code และผลกระทบ resource ไม่ใช่ดูแค่ syntax ผ่าน",
-          progress: 45,
+          progress: 50,
           effects: { time: 2, token: 1, risk: -4, quality: 4 },
         },
       ],
@@ -936,12 +994,12 @@ const gameData = {
           label: "Review + Walkthrough",
           icon: "CHK",
           tone: "blue",
-          tags: ["+75%", "เข้าใจและตรวจ"],
+          tags: ["+100%", "เข้าใจและตรวจ"],
           helper: "ทำ Code Review checklist ครบ พร้อม walkthrough: ทำตรง spec ไหม, acceptance criteria ครบไหม, มีไฟล์ที่แก้เกินไหม, test ครอบคลุมไหม, มี security risk ไหม, data integrity โอเคไหม, docs update ตรงไหม, มี hallucination หรือข้อมูลที่เดาเองไหม, code ซ้ำไหม, naming สื่อความหมายไหม",
           tradeoff: "ใช้เวลาและ token แต่ลดความมั่นใจลวง",
           outcome: "ทีมทั้งเห็น bug และเข้าใจว่าทำไมต้องแก้",
           lesson: "Review ที่ดีทำให้ทีมส่งงานด้วยความเข้าใจ ไม่ใช่ศรัทธาใน AI",
-          progress: 75,
+          progress: 100,
           effects: { time: 3, token: 3, risk: -7, quality: 7 },
         },
         {
@@ -950,12 +1008,12 @@ const gameData = {
           label: "Spec Review Gate",
           icon: "GATE",
           tone: "blue",
-          tags: ["+70%", "เทียบ spec"],
+          tags: ["+95%", "เทียบ spec"],
           helper: "ใช้ Spec + Code Review ตรวจว่าทำตรง spec ไหม, acceptance criteria ครบไหม, มีไฟล์ที่แก้เกินไหม, test ครอบคลุมไหม, มี security risk ไหม, data integrity โอเคไหม, docs update ตรงไหม, มี hallucination หรือข้อมูลที่เดาเองไหม, code ซ้ำไหม, naming สื่อความหมายไหม",
             tradeoff: "ช้า แต่ตัดสินด้วยขอบเขตจริงและหลักฐาน",
           outcome: "ทีมปิด gap ระหว่างสิ่งที่สร้างกับสิ่งที่ตกลงไว้ และเจอไฟล์ที่แก้เกินก่อนส่ง",
           lesson: "Spec ทำให้ Review ไม่ใช่ความเห็นส่วนตัว และช่วยจับงานที่ AI ขยายเอง",
-          progress: 70,
+          progress: 95,
           effects: { time: 3, token: 2, risk: -6, quality: 6 },
         },
       ],
@@ -1058,6 +1116,72 @@ const gameData = {
     ],
   },
 };
+
+function choiceEffects(option) {
+  return {
+    time: Number.isFinite(option.effects?.time) ? option.effects.time : 0,
+    token: Number.isFinite(option.effects?.token) ? option.effects.token : 0,
+    risk: Number.isFinite(option.effects?.risk) ? option.effects.risk : 0,
+    quality: Number.isFinite(option.effects?.quality) ? option.effects.quality : 0,
+  };
+}
+
+function defaultChoiceSolves(option) {
+  const effects = choiceEffects(option);
+  const progress = Number.isFinite(option.progress) ? option.progress : 0;
+  const solves = [];
+
+  if (option.preventPenalty) solves.push("Counters the current phase issue");
+  if (progress >= 100) solves.push("Completes the phase");
+  else if (progress >= 60) solves.push("Moves phase progress forward fast");
+  else if (progress >= 40) solves.push("Moves the phase forward with room to adapt");
+  if (effects.risk < 0) solves.push("Reduces accumulated risk");
+  if (effects.quality > 0) solves.push("Improves evidence or delivery quality");
+  if (option.requires?.length) solves.push("Combines multiple superpowers for wider coverage");
+  else if (option.skill) solves.push("Uses a focused superpower for this pressure");
+  if (!solves.length && effects.risk >= 3) solves.push("Trades safety for speed or momentum");
+
+  return solves.join(" / ") || "Creates a meaningful tactical path for this decision";
+}
+
+function defaultChoiceMisses(option) {
+  const effects = choiceEffects(option);
+  const misses = [];
+
+  if (effects.risk >= 4) misses.push("High risk can trigger a phase issue");
+  else if (effects.risk >= 2) misses.push("Leaves risk that needs another guardrail");
+  if (effects.quality <= -2) misses.push("Creates quality debt");
+  else if (effects.quality < 0) misses.push("Lowers delivery quality");
+  if (effects.token >= 3) misses.push("Spends a lot of AI budget");
+  if (effects.time >= 3) misses.push("Consumes deadline room");
+
+  return misses.join(" / ") || option.tradeoff || "Still needs verification in a later decision";
+}
+
+function hydrateChoiceMeaning(options = []) {
+  options.forEach((option) => {
+    option.purpose ??= option.helper || "Pick this to respond to the current workflow pressure";
+    option.solves ??= defaultChoiceSolves(option);
+    option.misses ??= defaultChoiceMisses(option);
+  });
+}
+
+function hydrateGameplayChoiceMeaning(data) {
+  data.steps.forEach((step) => {
+    hydrateChoiceMeaning(step.baseOptions);
+    hydrateChoiceMeaning(step.skillOptions);
+    hydrateChoiceMeaning(step.synergyOptions);
+    step.chaosEvents?.forEach((event) => {
+      hydrateChoiceMeaning(event.options);
+      hydrateChoiceMeaning(event.skillOptions);
+    });
+  });
+
+  hydrateChoiceMeaning(data.emergencyStep?.baseOptions);
+  hydrateChoiceMeaning(data.emergencyStep?.skillOptions);
+}
+
+hydrateGameplayChoiceMeaning(gameData);
 
 export default gameData;
 

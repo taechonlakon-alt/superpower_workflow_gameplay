@@ -2,6 +2,7 @@ import game from "./data/gameData.js";
 
 let root = null;
 const starterWorkflowSkills = [];
+const EMERGENCY_RISK_THRESHOLD = 8;
 let audioContext = null;
 let soundEnabled = true;
 let state = createInitialState();
@@ -17,6 +18,8 @@ function createInitialState() {
     seenPhaseGoals: [],
     phaseSummaries: [],
     activeSkillDetail: null,
+    randomModifiersTriggered: [],
+    randomModifierCooldown: 0,
     skills: [...starterWorkflowSkills],
     time: 0,
     token: game.caps.token,
@@ -96,7 +99,7 @@ function hasCounter(option, eventId) {
 
 function getProjectSignalTone() {
   const tokenSpent = getTokenSpent();
-  if (state.risk >= 7 || getTokenDebt() > 0 || state.time >= 16) return "critical";
+  if (state.risk >= EMERGENCY_RISK_THRESHOLD || getTokenDebt() > 0 || state.time >= 16) return "critical";
   if (state.risk >= 4 || tokenSpent >= 7 || state.time >= 10) return "tense";
   return "stable";
 }
@@ -148,6 +151,87 @@ function getChoiceReaction(option, countered) {
   };
 }
 
+function inferChoiceSolves(option) {
+  const effects = normalizeEffects(option.effects);
+  const progress = Number.isFinite(option.progress) ? option.progress : 0;
+  const solves = [];
+
+  if (progress >= 100) {
+    solves.push("ปิด phase ได้ครบในจังหวะเดียว");
+  } else if (progress >= 60) {
+    solves.push("เร่ง progress ของ phase อย่างชัดเจน");
+  } else if (progress >= 40) {
+    solves.push("ขยับงานไปข้างหน้าโดยยังเหลือ room ให้ปรับ");
+  }
+
+  if (effects.risk <= -5) {
+    solves.push("ลด risk หนักและเพิ่มความมั่นใจก่อนส่งต่อ");
+  } else if (effects.risk < 0) {
+    solves.push("ลด risk ที่กำลังสะสมใน workflow");
+  }
+
+  if (effects.quality >= 5) {
+    solves.push("เพิ่ม evidence และ quality ของงาน");
+  } else if (effects.quality > 0) {
+    solves.push("ทำให้งานตรวจสอบได้มากขึ้น");
+  }
+
+  if (option.preventPenalty) {
+    solves.push("counter issue ที่เกิดขึ้นใน phase นี้");
+  }
+
+  if (option.requires?.length) {
+    solves.push("รวมหลาย superpower เพื่อปิด gap หลายด้านพร้อมกัน");
+  } else if (option.skill) {
+    solves.push("ใช้ superpower เฉพาะทางแก้ pressure จุดนี้");
+  }
+
+  if (!solves.length && effects.risk >= 3) {
+    solves.push("ซื้อความเร็วหรือ momentum แต่ยอมรับ risk เพิ่ม");
+  }
+
+  return solves.length ? solves.join(" / ") : "ให้ทางเลือกเชิง tactical สำหรับสถานการณ์นี้";
+}
+
+function inferChoiceMisses(option) {
+  const effects = normalizeEffects(option.effects);
+  const misses = [];
+
+  if (effects.risk >= 4) {
+    misses.push("เพิ่ม risk สูง อาจเปิด phase issue ทันที");
+  } else if (effects.risk >= 2) {
+    misses.push("ยังมี risk ที่ต้องปิดด้วย guardrail ต่อ");
+  }
+
+  if (effects.quality <= -2) {
+    misses.push("quality debt สูง อาจทำให้ review หนักขึ้น");
+  } else if (effects.quality < 0) {
+    misses.push("งานเดินหน้าแต่คุณภาพลดลง");
+  }
+
+  if (effects.token >= 3) {
+    misses.push("ใช้ AI budget หนัก");
+  }
+
+  if (effects.time >= 3) {
+    misses.push("ใช้เวลามากและอาจบีบ deadline");
+  }
+
+  if (!misses.length && option.tradeoff) {
+    misses.push(option.tradeoff);
+  }
+
+  return misses.length ? misses.join(" / ") : "ยังต้อง verify ต่อใน phase ถัดไป";
+}
+
+function getChoiceMeaning(option) {
+  return {
+    purpose: option.purpose || option.helper || "เลือกแนวทางนี้เพื่อจัดการ pressure เฉพาะหน้าของ phase",
+    solves: option.solves || inferChoiceSolves(option),
+    misses: option.misses || inferChoiceMisses(option),
+  };
+}
+
 function buildMicroEvent({ id, title, icon, tags, tradeoff, outcome, lesson, effects, reaction }) {
   return {
     phase: "System Signal",
@@ -168,6 +252,118 @@ function buildMicroEvent({ id, title, icon, tags, tradeoff, outcome, lesson, eff
     reaction,
     isMicroEvent: true,
   };
+}
+
+function formatRandomEffectDelta(effects) {
+  const safeEffects = normalizeEffects(effects);
+  const deltas = [];
+
+  if (safeEffects.time !== 0) {
+    deltas.push(`Time ${safeEffects.time > 0 ? "+" : ""}${safeEffects.time}`);
+  }
+
+  if (safeEffects.token !== 0) {
+    deltas.push(`Token ${safeEffects.token > 0 ? "-" : "+"}${Math.abs(safeEffects.token)}`);
+  }
+
+  if (safeEffects.risk !== 0) {
+    deltas.push(`Risk ${safeEffects.risk > 0 ? "+" : ""}${safeEffects.risk}`);
+  }
+
+  if (safeEffects.quality !== 0) {
+    deltas.push(`Quality ${safeEffects.quality > 0 ? "+" : ""}${safeEffects.quality}`);
+  }
+
+  return deltas.length ? deltas.join(" / ") : "No resource change";
+}
+
+function buildRandomModifierEvent(modifier, step) {
+  const effects = normalizeEffects(modifier.effects);
+  const tone = modifier.tone || (effects.risk > 0 || effects.token > 0 || effects.time > 0 ? "warn" : "safe");
+
+  return {
+    phase: "Random Modifier",
+    eventId: modifier.id,
+    eventTitle: modifier.title,
+    optionId: modifier.id,
+    optionLabel: modifier.title,
+    optionIcon: modifier.icon || "???",
+    optionTone: tone === "danger" ? "gray" : "mint",
+    skillName: null,
+    tags: modifier.tags || ["random"],
+    tradeoff: "Random modifier แทรกหลัง decision เพื่อเพิ่มความคาดเดาไม่ได้ของ run",
+    outcome: modifier.copy,
+    lesson: "นี่เป็น gimmick สุ่ม ไม่ใช่ Problems Triggered จากการเลือกของผู้เล่น แต่ resource delta ยังมีผลกับ score จริง",
+    countered: false,
+    effects,
+    progress: 0,
+    lines: [
+      `สุ่มหลัง decision ใน phase ${step?.title || "current"}`,
+      modifier.copy,
+      formatRandomEffectDelta(effects),
+    ],
+    reaction: {
+      tone,
+      title: tone === "safe" ? "Random ช่วยกันพลาด" : "Random บิด resource",
+      copy: "เกมโยน modifier เข้ามาให้ต้อง adapt โดยไม่เปลี่ยนโจทย์หลักของ phase",
+    },
+    isRandomModifier: true,
+  };
+}
+
+function chooseWeightedRandomModifier(modifiers) {
+  const totalWeight = modifiers.reduce((total, modifier) => total + Math.max(0, modifier.weight || 1), 0);
+  let roll = Math.random() * totalWeight;
+
+  for (const modifier of modifiers) {
+    roll -= Math.max(0, modifier.weight || 1);
+    if (roll <= 0) return modifier;
+  }
+
+  return modifiers[modifiers.length - 1] || null;
+}
+
+function maybeTriggerRandomModifier(step) {
+  const config = game.randomModifierConfig || {};
+  const maxPerRun = Number.isFinite(config.maxPerRun) ? config.maxPerRun : 2;
+  const chance = Number.isFinite(config.chance) ? config.chance : 0.3;
+
+  if (!step || !game.randomModifiers?.length) return null;
+  if ((state.randomModifiersTriggered || []).length >= maxPerRun) return null;
+
+  if (state.randomModifierCooldown > 0) {
+    state.randomModifierCooldown = Math.max(0, state.randomModifierCooldown - 1);
+    return null;
+  }
+
+  const triggeredIds = new Set((state.randomModifiersTriggered || []).map((modifier) => modifier.id));
+  const availableModifiers = game.randomModifiers.filter((modifier) => !triggeredIds.has(modifier.id));
+  if (!availableModifiers.length) return null;
+
+  const shouldForceFirst =
+    state.randomModifiersTriggered.length === 0
+    && config.guaranteedFirstRandomByPhase
+    && step.id === config.guaranteedFirstRandomByPhase;
+
+  if (!shouldForceFirst && Math.random() >= chance) return null;
+
+  const modifier = chooseWeightedRandomModifier(availableModifiers);
+  if (!modifier) return null;
+
+  const randomEvent = buildRandomModifierEvent(modifier, step);
+  applyEffects(randomEvent.effects);
+  state.randomModifiersTriggered = [
+    ...state.randomModifiersTriggered,
+    {
+      id: modifier.id,
+      title: modifier.title,
+      phase: step.title,
+      effects: randomEvent.effects,
+    },
+  ];
+  state.randomModifierCooldown = Number.isFinite(config.cooldownDecisions) ? config.cooldownDecisions : 1;
+  state.lastSignalTone = getProjectSignalTone();
+  return randomEvent;
 }
 
 function maybeTriggerMicroEvent() {
@@ -252,6 +448,7 @@ function applyEffects(effects) {
 
 function buildResolution(step, option) {
   const optionEffects = normalizeEffects(option.effects);
+  const choiceMeaning = getChoiceMeaning(option);
   let skillNameStr = null;
   if (option.skill) {
     skillNameStr = getSkill(option.skill)?.name;
@@ -304,6 +501,9 @@ function buildResolution(step, option) {
     skillName: skillNameStr,
     tags: option.tags || [],
     tradeoff: option.tradeoff,
+    purpose: choiceMeaning.purpose,
+    solves: choiceMeaning.solves,
+    misses: choiceMeaning.misses,
     outcome: option.resolveMsg || option.outcome,
     lesson: option.lesson || "",
     reaction: getChoiceReaction(option, countered),
@@ -449,6 +649,30 @@ function buildPhaseSummary(step) {
   };
 }
 
+function getNormalPhaseDecisionCount(step) {
+  if (!step) return 0;
+  return state.history.filter((item) =>
+    item.phase === step.title
+    && item.eventId === "action"
+    && !item.isMicroEvent
+    && !item.isRandomModifier
+  ).length;
+}
+
+function shouldTriggerPhaseIssue(step, lastResult) {
+  if (!step?.chaosEvents?.length) return false;
+  if (state.activeChaos || state.triggeredChaosByPhase[step.id]) return false;
+  if (state.progress >= step.requiredProgress) return false;
+  if (!lastResult || lastResult.eventId !== "action") return false;
+
+  const effects = normalizeEffects(lastResult.effects);
+  const pressureFromRisk = effects.risk >= 4;
+  const pressureFromQuality = effects.quality <= -2;
+  const stalledPhase = getNormalPhaseDecisionCount(step) >= 2;
+
+  return pressureFromRisk || pressureFromQuality || stalledPhase;
+}
+
 function chooseOption(optionId) {
   const isEmergency = state.screen === "emergency_step";
   const step = isEmergency ? game.emergencyStep : getCurrentStep();
@@ -471,6 +695,69 @@ function chooseOption(optionId) {
   render();
 }
 
+function advanceAfterNormalDecision({ allowRandomModifier = true, allowMicroEvent = true, allowPhaseIssue = true, lastResult = null } = {}) {
+  if (state.risk >= EMERGENCY_RISK_THRESHOLD && !state.emergencyTriggered) {
+    state.emergencyTriggered = true;
+    state.resolution = null;
+    state.screen = "emergency_step";
+    render();
+    return;
+  }
+
+  const step = getCurrentStep();
+
+  if (!step) {
+    state.screen = "result";
+    state.lastSignalTone = getProjectSignalTone();
+    render();
+    return;
+  }
+
+  if (state.progress >= step.requiredProgress) {
+    state.phaseSummaries = [...state.phaseSummaries, buildPhaseSummary(step)];
+    state.index += 1;
+    state.progress = 0;
+    state.screen = state.index >= game.steps.length ? "result" : "step";
+    state.lastSignalTone = getProjectSignalTone();
+    render();
+    return;
+  }
+
+  if (allowPhaseIssue && shouldTriggerPhaseIssue(step, lastResult)) {
+    state.activeChaos = step.chaosEvents[0];
+    state.triggeredChaosByPhase[step.id] = state.activeChaos.id;
+    state.screen = "step";
+    state.lastSignalTone = getProjectSignalTone();
+    render();
+    return;
+  }
+
+  const microEvent = allowMicroEvent ? maybeTriggerMicroEvent() : null;
+  if (microEvent) {
+    state.resolution = microEvent;
+    state.history.push(microEvent);
+    state.screen = "resolution";
+    render();
+    return;
+  }
+
+  if (allowRandomModifier) {
+    const randomModifier = maybeTriggerRandomModifier(step);
+    if (randomModifier) {
+      state.resolution = randomModifier;
+      state.history.push(randomModifier);
+      state.screen = "resolution";
+      render();
+      return;
+    }
+  }
+
+  state.screen = "step";
+
+  state.lastSignalTone = getProjectSignalTone();
+  render();
+}
+
 function continueAfterResolution() {
   if (state.screen === "emergency_resolution") {
     state.resolution = null;
@@ -482,9 +769,15 @@ function continueAfterResolution() {
     return;
   }
 
+  if (state.resolution?.isRandomModifier) {
+    state.resolution = null;
+    advanceAfterNormalDecision({ allowRandomModifier: false, allowMicroEvent: false, allowPhaseIssue: false });
+    return;
+  }
+
   if (state.resolution?.isMicroEvent) {
     state.resolution = null;
-    if (state.risk >= 7 && !state.emergencyTriggered) {
+    if (state.risk >= EMERGENCY_RISK_THRESHOLD && !state.emergencyTriggered) {
       state.emergencyTriggered = true;
       state.screen = "emergency_step";
       render();
@@ -498,46 +791,15 @@ function continueAfterResolution() {
     return;
   }
 
-  if (state.risk >= 7 && !state.emergencyTriggered) {
-    state.emergencyTriggered = true;
-    state.resolution = null;
-    state.screen = "emergency_step";
-    render();
-    return;
-  }
-
+  const completedResolution = state.resolution;
+  const isNormalDecision = completedResolution?.eventId === "action";
   state.resolution = null;
-  const step = getCurrentStep();
-
-  if (state.progress >= step.requiredProgress) {
-    state.phaseSummaries = [...state.phaseSummaries, buildPhaseSummary(step)];
-    state.index += 1;
-    state.progress = 0;
-    state.screen = state.index >= game.steps.length ? "result" : "step";
-    state.lastSignalTone = getProjectSignalTone();
-    render();
-    return;
-  }
-
-  const microEvent = maybeTriggerMicroEvent();
-  if (microEvent) {
-    state.resolution = microEvent;
-    state.history.push(microEvent);
-    state.screen = "resolution";
-    render();
-    return;
-  }
-  
-  // Trigger the current phase's issue deterministically once per phase.
-  if (!state.activeChaos && state.progress < step.requiredProgress && step.chaosEvents?.length && !state.triggeredChaosByPhase[step.id]) {
-    state.activeChaos = step.chaosEvents[0];
-    state.triggeredChaosByPhase[step.id] = state.activeChaos.id;
-  }
-
-  state.screen = "step";
-
-  state.lastSignalTone = getProjectSignalTone();
-  render();
+  advanceAfterNormalDecision({
+    allowRandomModifier: isNormalDecision,
+    allowMicroEvent: isNormalDecision,
+    allowPhaseIssue: isNormalDecision,
+    lastResult: completedResolution,
+  });
 }
 
 function toggleSkill(skillId) {
@@ -923,6 +1185,7 @@ function skillDetailPopupMarkup(skill) {
 function choiceCardMarkup(option, index) {
   const isSkill = Boolean(option.skill);
   const isSynergy = Boolean(option.requires);
+  const meaning = getChoiceMeaning(option);
   const unlock = isSkill
     ? `Workflow Tool: ${getSkill(option.skill)?.name}`
     : isSynergy
@@ -937,6 +1200,9 @@ function choiceCardMarkup(option, index) {
       <span class="action-slot__body">
         <strong class="action-slot__title">${option.label}</strong>
         <span class="action-slot__helper">${option.helper || ""}</span>
+        <span class="action-slot__meaning">
+          <span><b>แก้ปัญหา</b> ${escapeHtml(meaning.solves)}</span>
+        </span>
         <span class="action-slot__tags">${option.tags ? tagMarkup(option.tags) : ""}</span>
       </span>
       <span class="action-slot__footer">
@@ -1104,27 +1370,27 @@ function renderStep(step, isEmergency = false) {
   const issueLabel = `${step.title} Issue`;
 
   const eventContent = isChaos ? `
-    <section class="event event--active event--chaos">
-      <div class="event-label" style="background:#e74c3c; color:#fff;">${issueLabel}</div>
+    <section class="event event--active event--issue">
+      <div class="event-label">${issueLabel}</div>
       <div class="event-icon">${eventIconMarkup()}</div>
       <div class="event-copyblock">
         <h3 class="event-title">${state.activeChaos.title}</h3>
         <p class="event-copy">"${state.activeChaos.copy}"</p>
       </div>
-      <div class="event-impact" style="color:#c0392b;">
-        <small>Danger</small>
+      <div class="event-impact">
+        <small>Pressure</small>
         <strong>${state.activeChaos.danger}</strong>
       </div>
     </section>
   ` : isEmergency && step.event ? `
     <section class="event event--active event--chaos">
-      <div class="event-label" style="background:#e74c3c; color:#fff;">EMERGENCY</div>
+      <div class="event-label">EMERGENCY</div>
       <div class="event-icon">${eventIconMarkup()}</div>
       <div class="event-copyblock">
         <h3 class="event-title">${step.event.title}</h3>
         <p class="event-copy">"${step.event.copy}"</p>
       </div>
-      <div class="event-impact" style="color:#c0392b;">
+      <div class="event-impact">
         <small>Danger</small>
         <strong>${step.event.danger}</strong>
       </div>
@@ -1149,8 +1415,8 @@ function renderStep(step, isEmergency = false) {
           ${soundButtonMarkup()}
         </section>
         <section class="playfield">
-          <section class="panel ${isEmergency || isChaos ? "panel--hazard" : ""}">
-            <div class="panel-head ${(isEmergency || isChaos) ? "panel-head--emergency" : ""}">
+          <section class="panel ${isEmergency ? "panel--hazard panel--emergency" : isChaos ? "panel--hazard panel--issue" : ""}">
+            <div class="panel-head ${isEmergency ? "panel-head--emergency" : isChaos ? "panel-head--issue" : ""}">
               <p class="phase-tag">${isEmergency ? "EMERGENCY" : isChaos ? "URGENT ISSUE" : `Phase ${state.index + 1} of ${getTotalPhaseCount()}`}</p>
               <div class="panel-title-row">
                 <h2 class="phase-title">${step.title}</h2>
@@ -1179,9 +1445,26 @@ function renderStep(step, isEmergency = false) {
   });
 }
 
+function resolutionChoiceMeaningMarkup(result) {
+  if (!result?.purpose && !result?.solves && !result?.misses) return "";
+
+  return `
+              <div class="resolution-card resolution-card--meaning">
+                <p class="mini-label">Choice Meaning</p>
+                ${result.purpose ? `<p><strong>สำคัญเพราะ</strong> ${escapeHtml(result.purpose)}</p>` : ""}
+                ${result.solves ? `<p><strong>แก้ปัญหา</strong> ${escapeHtml(result.solves)}</p>` : ""}
+                ${result.misses ? `<p><strong>ยังพลาด</strong> ${escapeHtml(result.misses)}</p>` : ""}
+              </div>
+  `;
+}
+
 function renderResolution() {
   const result = state.resolution;
   if (!result) return;
+  const resolutionLabel = result.isRandomModifier ? "Random Modifier" : result.isMicroEvent ? "System Signal" : "Decision Result";
+  const resolutionToneClass = result.isRandomModifier
+    ? `resolution-panel--random resolution-panel--${result.reaction?.tone || "warn"}`
+    : result.countered ? "resolution-panel--safe" : "resolution-panel--warn";
 
   root.innerHTML = `
     <main class="app">
@@ -1191,9 +1474,9 @@ function renderResolution() {
           ${soundButtonMarkup()}
         </section>
         <section class="playfield">
-          <section class="panel resolution-panel ${result.countered ? "resolution-panel--safe" : "resolution-panel--warn"}">
+          <section class="panel resolution-panel ${resolutionToneClass}">
             <div class="panel-head">
-              <p class="phase-tag">Decision Result</p>
+              <p class="phase-tag">${resolutionLabel}</p>
               <div class="panel-title-row">
                 <h2 class="phase-title">${result.optionLabel}</h2>
                 <span class="phase-badge phase-badge--text">${result.optionIcon}</span>
@@ -1226,6 +1509,7 @@ function renderResolution() {
                 <p class="mini-label">Lesson</p>
                 <p>${result.lesson}</p>
               </div>
+              ${resolutionChoiceMeaningMarkup(result)}
             </div>
 
             <button class="restart continue-button">Continue</button>
@@ -1239,10 +1523,19 @@ function renderResolution() {
   root.querySelector(".continue-button")?.addEventListener("click", continueAfterResolution);
 }
 
-function getTitleBadge({ failed, protectedEvents, riskyChoices, skillUses, problemsTriggered, overBudget, overtime }) {
+function getTitleBadge({ failed, protectedEvents, riskyChoices, skillUses, problemsTriggered, overBudget, overtime, workflowScore }) {
   const tokenSpent = getTokenSpent();
+  const masterReady =
+    workflowScore >= 86
+    && !failed
+    && !overBudget
+    && !overtime
+    && state.risk <= 3
+    && state.quality >= 12
+    && riskyChoices <= 1
+    && skillUses >= 3;
 
-  if (!failed && !overBudget && !overtime && protectedEvents >= 3 && state.risk <= 3 && state.quality >= 10) {
+  if (masterReady) {
     return {
       label: "Workflow Master",
       helper: "คุณใช้ guardrail หลายชั้นจน AI กลายเป็นแรงเสริม ไม่ใช่แหล่งความเสี่ยง",
@@ -1423,66 +1716,113 @@ function getScoreTier(score) {
   };
 }
 
-function getScoreCeiling({ failed, overBudget, overtime }) {
+function getScoreCeilingDetails({ failed, overBudget, overtime, riskyChoices, skillUses }) {
   const tokenDebt = getTokenDebt();
   const timeOverflow = Math.max(0, state.time - game.caps.time);
   let ceiling = failed ? 50 : 100;
+  const reasons = [];
+
+  const capScore = (value, reason) => {
+    if (value < ceiling) {
+      ceiling = value;
+    }
+    if (reason) reasons.push(reason);
+  };
+
+  if (failed) {
+    reasons.push("Failed/shipped damaged route caps score at 50");
+  }
+
+  if (state.risk >= 8) {
+    capScore(70, "Risk >= 8 caps score at 70");
+  } else if (state.risk >= 6) {
+    capScore(82, "Risk >= 6 caps score at 82");
+  }
 
   if (state.risk >= game.caps.risk) {
-    ceiling = Math.min(ceiling, 45);
+    capScore(45, "Risk reached the project failure cap");
   } else if (state.risk >= game.caps.risk * 0.8) {
-    ceiling = Math.min(ceiling, 68);
+    capScore(68, "Risk reached critical project pressure");
   }
 
   if (overBudget && overtime) {
-    ceiling = Math.min(ceiling, 76);
+    capScore(76, "AI budget and deadline both exceeded");
   } else if (overBudget || overtime) {
-    ceiling = Math.min(ceiling, 84);
+    capScore(84, overBudget ? "Token debt caps score at 84" : "Overtime caps score at 84");
   }
 
   if (tokenDebt >= 10) {
-    ceiling = Math.min(ceiling, 68);
+    capScore(68, "Token debt 10+ caps score at 68");
   } else if (tokenDebt >= 5) {
-    ceiling = Math.min(ceiling, 76);
+    capScore(76, "Token debt 5-9 caps score at 76");
   } else if (tokenDebt >= 1) {
-    ceiling = Math.min(ceiling, 84);
+    capScore(84, "Token debt 1-4 caps score at 84");
   }
 
   if (timeOverflow >= Math.ceil(game.caps.time * 0.6)) {
-    ceiling = Math.min(ceiling, 68);
+    capScore(68, "Heavy overtime caps score at 68");
   } else if (timeOverflow >= Math.ceil(game.caps.time * 0.25)) {
-    ceiling = Math.min(ceiling, 76);
+    capScore(76, "Moderate overtime caps score at 76");
   } else if (timeOverflow >= 3) {
-    ceiling = Math.min(ceiling, 84);
+    capScore(84, "Light overtime caps score at 84");
   }
 
-  return ceiling;
+  if (state.quality < 6) {
+    capScore(80, "Quality < 6 caps score at 80");
+  }
+
+  if (riskyChoices >= 3) {
+    capScore(75, "3+ risky choices caps score at 75");
+  }
+
+  const masterReady =
+    !failed
+    && !overBudget
+    && !overtime
+    && state.risk <= 3
+    && state.quality >= 12
+    && tokenDebt === 0
+    && riskyChoices <= 1
+    && skillUses >= 3;
+
+  if (!masterReady) {
+    capScore(85, "Workflow Master requires risk <= 3, quality >= 12, no token debt, <= 1 risky choice, and 3+ skill uses");
+  }
+
+  return {
+    ceiling,
+    reasons: [...new Set(reasons)],
+  };
+}
+
+function getScoreCeiling(args) {
+  return getScoreCeilingDetails(args).ceiling;
 }
 
 function calculateWorkflowScore({ failed, protectedEvents, riskyChoices, skillUses, overBudget, overtime }) {
   const positiveQuality = Math.max(0, state.quality);
-  const qualityScore = Math.min(positiveQuality, 16) * 2.2 + Math.max(0, positiveQuality - 16) * 0.45 + Math.min(0, state.quality) * 4;
-  const cappedRiskPenalty = Math.min(state.risk, game.caps.risk) * 4;
+  const qualityScore = Math.min(positiveQuality, 18) * 2.5 + Math.max(0, positiveQuality - 18) * 0.35 + Math.min(0, state.quality) * 4;
+  const cappedRiskPenalty = Math.min(state.risk, game.caps.risk) * 4.3;
   const overflowRiskPenalty = Math.max(0, state.risk - game.caps.risk) * 2.5;
   const tokenSpent = getTokenSpent();
   const tokenDebt = getTokenDebt();
   const timeOverflow = Math.max(0, state.time - game.caps.time);
-  const tokenPressurePenalty = tokenDebt * 2.6 + Math.max(0, tokenSpent - game.caps.token * 0.75) * 0.45;
+  const tokenPressurePenalty = tokenDebt * 3 + Math.max(0, tokenSpent - game.caps.token * 0.75) * 0.55;
   const timePressurePenalty = timeOverflow * 3 + Math.max(0, state.time - game.caps.time * 0.75) * 0.8;
   const rawScore =
-    64
+    66
     + qualityScore
-    + protectedEvents * 6
+    + Math.min(protectedEvents, 3) * 5
     + skillUses * 2.5
     - cappedRiskPenalty
     - overflowRiskPenalty
-    - riskyChoices * 6
+    - riskyChoices * 7
     - tokenPressurePenalty
     - timePressurePenalty
     + (failed ? -12 : 6);
 
   const minimumReadableScore = failed ? 18 : 24;
-  const cappedScore = Math.min(rawScore, getScoreCeiling({ failed, overBudget, overtime }));
+  const cappedScore = Math.min(rawScore, getScoreCeiling({ failed, overBudget, overtime, riskyChoices, skillUses }));
   return clamp(Math.round(cappedScore), minimumReadableScore, 100);
 }
 
@@ -1499,6 +1839,7 @@ function getFinalResult() {
   const overBudget = tokenDebt > 0;
   const overtime = state.time > game.caps.time;
   const phaseSummaries = state.phaseSummaries || [];
+  const randomModifiers = state.randomModifiersTriggered || [];
   const shippedRiskyShortcut = state.history.some((item) => item.optionId === "ship_now") && state.risk >= 6;
   const failed = state.risk >= game.caps.risk || state.quality < 1 || shippedRiskyShortcut;
 
@@ -1513,6 +1854,7 @@ function getFinalResult() {
 
   const workflowScore = calculateWorkflowScore({ failed, protectedEvents, riskyChoices, skillUses, overBudget, overtime });
   const scoreTier = getScoreTier(workflowScore);
+  const scoreCeiling = getScoreCeilingDetails({ failed, overBudget, overtime, riskyChoices, skillUses });
 
   return {
     failed,
@@ -1530,11 +1872,19 @@ function getFinalResult() {
     workflowScore,
     scoreVerdict: getScoreVerdict(workflowScore, failed, { overBudget, overtime }),
     scoreTier,
-    titleBadge: getTitleBadge({ failed, protectedEvents, riskyChoices, skillUses, problemsTriggered, overBudget, overtime }),
+    scoreCeilingReasons: scoreCeiling.reasons,
+    titleBadge: getTitleBadge({ failed, protectedEvents, riskyChoices, skillUses, problemsTriggered, overBudget, overtime, workflowScore }),
     workflowPattern: getWorkflowPattern({ failed, protectedEvents, riskyChoices, skillUses }),
     draftedSuperpowers,
     superpowersUsed,
     problemsTriggered,
+    randomModifiers,
+    randomModifierBadge: randomModifiers.length
+      ? {
+        label: "Chaos Run",
+        helper: `Random modifiers triggered ${randomModifiers.length} time${randomModifiers.length > 1 ? "s" : ""}`,
+      }
+      : null,
     phaseSummaries,
   };
 }
@@ -1597,6 +1947,11 @@ function reportListMarkup(label, items, emptyText) {
 function phaseLearningsMarkup(summaries) {
   const items = summaries.map((summary) => `${summary.phase}: ${summary.grade.label} - ${summary.focus}`);
   return reportListMarkup("Phase Learnings", items, "ยังไม่มี phase learning ถูกบันทึก");
+}
+
+function randomModifiersMarkup(modifiers) {
+  const items = modifiers.map((modifier) => `${modifier.phase}: ${modifier.title} (${formatRandomEffectDelta(modifier.effects)})`);
+  return reportListMarkup("Random Modifiers", items, "รอบนี้ไม่มี random modifier แทรก");
 }
 
 function scoreSlotMarkup(score, verdict) {
@@ -1687,9 +2042,11 @@ function renderResult() {
             <div class="mission-report__header">
               <p class="phase-tag">Workflow Report</p>
               <span class="title-badge">${result.titleBadge.label}</span>
+              ${result.randomModifierBadge ? `<span class="title-badge title-badge--chaos">${result.randomModifierBadge.label}</span>` : ""}
               <h2 class="result-title">${result.title}</h2>
               <p>${result.summary}</p>
               <p class="title-badge-helper">${result.titleBadge.helper}</p>
+              ${result.randomModifierBadge ? `<p class="title-badge-helper title-badge-helper--chaos">${result.randomModifierBadge.helper}</p>` : ""}
             </div>
 
             <div class="mission-report__body">
@@ -1737,6 +2094,8 @@ function renderResult() {
                   ${reportListMarkup("Drafted Superpowers", result.draftedSuperpowers, "ไม่ได้เลือก Superpower")}
                   ${reportListMarkup("Superpowers Used", result.superpowersUsed, "ยังไม่ได้ใช้ Superpower ที่เลือก")}
                   ${reportListMarkup("Problems Triggered", result.problemsTriggered, "ไม่มีปัญหาหลักถูก trigger")}
+                  ${reportListMarkup("Score Limits", result.scoreCeilingReasons, "ไม่มี score ceiling เพิ่มเติม")}
+                  ${randomModifiersMarkup(result.randomModifiers)}
                   ${phaseLearningsMarkup(result.phaseSummaries)}
                 </div>
               </aside>
@@ -1746,11 +2105,11 @@ function renderResult() {
                 ${state.history
       .map(
         (item, index) => `
-                    <article class="timeline-item ${item.isMicroEvent ? "is-signal" : item.countered ? "is-safe" : "is-risky"}">
+                    <article class="timeline-item ${item.isRandomModifier ? "is-random" : item.isMicroEvent ? "is-signal" : item.countered ? "is-safe" : "is-risky"}">
                       <span>${index + 1}</span>
                       <div>
                         <h4>${item.phase}: ${item.optionLabel}</h4>
-                        <p>${item.isMicroEvent ? "สัญญาณโปรเจกต์" : item.countered ? "คุม Event ได้" : "เดินหน้าต่อ แต่มีความเสี่ยงซ่อนอยู่"} — ${item.lesson}</p>
+                        <p>${item.isRandomModifier ? "Random modifier" : item.isMicroEvent ? "สัญญาณโปรเจกต์" : item.countered ? "คุม Event ได้" : "เดินหน้าต่อ แต่มีความเสี่ยงซ่อนอยู่"} — ${item.lesson}</p>
                       </div>
                     </article>
                   `,
