@@ -23,7 +23,7 @@ The production build is written to `dist/`.
 
 The project has a React entrypoint, while the proven legacy game engine is mounted through `src/components/LegacyGameHost.jsx`.
 
-The initial gameplay flow is: title/start screen, Superpower Draft skill selection, then the first `Phase Goal` before `Brainstorm` choices.
+The initial gameplay flow is: title/start screen, Superpower Draft skill selection, then the first `Phase Goal` before `Brainstorm` choices. Players inspect skill cards and choose exactly 3 Superpowers before `Start Mission` is enabled.
 
 ## Random Modifier Gimmick
 
@@ -38,3 +38,7 @@ Phase issues are pressure-based. They appear when a normal choice creates high r
 Every playable choice is hydrated with tactical meaning fields (`purpose`, `solves`, `misses`). Choice cards stay compact by showing what the option fixes, while decision results can explain why it mattered and what remains uncovered.
 
 Score tiers use ceilings from risk, token debt, quality, and risky choices. `Workflow Master` requires low risk, high quality, no token debt, limited risky choices, and repeated skill/synergy use.
+
+## Desktop UX Notes
+
+The current UI pass is desktop-first for `1280x800` and `1440x900`. Resource meters, Phase Goal popups, skill cards, and choice cards should stay scan-friendly on desktop; mobile should remain usable but is a follow-up optimization target.

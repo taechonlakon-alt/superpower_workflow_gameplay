@@ -1186,6 +1186,8 @@ function choiceCardMarkup(option, index) {
   const isSkill = Boolean(option.skill);
   const isSynergy = Boolean(option.requires);
   const meaning = getChoiceMeaning(option);
+  const visibleTags = option.tags ? option.tags.slice(0, 2) : [];
+  const hiddenTagCount = option.tags ? Math.max(0, option.tags.length - visibleTags.length) : 0;
   const unlock = isSkill
     ? `Workflow Tool: ${getSkill(option.skill)?.name}`
     : isSynergy
@@ -1203,7 +1205,10 @@ function choiceCardMarkup(option, index) {
         <span class="action-slot__meaning">
           <span><b>แก้ปัญหา</b> ${escapeHtml(meaning.solves)}</span>
         </span>
-        <span class="action-slot__tags">${option.tags ? tagMarkup(option.tags) : ""}</span>
+        <span class="action-slot__tags">
+          ${visibleTags.length ? tagMarkup(visibleTags) : ""}
+          ${hiddenTagCount ? `<span>+${hiddenTagCount}</span>` : ""}
+        </span>
       </span>
       <span class="action-slot__footer">
         ${unlock ? `<span class="action-slot__unlock">${unlock}</span>` : ""}
@@ -1235,12 +1240,15 @@ function shouldShowPhaseGoalPopup() {
 }
 
 function phaseGoalPopupMarkup(step) {
-  const guidance = Array.isArray(step.goal.guidance) && step.goal.guidance.length
+  const visibleGuidance = Array.isArray(step.goal.guidance)
+    ? step.goal.guidance.slice(0, 5)
+    : [];
+  const guidance = visibleGuidance.length
     ? `
       <div class="phase-goal-guidance">
         <p class="phase-goal-guidance__label">คำแนะนำ</p>
         <ul>
-          ${step.goal.guidance.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+          ${visibleGuidance.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
         </ul>
       </div>
     `
@@ -1326,8 +1334,7 @@ function renderSetup() {
                 <span class="phase-badge" aria-hidden="true">${eventIconMarkup()}</span>
               </div>
               <div class="phase-body">
-                <p>Resource Bar: Time คือเวลาที่เหลือ, Token คือ AI budget ที่เหลือ, Risk คือความเสี่ยงโปรเจกต์</p>
-                <p>Superpower ที่เลือกจะปลดล็อกทางเลือกพิเศษใน Brainstorm, Plan, Execute และ Review</p>
+                <p>คลิกการ์ดเพื่อดูรายละเอียด แล้วเลือกให้ครบ ${game.maxSkills} ใบก่อนเริ่ม Brainstorm</p>
               </div>
             </div>
 
@@ -1485,18 +1492,18 @@ function renderResolution() {
 
             ${resourceBarMarkup()}
             <div class="resolution-layout">
+              <div class="resolution-card reaction-card reaction-card--${result.reaction.tone} resolution-card--primary">
+                <p class="mini-label">Reaction</p>
+                <h3>${result.reaction.title}</h3>
+                <p>${result.reaction.copy}</p>
+              </div>
+
               <div class="resolution-card resolution-card--event">
                 <p class="mini-label">Event</p>
                 <h3>${result.eventTitle}</h3>
                 <ul>
                   ${result.lines.map((line) => `<li>${line}</li>`).join("")}
                 </ul>
-              </div>
-
-              <div class="resolution-card reaction-card reaction-card--${result.reaction.tone}">
-                <p class="mini-label">Reaction</p>
-                <h3>${result.reaction.title}</h3>
-                <p>${result.reaction.copy}</p>
               </div>
 
               <div class="resolution-card">

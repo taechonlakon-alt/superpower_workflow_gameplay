@@ -76,7 +76,9 @@ Start-flow invariant:
 
 - The player should first see the title/start screen with the `เริ่มภารกิจ` button.
 - Pressing `เริ่มภารกิจ` should show the Superpower Draft skill-selection screen.
-- Pressing `Start Mission` after choosing exactly 3 skills should enter `Brainstorm`.
+- The Superpower Draft starts with no skills selected.
+- Players inspect skill details and choose exactly 3 skills before pressing `Start Mission`.
+- Pressing `Start Mission` with exactly 3 skills should enter `Brainstorm`; before that it should stay disabled.
 - The first `Phase Goal` popup should appear only after the skill-selection screen, not as the first visible screen.
 - In code, initial `screen` should remain `"title"` and `starterWorkflowSkills` should remain `[]` unless a deliberate redesign changes the start flow.
 
@@ -129,6 +131,8 @@ The phase bar should clearly show all 5 labels:
 The main panel should show the `Brief` only. `Brief` should be a compact task statement, like what the client needs or what must be delivered in this phase. It should not explain workflow, step order, checklist details, or teaching notes.
 
 `Phase Goal` is shown as a popup before the player reaches the phase choices. The popup has two parts: a short meaning/purpose line, then a `คำแนะนำ` section for workflow details, step order, guardrails, and review checklists.
+
+For desktop readability, `คำแนะนำ` should stay at 5 bullets or fewer. Combine related checklist items instead of turning the popup into a tutorial wall.
 
 ## Phase Issues
 
@@ -200,9 +204,9 @@ Current phase goals:
 Current phase guidance:
 
 - `Brainstorm`: read docs/brief, summarize goal, propose core flow, explain trade-offs, ask remaining unknowns.
-- `Plan`: files, new files, tests, task order, verify, risks, and scope guard.
-- `Execute`: read plan, choose task, summarize, edit relevant files, run focused test, summarize result, stop or ask.
-- `Review`: spec, acceptance, file scope, tests, security, data integrity, docs, hallucination, duplicate code, and naming.
+- `Plan`: files/new files, tests, task order, verify, risks, and scope guard.
+- `Execute`: read plan, choose task, summarize, edit relevant files, run focused test, summarize result, then stop or ask before the next task.
+- `Review`: spec/acceptance, file scope/docs/evidence, tests/security/data integrity, hallucination, duplication, and naming.
 
 ## Execute Flow
 
@@ -264,7 +268,7 @@ The game loop is:
 
 ## Superpower Draft
 
-The game currently shows a short Superpower Draft before the mission. The player chooses 3 Superpowers, then those choices unlock contextual options during `Brainstorm`, `Plan`, `Execute`, `Review`, and emergency recovery.
+The game currently shows a short Superpower Draft before the mission. It starts with no skills selected. The player inspects skill cards, chooses exactly 3 Superpowers, and those choices unlock contextual options during `Brainstorm`, `Plan`, `Execute`, `Review`, and emergency recovery.
 
 Current Superpowers:
 
@@ -290,7 +294,7 @@ Superpowers expose special choices in related phases. They are not free wins. A 
 
 ## Skill Card UI
 
-Skill cards should stay compact. Each card shows only a short `summary` so the Superpower Draft does not become a wall of text.
+Skill cards should stay compact. Each card shows only a short `summary`, clamped to a small number of lines, so the Superpower Draft does not become a wall of text.
 
 Full skill detail lives in the Skill Detail popup opened by clicking a skill card. The popup shows the skill icon, type, name, summary, full description, teaching point, and warning when present. Selection happens inside the popup:
 
@@ -333,7 +337,7 @@ Every playable choice should have tactical meaning. The data layer hydrates thes
 }
 ```
 
-Choice cards show `solves` only so the screen stays lighter while still explaining what pressure the option can answer. Decision results can show `purpose`, `solves`, and `misses` so partial choices feel useful without pretending they solve everything.
+Choice cards show `solves` only so the screen stays lighter while still explaining what pressure the option can answer. Do not put `purpose` / `สำคัญเพราะ` back on the choice card. Decision results can show `purpose`, `solves`, and `misses` so partial choices feel useful without pretending they solve everything.
 
 Recent wording changes:
 
@@ -605,7 +609,7 @@ It should feel like a compact pixel RPG mission board:
 - consequence/tradeoff badge on the right
 - parchment surface inside a chunky stone/wood frame
 
-On desktop and laptop screens, the primary gameplay state should fit in one viewport without requiring vertical scrolling.
+The desktop-first target viewports are `1280x800` and `1440x900`. On desktop and laptop screens, the primary gameplay state should fit in one viewport without requiring vertical scrolling.
 
 If the layout needs to compress, prefer reducing:
 
@@ -615,6 +619,8 @@ If the layout needs to compress, prefer reducing:
 - HUD density
 
 Do not solve normal desktop gameplay by forcing scrolling.
+
+Mobile should remain usable, but mobile optimization is a follow-up pass rather than the target of this desktop cleanup.
 
 ## Choices
 
