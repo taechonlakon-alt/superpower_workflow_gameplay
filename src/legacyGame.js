@@ -1279,7 +1279,7 @@ function heroMarkup() {
       </div>
       <div class="start-board">
         <div class="start-character" aria-hidden="true">
-          <img src="/assets/character/lv1.gif" alt="Hero Lv1" class="hero-character-img" />
+          <img src="/assets/character/lv1.gif" alt="Hero Lv1" class="hero-character-img" onerror="this.onerror=null; this.src='/assets/character/lv1.png';" />
         </div>
         <div class="start-emblem">${titleGlyphMarkup()}</div>
         <p class="start-kicker">Project Survival Game</p>
@@ -1435,7 +1435,7 @@ function renderSetup() {
   root.innerHTML = `
     <main class="app">
       <div class="phase-character" aria-hidden="true">
-        <img src="/assets/character/lv${characterLevel}.gif" alt="Hero Lv${characterLevel}" class="phase-character-img" />
+        <img src="/assets/character/lv${characterLevel}.gif" alt="Hero Lv${characterLevel}" class="phase-character-img" onerror="this.onerror=null; this.src='/assets/character/lv${characterLevel}.png';" />
       </div>
       <section class="${shellClass()}">
         <section class="phasebar" style="display: flex; align-items: center; justify-content: space-between;">
@@ -1525,7 +1525,7 @@ function renderStep(step, isEmergency = false) {
   root.innerHTML = `
     <main class="app">
       <div class="phase-character" aria-hidden="true">
-        <img src="/assets/character/lv${characterLevel}.gif" alt="Hero Lv${characterLevel}" class="phase-character-img" />
+        <img src="/assets/character/lv${characterLevel}.gif" alt="Hero Lv${characterLevel}" class="phase-character-img" onerror="this.onerror=null; this.src='/assets/character/lv${characterLevel}.png';" />
       </div>
       <section class="${shellClass()}">
         <section class="phasebar" style="display: flex; align-items: center; justify-content: space-between;">
@@ -1597,7 +1597,7 @@ function renderResolution() {
   root.innerHTML = `
     <main class="app">
       <div class="phase-character" aria-hidden="true">
-        <img src="/assets/character/lv${characterLevel}.gif" alt="Hero Lv${characterLevel}" class="phase-character-img" />
+        <img src="/assets/character/lv${characterLevel}.gif" alt="Hero Lv${characterLevel}" class="phase-character-img" onerror="this.onerror=null; this.src='/assets/character/lv${characterLevel}.png';" />
       </div>
       <section class="${shellClass()}">
         <section class="phasebar" style="display: flex; align-items: center; justify-content: space-between;">
@@ -2180,7 +2180,7 @@ function renderResult() {
   root.innerHTML = `
     <main class="app">
       <div class="phase-character" aria-hidden="true">
-        <img src="/assets/character/lv${characterLevel}.gif" alt="Hero Lv${characterLevel}" class="phase-character-img" />
+        <img src="/assets/character/lv${characterLevel}.gif" alt="Hero Lv${characterLevel}" class="phase-character-img" onerror="this.onerror=null; this.src='/assets/character/lv${characterLevel}.png';" />
       </div>
       <section class="${shellClass()}">
         <section class="phasebar" style="display: flex; align-items: center; justify-content: space-between;">
@@ -2346,10 +2346,10 @@ function renderEvolution() {
       <div class="evolution-container">
         <div class="evolution-flash" aria-hidden="true"></div>
         <div class="evolution-character old-character" aria-hidden="true">
-          <img src="/assets/character/lv${state.evolutionOldLevel}.gif" alt="Evolving..." />
+          <img src="/assets/character/lv${state.evolutionOldLevel}.gif" alt="Evolving..." onerror="this.onerror=null; this.src='/assets/character/lv${state.evolutionOldLevel}.png';" />
         </div>
         <div class="evolution-character new-character" aria-hidden="true">
-          <img src="/assets/character/lv${state.evolutionNewLevel}.gif" alt="Evolution Complete!" />
+          <img src="/assets/character/lv${state.evolutionNewLevel}.gif" alt="Evolution Complete!" onerror="this.onerror=null; this.src='/assets/character/lv${state.evolutionNewLevel}.png';" />
         </div>
       </div>
       <div class="evolution-text">
