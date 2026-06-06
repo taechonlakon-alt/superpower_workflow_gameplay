@@ -15,8 +15,8 @@ function createInitialState() {
     progress: 0,
     activeChaos: null,
     triggeredChaosByPhase: {},
-    seenPhaseGoals: [],
     phaseSummaries: [],
+    seenPhaseGoals: [],
     activeSkillDetail: null,
     randomModifiersTriggered: [],
     randomModifierCooldown: 0,
@@ -232,6 +232,34 @@ function getChoiceMeaning(option) {
   };
 }
 
+function getInPlayHint(step, option, countered) {
+  if (option.hint) return option.hint;
+
+  const effects = normalizeEffects(option.effects);
+
+  if (countered) {
+    return "Hint: เลือก tool ถูกกับ edge case แล้ว รอบต่อไปให้ดูว่า cost ด้านเวลา/token คุ้มกับ risk ที่ลดลงไหม";
+  }
+
+  if (option.requires?.length) {
+    return "Hint: combo ช่วยปิดหลาย gap ได้เร็ว แต่ยังต้องดูว่า phase นี้ต้องการ combo ทั้งชุดจริงหรือไม่";
+  }
+
+  if (effects.risk >= 4 || effects.quality <= -2) {
+    return "Hint: ทางลัดนี้มีเหตุผลเรื่องความเร็ว แต่กำลังเปลี่ยนเป็นหนี้ risk/quality ที่ต้องจ่ายตอน Review";
+  }
+
+  if (effects.token >= 3 || effects.time >= 3) {
+    return "Hint: choice นี้ซื้อความมั่นใจด้วย budget/time ถ้าใช้ซ้ำต้องมี evidence กลับมาคุ้มค่า";
+  }
+
+  if (effects.risk < 0 || effects.quality >= 3) {
+    return "Hint: guardrail ที่ดีควรลดความไม่แน่นอนของ phase ไม่ใช่แค่เพิ่มขั้นตอนให้ดูครบ";
+  }
+
+  return step?.goal?.copy || option.lesson || "Hint: ดูผล resource แล้วตัดสินว่าควรเร่งต่อหรือวาง guardrail เพิ่ม";
+}
+
 function buildMicroEvent({ id, title, icon, tags, tradeoff, outcome, lesson, effects, reaction }) {
   return {
     phase: "System Signal",
@@ -282,7 +310,7 @@ function buildRandomModifierEvent(modifier, step) {
   const tone = modifier.tone || (effects.risk > 0 || effects.token > 0 || effects.time > 0 ? "warn" : "safe");
 
   return {
-    phase: "Random Modifier",
+    phase: "External Signal",
     eventId: modifier.id,
     eventTitle: modifier.title,
     optionId: modifier.id,
@@ -290,25 +318,45 @@ function buildRandomModifierEvent(modifier, step) {
     optionIcon: modifier.icon || "???",
     optionTone: tone === "danger" ? "gray" : "mint",
     skillName: null,
-    tags: modifier.tags || ["random"],
-    tradeoff: "Random modifier แทรกหลัง decision เพื่อเพิ่มความคาดเดาไม่ได้ของ run",
+    tags: modifier.tags || ["external"],
+    tradeoff: "External pressure แทรกหลัง decision เพื่อทดสอบว่า workflow รับแรงกดจริงได้ไหม",
     outcome: modifier.copy,
-    lesson: "นี่เป็น gimmick สุ่ม ไม่ใช่ Problems Triggered จากการเลือกของผู้เล่น แต่ resource delta ยังมีผลกับ score จริง",
+    lesson: "นี่เป็น external signal ไม่ใช่ Problems Triggered จาก choice โดยตรง แต่ resource delta ยังสะท้อนแรงกดของ run นี้",
+    hint: modifier.hint || "Hint: ถ้า signal นี้เริ่มกัด resource ให้ใช้ choice ถัดไปปิด pressure ด้วยหลักฐาน ไม่ใช่เร่งแบบเดิม",
     countered: false,
     effects,
     progress: 0,
     lines: [
-      `สุ่มหลัง decision ใน phase ${step?.title || "current"}`,
+      `External signal หลัง decision ใน phase ${step?.title || "current"}`,
       modifier.copy,
       formatRandomEffectDelta(effects),
     ],
     reaction: {
       tone,
-      title: tone === "safe" ? "Random ช่วยกันพลาด" : "Random บิด resource",
-      copy: "เกมโยน modifier เข้ามาให้ต้อง adapt โดยไม่เปลี่ยนโจทย์หลักของ phase",
+      title: tone === "safe" ? "Workflow รับแรงกดได้" : "แรงกดนอกแผนเริ่มโผล่",
+      copy: "เกมโยน external signal เข้ามาให้ adapt โดยไม่เปลี่ยนโจทย์หลักของ phase",
     },
     isRandomModifier: true,
   };
+}
+
+function isHarmfulModifier(modifier) {
+  const effects = normalizeEffects(modifier.effects);
+  return effects.time > 0 || effects.token > 0 || effects.risk > 0 || effects.quality < 0;
+}
+
+function hasExternalPressure(lastResult) {
+  const effects = normalizeEffects(lastResult?.effects);
+  return (
+    effects.risk >= 3
+    || effects.quality < 0
+    || effects.token >= 3
+    || effects.time >= 3
+    || state.risk >= 4
+    || getTokenSpent() >= 7
+    || state.time >= 10
+    || state.quality < 0
+  );
 }
 
 function chooseWeightedRandomModifier(modifiers) {
@@ -323,7 +371,7 @@ function chooseWeightedRandomModifier(modifiers) {
   return modifiers[modifiers.length - 1] || null;
 }
 
-function maybeTriggerRandomModifier(step) {
+function maybeTriggerRandomModifier(step, lastResult = null) {
   const config = game.randomModifierConfig || {};
   const maxPerRun = Number.isFinite(config.maxPerRun) ? config.maxPerRun : 2;
   const chance = Number.isFinite(config.chance) ? config.chance : 0.3;
@@ -337,7 +385,11 @@ function maybeTriggerRandomModifier(step) {
   }
 
   const triggeredIds = new Set((state.randomModifiersTriggered || []).map((modifier) => modifier.id));
-  const availableModifiers = game.randomModifiers.filter((modifier) => !triggeredIds.has(modifier.id));
+  const pressureActive = hasExternalPressure(lastResult);
+  const availableModifiers = game.randomModifiers.filter((modifier) => {
+    if (triggeredIds.has(modifier.id)) return false;
+    return pressureActive || !isHarmfulModifier(modifier);
+  });
   if (!availableModifiers.length) return null;
 
   const shouldForceFirst =
@@ -506,6 +558,7 @@ function buildResolution(step, option) {
     misses: choiceMeaning.misses,
     outcome: option.resolveMsg || option.outcome,
     lesson: option.lesson || "",
+    hint: getInPlayHint(step, option, countered),
     reaction: getChoiceReaction(option, countered),
     countered,
     effects: optionEffects,
@@ -742,7 +795,7 @@ function advanceAfterNormalDecision({ allowRandomModifier = true, allowMicroEven
   }
 
   if (allowRandomModifier) {
-    const randomModifier = maybeTriggerRandomModifier(step);
+    const randomModifier = maybeTriggerRandomModifier(step, lastResult);
     if (randomModifier) {
       state.resolution = randomModifier;
       state.history.push(randomModifier);
@@ -803,35 +856,39 @@ function continueAfterResolution() {
 }
 
 function toggleSkill(skillId) {
-  console.log("toggleSkill called with ID:", skillId);
   if (state.skills.includes(skillId)) {
     state.skills = state.skills.filter((id) => id !== skillId);
     state.activeSkillDetail = null;
-    console.log("Skill removed. Current skills:", state.skills);
     render();
     return;
   }
 
   if (state.skills.length >= game.maxSkills) {
-    console.log("Cannot add skill. Already at max skills:", state.skills);
     return;
   }
   state.skills = [...state.skills, skillId];
   state.activeSkillDetail = null;
-  console.log("Skill added. Current skills:", state.skills);
   render();
 }
 
 function openSkillDetail(skillId) {
-  console.log("openSkillDetail called with ID:", skillId);
   if (!getSkill(skillId)) return;
   state.activeSkillDetail = skillId;
   render();
 }
 
 function closeSkillDetail() {
-  console.log("closeSkillDetail called");
   state.activeSkillDetail = null;
+  render();
+}
+
+function confirmPhaseGoal() {
+  const step = getCurrentStep();
+  if (!step || state.screen !== "step") return;
+
+  if (!state.seenPhaseGoals.includes(step.id)) {
+    state.seenPhaseGoals = [...state.seenPhaseGoals, step.id];
+  }
   render();
 }
 
@@ -845,14 +902,6 @@ function startMission() {
 function startSkillDraft() {
   state.activeSkillDetail = null;
   state.screen = "setup";
-  render();
-}
-
-function acknowledgePhaseGoal() {
-  const step = getCurrentStep();
-  if (!step?.goal || state.seenPhaseGoals.includes(step.id)) return;
-
-  state.seenPhaseGoals = [...state.seenPhaseGoals, step.id];
   render();
 }
 
@@ -939,12 +988,87 @@ function soundButtonMarkup() {
   `;
 }
 
-function bindCommonUi() {
-  root.querySelector(".sound-toggle")?.addEventListener("click", () => {
+function handleRootClick(event) {
+  const target = event.target;
+  if (!(target instanceof Element) || !root?.contains(target)) return;
+
+  if (target.classList.contains("skill-detail-overlay")) {
+    closeSkillDetail();
+    return;
+  }
+
+  const closeSkillButton = target.closest(".skill-detail-close");
+  if (closeSkillButton) {
+    closeSkillDetail();
+    return;
+  }
+
+  const toggleSkillButton = target.closest(".skill-detail-toggle");
+  if (toggleSkillButton) {
+    toggleSkill(toggleSkillButton.dataset.skill);
+    return;
+  }
+
+  const soundButton = target.closest(".sound-toggle");
+  if (soundButton) {
     soundEnabled = !soundEnabled;
     if (soundEnabled) beep({ frequency: 640, duration: 0.06, volume: 0.02 });
     render();
-  });
+    return;
+  }
+
+  const heroStartButton = target.closest(".hero-start-btn");
+  if (heroStartButton) {
+    if (state.showHeroPopup && heroStartButton.closest(".hero-popup-overlay")) {
+      state.showHeroPopup = false;
+      render();
+      return;
+    }
+
+    startSkillDraft();
+    return;
+  }
+
+  const skillCard = target.closest(".skill-card");
+  if (skillCard) {
+    openSkillDetail(skillCard.dataset.skill);
+    return;
+  }
+
+  const handCard = target.closest(".superpower-hand__card");
+  if (handCard) {
+    openSkillDetail(handCard.dataset.skill);
+    return;
+  }
+
+  const startButton = target.closest(".start-mission");
+  if (startButton) {
+    startMission();
+    return;
+  }
+
+  const phaseGoalButton = target.closest(".phase-goal-start");
+  if (phaseGoalButton) {
+    confirmPhaseGoal();
+    return;
+  }
+
+  const choiceButton = target.closest(".choice");
+  if (choiceButton) {
+    chooseOption(choiceButton.dataset.option);
+    return;
+  }
+
+  const continueButton = target.closest(".continue-button");
+  if (continueButton) {
+    continueAfterResolution();
+    return;
+  }
+
+  const restartButton = target.closest(".restart");
+  if (restartButton) {
+    restart();
+  }
 }
 
 function getPressureResourceTone(value, warnAt, dangerAt) {
@@ -1026,7 +1150,33 @@ function resourceBarMarkup() {
           `,
         )
         .join("")}
-    </div>
+      </div>
+  `;
+}
+
+function selectedSkillHandMarkup() {
+  const selectedSkills = state.skills.map((skillId) => getSkill(skillId)).filter(Boolean);
+  if (!selectedSkills.length) return "";
+
+  return `
+    <section class="superpower-hand" aria-label="Superpower Hand">
+      <div class="superpower-hand__label">
+        <span>Superpower Hand</span>
+        <strong>ถืออยู่ ${selectedSkills.length}/${game.maxSkills}</strong>
+      </div>
+      <div class="superpower-hand__cards">
+        ${selectedSkills.map((skill) => `
+          <button class="superpower-hand__card" type="button" data-skill="${escapeHtml(skill.id)}" aria-label="ดูรายละเอียด ${escapeHtml(skill.name)}">
+            <span class="superpower-hand__icon">${escapeHtml(skill.icon)}</span>
+            <span class="superpower-hand__meta">
+              <span>${escapeHtml(skill.type)}</span>
+              <strong>${escapeHtml(skill.name)}</strong>
+            </span>
+            <span class="superpower-hand__ready">พร้อมใช้</span>
+          </button>
+        `).join("")}
+      </div>
+    </section>
   `;
 }
 
@@ -1131,7 +1281,7 @@ function skillCardMarkup(skill) {
   `;
 }
 
-function skillDetailPopupMarkup(skill) {
+function skillDetailPopupMarkup(skill, allowEdit = state.screen === "setup") {
   const selected = state.skills.includes(skill.id);
   const locked = !selected && state.skills.length >= game.maxSkills;
   const actionLabel = selected ? "ถอดสกิล" : locked ? "เลือกครบ 3 ใบแล้ว" : "เลือกสกิล";
@@ -1173,7 +1323,7 @@ function skillDetailPopupMarkup(skill) {
           ${teaches}
           ${warning}
           <div class="skill-detail-actions">
-            <button class="restart skill-detail-toggle" type="button" data-skill="${escapeHtml(skill.id)}" ${locked ? "disabled" : ""}>${actionLabel}</button>
+            ${allowEdit ? `<button class="restart skill-detail-toggle" type="button" data-skill="${escapeHtml(skill.id)}" ${locked ? "disabled" : ""}>${actionLabel}</button>` : ""}
             <button class="restart skill-detail-close" type="button">ปิด</button>
           </div>
         </section>
@@ -1196,9 +1346,6 @@ function choiceCardMarkup(option, index) {
 
   return `
     <button class="choice action-slot action-slot--${option.tone} ${isSkill ? "choice--skill" : ""} ${isSynergy ? "choice--synergy" : ""}" data-option="${option.id}" style="--choice-delay:${index * 65}ms">
-      <span class="action-slot__icon choice-icon--${option.tone}">
-        <span class="choice-rune">${option.icon || "ACT"}</span>
-      </span>
       <span class="action-slot__body">
         <strong class="action-slot__title">${option.label}</strong>
         <span class="action-slot__helper">${option.helper || ""}</span>
@@ -1232,59 +1379,8 @@ function briefMarkup(step, isEmergency = false, isChaos = false) {
   `;
 }
 
-function shouldShowPhaseGoalPopup() {
-  if (state.screen !== "step") return false;
-
-  const step = getCurrentStep();
-  return Boolean(step?.goal && !state.seenPhaseGoals.includes(step.id));
-}
-
-function phaseGoalPopupMarkup(step) {
-  const visibleGuidance = Array.isArray(step.goal.guidance)
-    ? step.goal.guidance.slice(0, 5)
-    : [];
-  const guidance = visibleGuidance.length
-    ? `
-      <div class="phase-goal-guidance">
-        <p class="phase-goal-guidance__label">คำแนะนำ</p>
-        <ul>
-          ${visibleGuidance.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
-        </ul>
-      </div>
-    `
-    : "";
-
-  return `
-    <div class="hero-popup-overlay phase-goal-overlay">
-      <div class="hero-popup-content phase-goal-popup">
-        <section class="brief-card brief-card--goal">
-          <p class="brief-label">Phase Goal</p>
-          <div class="phase-goal-popup__head">
-            <span class="phase-goal-popup__phase">Phase ${state.index + 1} of ${getTotalPhaseCount()}</span>
-            <h2>${escapeHtml(step.title)}</h2>
-          </div>
-          <div class="brief-copy">
-            <p><strong>${escapeHtml(step.goal.title)}</strong></p>
-            <p>${escapeHtml(step.goal.copy)}</p>
-          </div>
-          ${guidance}
-          <button class="restart phase-goal-start" type="button">เริ่มต่อไป</button>
-        </section>
-      </div>
-    </div>
-  `;
-}
-
-function renderPhaseGoalPopup() {
-  const step = getCurrentStep();
-  if (!step?.goal) return;
-
-  root.insertAdjacentHTML("beforeend", phaseGoalPopupMarkup(step));
-  root.querySelector(".phase-goal-start")?.addEventListener("click", acknowledgePhaseGoal);
-}
-
 function renderSkillDetailPopup() {
-  if (state.screen !== "setup" || !state.activeSkillDetail) return;
+  if (!state.activeSkillDetail) return;
 
   const skill = getSkill(state.activeSkillDetail);
   if (!skill) {
@@ -1292,29 +1388,7 @@ function renderSkillDetailPopup() {
     return;
   }
 
-  console.log("renderSkillDetailPopup opening popup for:", skill.id);
   root.insertAdjacentHTML("beforeend", skillDetailPopupMarkup(skill));
-  
-  const closeBtn = root.querySelector(".skill-detail-close");
-  console.log("Found close button:", !!closeBtn);
-  closeBtn?.addEventListener("click", () => {
-    console.log("close button clicked inside popup");
-    closeSkillDetail();
-  });
-
-  const toggleBtn = root.querySelector(".skill-detail-toggle");
-  console.log("Found toggle button:", !!toggleBtn);
-  toggleBtn?.addEventListener("click", () => {
-    console.log("toggle button clicked inside popup for:", skill.id);
-    toggleSkill(skill.id);
-  });
-
-  root.querySelector(".skill-detail-overlay")?.addEventListener("click", (event) => {
-    if (event.target.classList.contains("skill-detail-overlay")) {
-      console.log("overlay clicked (outside popup)");
-      closeSkillDetail();
-    }
-  });
 }
 
 function renderSetup() {
@@ -1351,14 +1425,6 @@ function renderSetup() {
       </section>
     </main>
   `;
-
-  bindCommonUi();
-  root.querySelectorAll(".skill-card").forEach((button) => {
-    button.addEventListener("click", () => {
-      openSkillDetail(button.dataset.skill);
-    });
-  });
-  root.querySelector(".start-mission")?.addEventListener("click", startMission);
 }
 
 function renderTitle() {
@@ -1367,8 +1433,6 @@ function renderTitle() {
       ${heroMarkup()}
     </main>
   `;
-
-  root.querySelector(".hero-start-btn")?.addEventListener("click", startSkillDraft);
 }
 
 function renderStep(step, isEmergency = false) {
@@ -1433,6 +1497,7 @@ function renderStep(step, isEmergency = false) {
             </div>
 
             ${resourceBarMarkup()}
+            ${selectedSkillHandMarkup()}
             ${eventContent}
 
             <div class="choices choices--adaptive action-grid">
@@ -1445,11 +1510,6 @@ function renderStep(step, isEmergency = false) {
       </section>
     </main>
   `;
-
-  bindCommonUi();
-  root.querySelectorAll(".choice").forEach((button) => {
-    button.addEventListener("click", () => chooseOption(button.dataset.option));
-  });
 }
 
 function resolutionChoiceMeaningMarkup(result) {
@@ -1465,10 +1525,21 @@ function resolutionChoiceMeaningMarkup(result) {
   `;
 }
 
+function resolutionHintMarkup(result) {
+  if (!result?.hint) return "";
+
+  return `
+              <div class="resolution-card resolution-card--hint">
+                <p class="mini-label">In-Play Hint</p>
+                <p>${escapeHtml(result.hint)}</p>
+              </div>
+  `;
+}
+
 function renderResolution() {
   const result = state.resolution;
   if (!result) return;
-  const resolutionLabel = result.isRandomModifier ? "Random Modifier" : result.isMicroEvent ? "System Signal" : "Decision Result";
+  const resolutionLabel = result.isRandomModifier ? "External Signal" : result.isMicroEvent ? "System Signal" : "Decision Result";
   const resolutionToneClass = result.isRandomModifier
     ? `resolution-panel--random resolution-panel--${result.reaction?.tone || "warn"}`
     : result.countered ? "resolution-panel--safe" : "resolution-panel--warn";
@@ -1486,11 +1557,11 @@ function renderResolution() {
               <p class="phase-tag">${resolutionLabel}</p>
               <div class="panel-title-row">
                 <h2 class="phase-title">${result.optionLabel}</h2>
-                <span class="phase-badge phase-badge--text">${result.optionIcon}</span>
               </div>
             </div>
 
             ${resourceBarMarkup()}
+            ${selectedSkillHandMarkup()}
             <div class="resolution-layout">
               <div class="resolution-card reaction-card reaction-card--${result.reaction.tone} resolution-card--primary">
                 <p class="mini-label">Reaction</p>
@@ -1516,6 +1587,7 @@ function renderResolution() {
                 <p class="mini-label">Lesson</p>
                 <p>${result.lesson}</p>
               </div>
+              ${resolutionHintMarkup(result)}
               ${resolutionChoiceMeaningMarkup(result)}
             </div>
 
@@ -1525,9 +1597,6 @@ function renderResolution() {
       </section>
     </main>
   `;
-
-  bindCommonUi();
-  root.querySelector(".continue-button")?.addEventListener("click", continueAfterResolution);
 }
 
 function getTitleBadge({ failed, protectedEvents, riskyChoices, skillUses, problemsTriggered, overBudget, overtime, workflowScore }) {
@@ -1888,8 +1957,8 @@ function getFinalResult() {
     randomModifiers,
     randomModifierBadge: randomModifiers.length
       ? {
-        label: "Chaos Run",
-        helper: `Random modifiers triggered ${randomModifiers.length} time${randomModifiers.length > 1 ? "s" : ""}`,
+        label: "Signal Run",
+        helper: `External signals triggered ${randomModifiers.length} time${randomModifiers.length > 1 ? "s" : ""}`,
       }
       : null,
     phaseSummaries,
@@ -1958,7 +2027,7 @@ function phaseLearningsMarkup(summaries) {
 
 function randomModifiersMarkup(modifiers) {
   const items = modifiers.map((modifier) => `${modifier.phase}: ${modifier.title} (${formatRandomEffectDelta(modifier.effects)})`);
-  return reportListMarkup("Random Modifiers", items, "รอบนี้ไม่มี random modifier แทรก");
+  return reportListMarkup("Random Modifiers", items, "รอบนี้ไม่มี External Signal แทรก");
 }
 
 function scoreSlotMarkup(score, verdict) {
@@ -2134,11 +2203,40 @@ function renderResult() {
       </section>
     </main>
   `;
-
-  bindCommonUi();
   playResultSound(result.failed);
   animateScoreSlot();
-  root.querySelector(".restart")?.addEventListener("click", restart);
+}
+
+function phaseGoalPopupMarkup() {
+  if (state.screen !== "step" || state.activeChaos) return "";
+
+  const step = getCurrentStep();
+  if (!step?.goal || state.seenPhaseGoals.includes(step.id)) return "";
+
+  const guidance = Array.isArray(step.goal.guidance) ? step.goal.guidance.slice(0, 5) : [];
+  return `
+    <div class="hero-popup-overlay phase-goal-overlay">
+      <section class="phase-goal-popup" role="dialog" aria-modal="true" aria-labelledby="phase-goal-title">
+        <div class="phase-goal-popup__head">
+          <p class="phase-tag">Phase Goal</p>
+          <span>Phase ${state.index + 1} of ${getTotalPhaseCount()} · ${escapeHtml(step.title)}</span>
+        </div>
+        <h2 id="phase-goal-title">${escapeHtml(step.goal.title)}</h2>
+        <p class="phase-goal-popup__copy">${escapeHtml(step.goal.copy)}</p>
+        ${guidance.length
+          ? `
+            <div class="phase-goal-popup__guidance">
+              <p class="mini-label">คำแนะนำ</p>
+              <ol>
+                ${guidance.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+              </ol>
+            </div>
+          `
+          : ""}
+        <button class="restart phase-goal-start" type="button">เริ่มต่อไป</button>
+      </section>
+    </div>
+  `;
 }
 
 function render() {
@@ -2173,14 +2271,11 @@ function render() {
       </div>
     `;
     root.insertAdjacentHTML("beforeend", popupHtml);
-    root.querySelector('.hero-start-btn')?.addEventListener('click', () => {
-      state.showHeroPopup = false;
-      render();
-    });
   }
 
-  if (shouldShowPhaseGoalPopup()) {
-    renderPhaseGoalPopup();
+  const phaseGoalPopup = phaseGoalPopupMarkup();
+  if (phaseGoalPopup) {
+    root.insertAdjacentHTML("beforeend", phaseGoalPopup);
   }
 
   renderSkillDetailPopup();
@@ -2189,10 +2284,12 @@ function render() {
 export function mountLegacyGame(container) {
   root = container;
   state = createInitialState();
+  root.addEventListener("click", handleRootClick);
   render();
 
   return () => {
     if (root === container) {
+      root.removeEventListener("click", handleRootClick);
       root.innerHTML = "";
       root = null;
     }

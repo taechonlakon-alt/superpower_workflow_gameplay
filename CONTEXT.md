@@ -79,7 +79,7 @@ Start-flow invariant:
 - The Superpower Draft starts with no skills selected.
 - Players inspect skill details and choose exactly 3 skills before pressing `Start Mission`.
 - Pressing `Start Mission` with exactly 3 skills should enter `Brainstorm`; before that it should stay disabled.
-- The first `Phase Goal` popup should appear only after the skill-selection screen, not as the first visible screen.
+- `Brainstorm` should first show its `Phase Goal` popup; pressing `เริ่มต่อไป` reveals the `Brief` and choices.
 - In code, initial `screen` should remain `"title"` and `starterWorkflowSkills` should remain `[]` unless a deliberate redesign changes the start flow.
 
 ## Current Gameplay Structure
@@ -111,7 +111,7 @@ The phase bar also includes:
 
 Each phase presents:
 
-- a pre-phase `Phase Goal` popup
+- a one-time `Phase Goal` popup
 - a short briefing
 - an event
 - base choices
@@ -128,11 +128,7 @@ The phase bar should clearly show all 5 labels:
 - `Phase 4` Review
 - `Phase 5` Report
 
-The main panel should show the `Brief` only. `Brief` should be a compact task statement, like what the client needs or what must be delivered in this phase. It should not explain workflow, step order, checklist details, or teaching notes.
-
-`Phase Goal` is shown as a popup before the player reaches the phase choices. The popup has two parts: a short meaning/purpose line, then a `คำแนะนำ` section for workflow details, step order, guardrails, and review checklists.
-
-For desktop readability, `คำแนะนำ` should stay at 5 bullets or fewer. Combine related checklist items instead of turning the popup into a tutorial wall.
+The `Phase Goal` popup explains what the phase is for and shows up to five guidance items. After the player presses `เริ่มต่อไป`, the main panel should show only the `Brief` for phase context. `Brief` should be a compact task statement, not a repeated workflow checklist.
 
 ## Phase Issues
 
@@ -149,23 +145,25 @@ Current phase issue mapping uses hybrid edge cases:
 
 The event label should name the current phase, such as `Brainstorm Issue`, so the player can connect the problem to the workflow step.
 
-## Random Modifiers
+## External Signals
 
-The game has an always-on light randomness gimmick. It is not a Hard Mode toggle.
+The game has an always-on light external-pressure gimmick. It is not a Hard Mode toggle.
 
-Random modifiers are gamey resource events that can appear after a normal decision result and before the game continues back into the phase flow. They should not replace or randomize phase issues.
+External signals can appear after a normal decision result and before the game continues back into the phase flow. They should not replace or randomize phase issues.
 
 Current rules:
 
-- roll only after normal decision results, never during setup, Phase Goal popup, emergency, or final report
-- base chance is 25%
-- maximum is 2 random modifiers per run
-- cooldown is 1 decision after a modifier triggers
-- if no modifier has appeared by `Execute`, the first Execute decision can force the first modifier
+- roll only after normal decision results, never during setup, emergency, or final report
+- base chance is 22%
+- maximum is 2 external signals per run
+- cooldown is 1 decision after a signal triggers
+- if no signal has appeared by `Execute`, the first Execute decision can force the first signal
 - do not repeat the same modifier in one run
-- do not stack random modifiers on the same transition as phase completion, phase issue, or micro-event
+- do not stack external signals on the same transition as phase completion, phase issue, or micro-event
+- harmful signals can only appear when the run already has pressure from risky choices, quality debt, time pressure, or AI budget pressure
+- clean routes can receive a safe/forecast signal instead of a punishment
 
-Random modifiers use normal resource effects, so they affect score through `Time`, `Token`, `Risk`, and internal `Quality`. They are still reported separately as `Random Modifiers` and must not be counted as `Problems Triggered`.
+External signals use normal resource effects, so they affect score through `Time`, `Token`, `Risk`, and internal `Quality`. They are still reported separately as `Random Modifiers` and must not be counted as `Problems Triggered`.
 
 ## Phase Goal And Completion
 
@@ -173,7 +171,7 @@ There is no `Phase Summary` screen during play.
 
 After a normal phase reaches its required progress and the player continues from the decision result, the game moves directly to the next phase. The completed phase evaluation is still stored in `state.phaseSummaries[]` for final report feedback and tuning.
 
-When a normal phase is entered for the first time, the game should show a `Phase Goal` popup before the player can choose an option. The player confirms it with `เริ่มต่อไป`, then the normal phase screen appears with only the `Brief` card in the panel head. The popup should appear once per normal phase and should not appear for emergency phases.
+When a normal phase is entered for the first time, the game shows a `Phase Goal` popup with the phase meaning and up to five guidance items. The player presses `เริ่มต่อไป` before seeing the `Brief`, Resource Bar, Superpower Hand, and choices. The popup appears once per normal phase and does not appear for Emergency.
 
 Each main phase should define:
 
@@ -185,7 +183,7 @@ goal: {
 }
 ```
 
-The goal `copy` should explain what the phase does and why it matters. `guidance` carries the actionable flow/checklist shown below the goal copy.
+The goal `copy` should explain what the phase does and why it matters. `guidance` renders as a concise list of no more than five items in the popup.
 
 The `briefing` field should stay short and situational:
 
@@ -261,7 +259,7 @@ The game loop is:
 2. Draft 3 Superpowers.
 3. Read the phase event.
 4. Choose a response.
-5. See reaction, consequence, and lesson.
+5. See reaction, consequence, in-play hint, and lesson.
 6. Continue directly to the next phase when phase progress is complete.
 7. Handle emergency if risk becomes critical.
 8. Review final report with final stats, phase learnings, Superpowers used, Problems triggered, Random Modifiers, and title badge.
@@ -269,6 +267,8 @@ The game loop is:
 ## Superpower Draft
 
 The game currently shows a short Superpower Draft before the mission. It starts with no skills selected. The player inspects skill cards, chooses exactly 3 Superpowers, and those choices unlock contextual options during `Brainstorm`, `Plan`, `Execute`, `Review`, and emergency recovery.
+
+After the mission starts, the selected skills should stay visible as a compact `Superpower Hand`. This is a visual reminder that the player is carrying those skill cards like tools/weapons. It must not create a new skill-use mechanic; skill effects still happen through unlocked choices.
 
 Current Superpowers:
 
@@ -304,6 +304,8 @@ Full skill detail lives in the Skill Detail popup opened by clicking a skill car
 
 The card itself should remain clickable even after 3 skills are selected so players can still inspect other skill details.
 
+During the mission, clicking a `Superpower Hand` card can open the same Skill Detail popup for reading, but it should not allow changing the drafted skills mid-run.
+
 ## Terraform Skill Rule
 
 `Terraform` is a playable Superpower selected as 1 of the 3 cards. It unlocks IaC-focused choices for Plan, Execute, and Review.
@@ -337,7 +339,7 @@ Every playable choice should have tactical meaning. The data layer hydrates thes
 }
 ```
 
-Choice cards show `solves` only so the screen stays lighter while still explaining what pressure the option can answer. Do not put `purpose` / `สำคัญเพราะ` back on the choice card. Decision results can show `purpose`, `solves`, and `misses` so partial choices feel useful without pretending they solve everything.
+Choice cards show `solves` only so the screen stays lighter while still explaining what pressure the option can answer. Do not put `purpose` / `สำคัญเพราะ` back on the choice card. Decision results can show `purpose`, `solves`, `misses`, and an `In-Play Hint` so partial choices feel useful without pretending they solve everything.
 
 Recent wording changes:
 
@@ -349,6 +351,8 @@ Recent wording changes:
 The goal is to make choices sound like plausible real decisions, not quiz answers.
 
 Risky choices may still reveal risk through tags and tradeoff text, but the label should not be a caricature.
+
+Choice labels should avoid obvious red-flag wording. Prefer plausible shortcuts that a real team might choose under pressure.
 
 ## Consequence-first Learning
 
@@ -620,7 +624,7 @@ If the layout needs to compress, prefer reducing:
 
 Do not solve normal desktop gameplay by forcing scrolling.
 
-Mobile should remain usable, but mobile optimization is a follow-up pass rather than the target of this desktop cleanup.
+Mobile should remain usable even when desktop is the primary target. At minimum there must be no horizontal scroll, buttons must remain tappable, and choice cards must stack instead of overlapping.
 
 ## Choices
 
@@ -703,7 +707,7 @@ Latest validation completed:
 - `node --check game-data.js` passed
 - Node smoke render passed after loading `game-data.js` before `script.js`
 - Node smoke flow passed for visible `Phase 1` through `Phase 5` labels, visible `Brief` header, and deterministic `Brainstorm Issue`
-- Node smoke flow should verify direct phase advancement, one-time `Phase Goal` popup per normal phase, stored `state.phaseSummaries[]`, final score tier card, `Phase Learnings`, and preserved `Problems Triggered`
+- Node smoke flow should verify one `Phase Goal` popup per normal phase, no popup for Emergency or repeat decisions, stored `state.phaseSummaries[]`, final score tier card, `Phase Learnings`, and preserved `Problems Triggered`
 - starter workflow balance simulation passed
 - current starter route fail rate about `31.9%`
 - optimal route still wins

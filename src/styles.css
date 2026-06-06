@@ -46,6 +46,7 @@ html,
 body {
   margin: 0;
   min-height: 100%;
+  overflow-x: hidden;
 }
 
 body {
@@ -726,6 +727,27 @@ button {
     linear-gradient(90deg, rgba(255, 255, 255, 0.24), transparent 38%),
     linear-gradient(180deg, #fff2c7 0%, #d5ae6c 100%);
   box-shadow: 0 4px 0 rgba(62, 45, 25, 0.18);
+}
+
+.phase-objective {
+  display: grid;
+  gap: 2px;
+  margin: 2px 0 5px;
+  padding: 5px 8px;
+  border: 2px solid rgba(82, 93, 30, 0.36);
+  background: rgba(238, 255, 207, 0.48);
+}
+
+.phase-objective p {
+  margin: 0;
+  color: #3f3525;
+  font-size: 0.78rem;
+  line-height: 1.12;
+  font-weight: 800;
+}
+
+.phase-objective strong {
+  color: #52631e;
 }
 
 .brief-label {
@@ -1491,80 +1513,6 @@ button {
   transform: translateY(-2px) scale(1.02);
 }
 
-.phase-goal-popup {
-  max-width: min(560px, calc(100vw - 40px));
-}
-
-.phase-goal-popup .brief-card {
-  width: 100%;
-  margin: 0;
-  padding: 16px 18px;
-  gap: 10px;
-  border-width: 4px;
-  box-shadow:
-    0 12px 0 rgba(43, 31, 18, 0.22),
-    0 24px 44px rgba(0, 0, 0, 0.26),
-    inset 0 6px 0 rgba(255, 255, 255, 0.22);
-}
-
-.phase-goal-popup__head {
-  display: grid;
-  gap: 4px;
-}
-
-.phase-goal-popup__head h2 {
-  margin: 0;
-  color: #2d2116;
-  font-family: var(--font-display);
-  font-size: 1.55rem;
-  line-height: 1;
-  letter-spacing: 0;
-}
-
-.phase-goal-popup__phase {
-  color: #6f4a21;
-  font-family: var(--font-pixel);
-  font-size: 0.78rem;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.phase-goal-guidance {
-  display: grid;
-  gap: 5px;
-  padding: 8px 10px;
-  border: 2px solid rgba(100, 70, 30, 0.44);
-  background: rgba(255, 246, 211, 0.5);
-}
-
-.phase-goal-guidance__label {
-  margin: 0;
-  color: #6b431b;
-  font-family: var(--font-pixel);
-  font-size: 0.72rem;
-  font-weight: 900;
-}
-
-.phase-goal-guidance ul {
-  display: grid;
-  gap: 4px;
-  margin: 0;
-  padding-left: 20px;
-}
-
-.phase-goal-guidance li {
-  color: #382718;
-  font-size: 0.8rem;
-  line-height: 1.12;
-  font-weight: 800;
-}
-
-.phase-goal-start {
-  justify-self: start;
-  margin-top: 4px;
-  padding: 10px 24px;
-}
-
 @media (prefers-reduced-motion: reduce) {
 
   *,
@@ -2215,6 +2163,117 @@ button {
   background: linear-gradient(90deg, #ef3f35, #ff9a68);
 }
 
+.superpower-hand {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(132px, 0.18fr) minmax(0, 1fr);
+  gap: 7px;
+  align-items: stretch;
+  margin: 0 0 8px;
+  padding: 6px;
+  border: 4px solid #4f321d;
+  background: linear-gradient(180deg, #9a6030, #70401f);
+  box-shadow: inset 0 0 0 3px rgba(255, 235, 168, 0.12);
+}
+
+.superpower-hand__label {
+  display: grid;
+  align-content: center;
+  gap: 2px;
+  padding: 5px 7px;
+  border: 2px solid rgba(47, 32, 18, 0.58);
+  background: rgba(255, 241, 189, 0.22);
+  color: #fff2cf;
+  font-family: var(--font-pixel);
+  text-transform: uppercase;
+}
+
+.superpower-hand__label span {
+  font-size: 0.58rem;
+  font-weight: 900;
+}
+
+.superpower-hand__label strong {
+  color: #fff7db;
+  font-size: 0.66rem;
+  line-height: 1;
+}
+
+.superpower-hand__cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.superpower-hand__card {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  gap: 6px;
+  align-items: center;
+  min-width: 0;
+  min-height: 42px;
+  padding: 5px 6px;
+  border: 3px solid #3d2c1b;
+  background: linear-gradient(180deg, #f7edcf, #c9b071);
+  color: #3d2c1b;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 2px 0 rgba(43, 30, 17, 0.22);
+}
+
+.superpower-hand__card:hover {
+  filter: brightness(1.04);
+  transform: translateY(-1px);
+}
+
+.superpower-hand__icon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 2px solid #635036;
+  background: linear-gradient(180deg, #fff1a7, #d69d35);
+  color: #4b2e0c;
+  font-family: var(--font-pixel);
+  font-size: 0.58rem;
+  font-weight: 900;
+}
+
+.superpower-hand__meta {
+  display: grid;
+  min-width: 0;
+  gap: 1px;
+}
+
+.superpower-hand__meta span,
+.superpower-hand__ready {
+  color: #795f38;
+  font-family: var(--font-pixel);
+  font-size: 0.52rem;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.superpower-hand__meta strong {
+  color: #2467a6;
+  overflow: hidden;
+  font-size: 0.78rem;
+  line-height: 1;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.superpower-hand__ready {
+  align-self: center;
+  padding: 3px 5px;
+  border: 2px solid rgba(45, 116, 30, 0.45);
+  background: rgba(234, 255, 200, 0.72);
+  color: #2d741e;
+}
+
 .signal-board {
   display: grid;
   gap: 8px;
@@ -2597,6 +2656,13 @@ button {
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.34), transparent 42%),
     linear-gradient(180deg, #edf9ff 0%, #c5e1f2 100%);
+}
+
+.resolution-card--hint {
+  border-color: rgba(82, 93, 30, 0.42);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.26), transparent 42%),
+    linear-gradient(180deg, #f7ffd7 0%, #d5e9a8 100%);
 }
 
 .resolution-card h3 {
@@ -4425,6 +4491,43 @@ body::before {
   .action-slot__tradeoff {
     font-size: 0.68rem;
   }
+
+  .superpower-hand {
+    margin-bottom: 6px;
+    padding: 5px;
+  }
+
+  .superpower-hand__card {
+    min-height: 38px;
+    padding: 4px 5px;
+  }
+
+  .superpower-hand__icon {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+@media (max-width: 760px) {
+  .choices--adaptive.action-grid {
+    grid-template-columns: 1fr;
+    grid-auto-rows: auto;
+    padding-right: 0;
+  }
+
+  .choices--adaptive.action-grid .action-slot {
+    min-height: 0;
+  }
+
+  .superpower-hand {
+    grid-template-columns: 1fr;
+  }
+
+  .superpower-hand__cards {
+    grid-template-columns: 1fr;
+    max-height: 150px;
+    overflow-y: auto;
+  }
 }
 
 .mission-report {
@@ -5292,3 +5395,2398 @@ body::before {
   font-size: 0.92rem;
 }
 
+/* Desktop game-board contract: every game state fits one viewport without
+   turning the mission board into a scroll container. */
+@media (min-width: 900px) {
+  html,
+  body,
+  #app,
+  .app {
+    width: 100%;
+    height: 100vh;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .app {
+    display: flex;
+    padding: 0;
+    align-items: stretch;
+    justify-content: stretch;
+  }
+
+  .shell {
+    width: min(1440px, 100vw);
+    height: 100vh;
+    min-height: 0;
+    margin: 0 auto;
+    padding: 6px 7px 10px;
+    overflow: hidden;
+  }
+
+  .phasebar {
+    flex: 0 0 auto;
+    margin: 0 7px;
+    padding: 4px 7px 5px;
+  }
+
+  .phase-tab {
+    gap: 4px;
+    padding: 4px 6px;
+    border-width: 2px;
+    box-shadow: 0 2px 0 rgba(47, 40, 30, 0.16);
+  }
+
+  .phase-num {
+    min-width: 20px;
+    height: 20px;
+    padding: 0 4px;
+    font-size: 0.68rem;
+  }
+
+  .phase-label {
+    font-size: 0.5rem;
+  }
+
+  .phase-text {
+    font-size: 0.72rem;
+  }
+
+  .sound-toggle {
+    min-width: 70px;
+    padding: 5px 8px;
+  }
+
+  .playfield {
+    min-height: 0;
+    margin: 0 7px;
+    padding: 5px 7px 7px;
+    overflow: hidden;
+  }
+
+  .panel,
+  .result,
+  .mission-report {
+    min-height: 0;
+    padding: 8px 10px 7px;
+    overflow: hidden;
+  }
+
+  .panel-head {
+    flex: 0 0 auto;
+    gap: 1px;
+    margin-bottom: 3px;
+  }
+
+  .panel-title-row {
+    gap: 7px;
+  }
+
+  .phase-title,
+  .result-title {
+    font-size: clamp(1.65rem, 2.15vw, 2.35rem);
+    line-height: 0.9;
+  }
+
+  .phase-badge {
+    width: 32px;
+    height: 32px;
+    margin-top: 1px;
+    border-width: 3px;
+  }
+
+  .phase-badge svg {
+    width: 21px;
+    height: 21px;
+  }
+
+  .phase-tag {
+    padding: 2px 5px;
+    border-width: 2px;
+    font-size: 0.58rem;
+  }
+
+  .phase-objective {
+    gap: 1px;
+    margin: 1px 0 3px;
+    padding: 3px 6px;
+  }
+
+  .phase-objective p {
+    font-size: 0.68rem;
+    line-height: 1.05;
+  }
+
+  .brief-card {
+    gap: 2px;
+    margin-bottom: 4px;
+    padding: 4px 6px;
+    border-width: 3px;
+    box-shadow: 0 2px 0 rgba(62, 45, 25, 0.18);
+  }
+
+  .brief-label {
+    padding: 1px 5px;
+    font-size: 0.54rem;
+  }
+
+  .brief-copy p,
+  .phase-body p {
+    font-size: 0.72rem;
+    line-height: 1.08;
+  }
+
+  .resource-bar {
+    flex: 0 0 auto;
+    gap: 5px;
+    margin-bottom: 4px;
+    padding: 4px;
+    border-width: 3px;
+    box-shadow: 0 2px 0 rgba(47, 32, 18, 0.18);
+  }
+
+  .resource-meter {
+    padding: 4px 6px 5px;
+    border-width: 2px;
+    box-shadow: 0 2px 0 rgba(47, 40, 30, 0.18);
+  }
+
+  .resource-meter__topline {
+    gap: 5px;
+  }
+
+  .resource-meter__label {
+    font-size: 0.58rem;
+  }
+
+  .resource-meter__value {
+    font-size: 0.96rem;
+  }
+
+  .resource-meter__track {
+    height: 6px;
+    margin-top: 3px;
+    border-width: 1px;
+  }
+
+  .resource-meter__helper {
+    margin-top: 2px;
+    overflow: hidden;
+    font-size: 0.52rem;
+    line-height: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .superpower-hand {
+    flex: 0 0 auto;
+    grid-template-columns: minmax(112px, 0.14fr) minmax(0, 1fr);
+    gap: 5px;
+    margin-bottom: 4px;
+    padding: 4px;
+    border-width: 3px;
+  }
+
+  .superpower-hand__label {
+    gap: 1px;
+    padding: 3px 5px;
+  }
+
+  .superpower-hand__label span {
+    font-size: 0.5rem;
+  }
+
+  .superpower-hand__label strong {
+    font-size: 0.56rem;
+  }
+
+  .superpower-hand__cards {
+    gap: 4px;
+  }
+
+  .superpower-hand__card {
+    grid-template-columns: 26px minmax(0, 1fr) auto;
+    gap: 4px;
+    min-height: 34px;
+    padding: 3px 5px;
+    border-width: 2px;
+  }
+
+  .superpower-hand__icon {
+    width: 25px;
+    height: 25px;
+    border-width: 2px;
+    font-size: 0.5rem;
+  }
+
+  .superpower-hand__meta strong {
+    font-size: 0.68rem;
+  }
+
+  .superpower-hand__meta span,
+  .superpower-hand__ready {
+    font-size: 0.46rem;
+  }
+
+  .superpower-hand__ready {
+    padding: 2px 4px;
+    border-width: 1px;
+  }
+
+  .event {
+    flex: 0 0 auto;
+    grid-template-columns: 58px 42px minmax(0, 1fr) 132px;
+    gap: 6px;
+    margin: 0 0 4px;
+    padding: 4px 6px;
+    border-width: 3px;
+    box-shadow: 0 3px 0 rgba(73, 51, 30, 0.24);
+  }
+
+  .event-label {
+    padding: 0 5px;
+    border-width: 2px;
+    font-size: 0.56rem;
+  }
+
+  .event-icon {
+    width: 38px;
+    height: 38px;
+    border-width: 2px;
+  }
+
+  .event-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .event-title {
+    font-size: 0.96rem;
+  }
+
+  .event-copy {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: 0.7rem;
+    line-height: 1.05;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .event-impact {
+    padding: 4px 5px;
+    border-width: 3px;
+  }
+
+  .event-impact small {
+    font-size: 0.56rem;
+  }
+
+  .event-impact strong {
+    font-size: 0.96rem;
+  }
+
+  .progress-bar-container {
+    flex: 0 0 auto;
+    margin-bottom: 4px;
+    padding: 4px 6px;
+    border-width: 3px;
+    box-shadow:
+      0 2px 0 rgba(47, 32, 18, 0.2),
+      inset 0 3px 0 rgba(255, 255, 255, 0.22);
+  }
+
+  .progress-bar-header {
+    margin-bottom: 3px;
+    font-size: 0.64rem;
+  }
+
+  .progress-bar-track {
+    height: 12px;
+    border-width: 2px;
+  }
+
+  .choices,
+  .choices--adaptive,
+  .choices--adaptive.action-grid {
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    gap: 6px;
+    padding: 2px 1px 3px;
+    overflow: hidden;
+    scrollbar-gutter: auto;
+    align-content: stretch;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: minmax(0, 1fr);
+  }
+
+  .choices--adaptive.action-grid:has(.choice:nth-child(5)) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .choices--adaptive.action-grid:has(.choice:nth-child(7)) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .choice,
+  .action-slot,
+  .choices--adaptive.action-grid .action-slot {
+    min-height: 0;
+    height: 100%;
+    padding: 6px 7px 7px;
+    overflow: hidden;
+    border-width: 3px;
+  }
+
+  .action-slot {
+    grid-template-columns: 38px minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    column-gap: 6px;
+  }
+
+  .action-slot__icon {
+    width: 34px;
+    height: 34px;
+    border-width: 2px;
+  }
+
+  .action-slot__body {
+    gap: 2px;
+    overflow: hidden;
+  }
+
+  .action-slot__title {
+    font-size: clamp(0.82rem, 1vw, 1rem);
+  }
+
+  .action-slot__helper {
+    font-size: 0.62rem;
+    line-height: 1.06;
+  }
+
+  .action-slot__meaning {
+    font-size: 0.56rem;
+    line-height: 1.06;
+  }
+
+  .action-slot__meaning span {
+    padding: 2px 4px;
+    -webkit-line-clamp: 1;
+  }
+
+  .action-slot__meaning b {
+    font-size: 0.46rem;
+  }
+
+  .action-slot__tags {
+    gap: 2px;
+    overflow: hidden;
+    max-height: 18px;
+  }
+
+  .action-slot__tags span {
+    padding: 1px 4px;
+    border-width: 1px;
+    font-size: 0.48rem;
+  }
+
+  .action-slot__footer {
+    gap: 4px;
+    margin-top: 3px;
+    padding-top: 3px;
+    border-top-width: 1px;
+  }
+
+  .action-slot__unlock {
+    font-size: 0.5rem;
+  }
+
+  .action-slot__tradeoff {
+    min-height: 20px;
+    padding: 3px 5px;
+    border-width: 2px;
+    font-size: 0.56rem;
+    line-height: 1.04;
+    -webkit-line-clamp: 2;
+  }
+
+  .action-slot__select {
+    min-width: 54px;
+    min-height: 24px;
+    padding: 3px 6px;
+    font-size: 0.56rem;
+  }
+
+  .panel-footer {
+    flex: 0 0 auto;
+    margin-top: 2px;
+    font-size: 0.54rem;
+  }
+
+  .setup-panel .panel-head {
+    margin-bottom: 3px;
+  }
+
+  .skill-grid.inventory-grid {
+    flex: 1 1 0;
+    min-height: 0;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    margin-top: 3px;
+    padding: 7px;
+    border-width: 4px;
+    overflow: hidden;
+  }
+
+  .skill-card,
+  .inventory-slot {
+    min-height: 0;
+    height: 100%;
+    grid-template-columns: 38px minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    column-gap: 6px;
+    padding: 6px;
+    border-width: 3px;
+  }
+
+  .inventory-slot__icon {
+    width: 36px;
+    height: 36px;
+    border-width: 2px;
+    font-size: 0.58rem;
+  }
+
+  .inventory-slot__type {
+    font-size: 0.48rem;
+  }
+
+  .inventory-slot strong {
+    padding-right: 9px;
+    font-size: 0.78rem;
+  }
+
+  .inventory-slot__copy {
+    min-height: 0;
+    font-size: 0.6rem;
+    line-height: 1.06;
+    -webkit-line-clamp: 2;
+  }
+
+  .inventory-slot__detail {
+    font-size: 0.48rem;
+  }
+
+  .inventory-slot__check {
+    right: 4px;
+    top: 3px;
+  }
+
+  .setup-actions {
+    flex: 0 0 auto;
+    gap: 8px;
+    margin-top: 5px;
+  }
+
+  .setup-actions .restart {
+    margin-top: 0;
+    padding: 7px 12px;
+    border-width: 4px;
+    font-size: 0.76rem;
+  }
+
+  .draft-count {
+    font-size: 0.68rem;
+  }
+
+  .resolution-layout {
+    flex: 1 1 0;
+    min-height: 0;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-flow: row dense;
+    gap: 6px;
+    margin-top: 3px;
+    overflow: hidden;
+  }
+
+  .resolution-card,
+  .resolution-card--primary {
+    min-height: 0;
+    padding: 6px 8px;
+    border-width: 3px;
+    overflow: hidden;
+  }
+
+  .resolution-card--primary {
+    grid-column: 1 / -1;
+  }
+
+  .resolution-card--event {
+    grid-row: auto;
+  }
+
+  .resolution-card h3 {
+    margin: 2px 0 4px;
+    font-size: 0.94rem;
+  }
+
+  .resolution-card--primary h3 {
+    font-size: 1.14rem;
+  }
+
+  .resolution-card p,
+  .resolution-card li {
+    font-size: 0.68rem;
+    line-height: 1.08;
+  }
+
+  .resolution-card ul {
+    padding-left: 16px;
+  }
+
+  .resolution-tags {
+    margin-top: 4px;
+  }
+
+  .continue-button {
+    flex: 0 0 auto;
+    margin-top: 5px;
+    padding: 7px 13px;
+  }
+
+  .hero-popup-overlay {
+    height: 100vh;
+    padding: 10px;
+    overflow: hidden;
+  }
+
+  .hero-popup-content {
+    max-height: calc(100vh - 20px);
+    overflow: hidden;
+  }
+
+  .start-board {
+    max-height: calc(100vh - 72px);
+    margin: 0 auto;
+    padding: 12px 16px 15px;
+  }
+
+  .start-emblem {
+    width: 38px;
+    height: 38px;
+    margin-bottom: 6px;
+    border-width: 3px;
+  }
+
+  .start-emblem svg {
+    width: 23px;
+    height: 23px;
+  }
+
+  .start-kicker {
+    margin-bottom: 5px;
+    font-size: 0.66rem;
+  }
+
+  .start-logo {
+    margin-bottom: 8px;
+    font-size: clamp(1.75rem, 4.5vw, 2.75rem);
+  }
+
+  .start-stage {
+    gap: 6px;
+    padding: 5px 8px;
+    border-width: 3px;
+  }
+
+  .start-stage span {
+    padding: 2px 4px;
+    border-width: 2px;
+    font-size: 0.58rem;
+  }
+
+  .start-stage strong {
+    font-size: 0.86rem;
+  }
+
+  .start-copy {
+    margin-top: 7px;
+    font-size: 0.68rem;
+    line-height: 1.12;
+  }
+
+  .hero-popup-content .hero-start-btn {
+    margin-top: 9px;
+    padding: 7px 18px;
+  }
+
+  .skill-detail-popup {
+    width: min(760px, calc(100vw - 24px));
+    max-width: min(760px, calc(100vw - 24px));
+  }
+
+  .skill-detail-card {
+    max-height: calc(100vh - 24px);
+    gap: 6px;
+    padding: 10px 12px;
+    overflow: hidden;
+    border-width: 4px;
+  }
+
+  .skill-detail-head {
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .skill-detail-icon {
+    width: 44px;
+    height: 44px;
+    border-width: 3px;
+    font-size: 0.62rem;
+  }
+
+  .skill-detail-type,
+  .skill-detail-label {
+    font-size: 0.58rem;
+  }
+
+  .skill-detail-meta strong {
+    font-size: 1.24rem;
+  }
+
+  .skill-detail-summary,
+  .skill-detail-section,
+  .skill-detail-warning {
+    gap: 3px;
+    padding: 6px 8px;
+    border-width: 2px;
+    font-size: 0.72rem;
+    line-height: 1.08;
+  }
+
+  .skill-detail-section p,
+  .skill-detail-warning p {
+    line-height: 1.08;
+  }
+
+  .skill-detail-actions {
+    gap: 6px;
+  }
+
+  .skill-detail-actions .restart {
+    min-width: 110px;
+    margin-top: 0;
+    padding: 7px 12px;
+    border-width: 4px;
+  }
+
+  .mission-report {
+    padding: 6px 8px;
+  }
+
+  .mission-report__header {
+    gap: 2px;
+  }
+
+  .mission-report__header .result-title {
+    font-size: clamp(1.35rem, 1.9vw, 1.8rem);
+  }
+
+  .mission-report__header > p:not(.phase-tag) {
+    max-width: 90ch;
+    overflow: hidden;
+    font-size: 0.64rem;
+    line-height: 1.05;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .title-badge {
+    padding: 2px 6px;
+    border-width: 2px;
+    font-size: 0.56rem;
+  }
+
+  .mission-report__body {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+    gap: 7px;
+    margin-top: 4px;
+    overflow: hidden;
+  }
+
+  .mission-report__summary {
+    grid-template-columns: minmax(0, 1fr) minmax(132px, 0.58fr) minmax(150px, 0.7fr);
+    gap: 5px;
+    overflow: hidden;
+  }
+
+  .mission-report__meters,
+  .mission-report__evidence,
+  .report-lists {
+    grid-column: 1 / -1;
+    gap: 4px;
+  }
+
+  .mission-report .run-pattern,
+  .score-slot,
+  .score-tier {
+    min-height: 0;
+    padding: 6px 7px;
+    border-width: 3px;
+  }
+
+  .mission-report .run-pattern strong {
+    font-size: 1rem;
+  }
+
+  .mission-report .run-pattern p,
+  .score-slot p,
+  .score-tier p,
+  .score-tier em {
+    margin-top: 3px;
+    font-size: 0.58rem;
+    line-height: 1.04;
+  }
+
+  .score-slot {
+    gap: 3px;
+  }
+
+  .score-slot::before {
+    inset: 4px;
+    border-width: 2px;
+  }
+
+  .score-slot__label,
+  .score-tier__range {
+    font-size: 0.52rem;
+  }
+
+  .score-slot__digit {
+    width: 25px;
+    height: 31px;
+    border-width: 2px;
+    font-size: 1.15rem;
+  }
+
+  .score-slot__max {
+    padding-bottom: 4px;
+    font-size: 0.62rem;
+  }
+
+  .score-tier__range {
+    margin-bottom: 3px;
+    padding: 2px 4px;
+  }
+
+  .score-tier strong {
+    font-size: 0.84rem;
+  }
+
+  .mission-report__meters,
+  .mission-report__evidence {
+    gap: 4px;
+  }
+
+  .mission-report .report-signal,
+  .mission-report .report-evidence {
+    padding: 4px 5px;
+    border-width: 3px;
+  }
+
+  .mission-report .report-signal__icon {
+    min-width: 26px;
+    height: 20px;
+  }
+
+  .mission-report .report-signal__label {
+    margin-top: 2px;
+    font-size: 0.48rem;
+  }
+
+  .mission-report .report-signal strong,
+  .mission-report .report-evidence strong {
+    font-size: 0.88rem;
+  }
+
+  .mission-report .report-signal p,
+  .mission-report .report-evidence p,
+  .mission-report .report-evidence span {
+    font-size: 0.5rem;
+    line-height: 1;
+  }
+
+  .report-lists {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .report-list-card {
+    max-height: 92px;
+    padding: 4px 5px;
+    border-width: 3px;
+    overflow: hidden;
+  }
+
+  .report-list-card .mini-label {
+    font-size: 0.48rem;
+  }
+
+  .report-list-card ul {
+    gap: 2px;
+    margin-top: 3px;
+  }
+
+  .report-list-card li {
+    overflow: hidden;
+    padding: 2px 3px;
+    border-width: 1px;
+    font-size: 0.5rem;
+    line-height: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .timeline-report,
+  .mission-report__timeline {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px;
+    padding: 5px;
+    overflow: hidden;
+  }
+
+  .mission-report__timeline h3 {
+    position: static;
+    grid-column: 1 / -1;
+    padding: 1px 0 3px;
+    font-size: 0.9rem;
+  }
+
+  .mission-report__timeline .timeline-item {
+    grid-template-columns: 22px minmax(0, 1fr);
+    gap: 5px;
+    min-height: 0;
+    padding: 4px 5px;
+    border-width: 2px;
+  }
+
+  .mission-report__timeline .timeline-item > span {
+    height: 20px;
+    border-width: 2px;
+    font-size: 0.54rem;
+  }
+
+  .mission-report__timeline .timeline-item h4 {
+    overflow: hidden;
+    margin-bottom: 1px;
+    font-size: 0.68rem;
+    line-height: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mission-report__timeline .timeline-item p {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: 0.56rem;
+    line-height: 1.04;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .mission-report__footer {
+    flex: 0 0 auto;
+    gap: 7px;
+    margin-top: 4px;
+    padding-top: 4px;
+    border-top-width: 2px;
+  }
+
+  .mission-report__footer .result-lesson {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: 0.62rem;
+    line-height: 1.05;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .mission-report__footer .restart {
+    padding: 6px 10px;
+    border-width: 4px;
+    font-size: 0.68rem;
+  }
+}
+
+/* Chunky, crisp interactions: short stepped movement instead of dashboard ease. */
+.choice,
+.action-slot,
+.skill-card {
+  transition:
+    transform 80ms steps(2, end),
+    box-shadow 80ms steps(2, end),
+    border-color 80ms linear,
+    filter 80ms linear;
+}
+
+.choice:hover,
+.action-slot:hover,
+.skill-card:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.06) saturate(1.04);
+  box-shadow:
+    0 7px 0 rgba(47, 35, 22, 0.42),
+    inset 0 4px 0 rgba(255, 255, 255, 0.22);
+}
+
+.choice:hover .action-slot__icon,
+.action-slot:hover .action-slot__icon,
+.skill-card:hover:not(:disabled) .inventory-slot__icon {
+  transform: translateY(-1px);
+  filter: brightness(1.12) saturate(1.08);
+  box-shadow:
+    0 3px 0 rgba(52, 37, 20, 0.28),
+    inset 0 3px 0 rgba(255, 255, 255, 0.24);
+}
+
+.choice:hover .action-slot__tradeoff,
+.action-slot:hover .action-slot__tradeoff {
+  border-color: #9d6116;
+  background: #ffe27a;
+  color: #4d2f08;
+}
+
+.choice:hover .action-slot__unlock,
+.action-slot:hover .action-slot__unlock {
+  padding: 2px 4px;
+  background: #fff0a8;
+  color: #5f3605;
+}
+
+.choice:active,
+.action-slot:active,
+.skill-card:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow:
+    0 2px 0 rgba(47, 35, 22, 0.44),
+    inset 0 3px 0 rgba(81, 55, 25, 0.12);
+}
+
+/* Pressure feedback stays static after one short impact animation. */
+.shell.shell--tense .panel,
+.shell.shell--tense .result {
+  border-color: #bd6c19;
+  box-shadow:
+    inset 0 0 0 5px rgba(255, 165, 38, 0.26),
+    inset 0 -18px 28px rgba(117, 59, 8, 0.18),
+    0 7px 0 rgba(72, 39, 15, 0.28);
+}
+
+.shell.shell--critical .panel,
+.shell.shell--critical .result {
+  border-color: #b52f24;
+  box-shadow:
+    inset 0 0 0 6px rgba(226, 53, 39, 0.32),
+    inset 0 -24px 34px rgba(94, 12, 8, 0.28),
+    0 7px 0 rgba(72, 20, 15, 0.34);
+  animation:
+    boardPop 180ms steps(2, end),
+    pressure-jolt 280ms steps(2, end) 1;
+}
+
+.resource-meter--warn .resource-meter__track {
+  border-color: #5b3305;
+  background: #3a2107;
+}
+
+.resource-meter--warn .resource-meter__fill {
+  background: #ff9d16;
+  box-shadow: inset 0 2px 0 #ffd46a;
+}
+
+.resource-meter--danger {
+  animation: meter-danger-jolt 260ms steps(2, end) 1;
+}
+
+.resource-meter--danger .resource-meter__track {
+  border-color: #5c100c;
+  background: #310806;
+}
+
+.resource-meter--danger .resource-meter__fill {
+  background: #f0271d;
+  box-shadow: inset 0 2px 0 #ff8173;
+}
+
+@keyframes pressure-jolt {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  35% {
+    transform: translateX(-3px);
+  }
+
+  70% {
+    transform: translateX(3px);
+  }
+}
+
+@keyframes meter-danger-jolt {
+  0%,
+  100% {
+    transform: translateX(0);
+    filter: brightness(1);
+  }
+
+  40% {
+    transform: translateX(-2px);
+    filter: brightness(1.18);
+  }
+
+  75% {
+    transform: translateX(2px);
+    filter: brightness(1.08);
+  }
+}
+
+@media (max-width: 899px) {
+  html,
+  body,
+  #app,
+  .app {
+    height: auto;
+    min-height: 100%;
+    overflow-x: hidden;
+    overflow-y: visible;
+  }
+
+  .app {
+    display: block;
+  }
+
+  .shell {
+    width: calc(100vw - 20px);
+    height: auto;
+    min-height: calc(100vh - 20px);
+    overflow: visible;
+  }
+
+  .playfield,
+  .panel,
+  .result,
+  .mission-report,
+  .choices,
+  .choices--adaptive,
+  .choices--adaptive.action-grid {
+    height: auto;
+    overflow: visible;
+  }
+}
+
+/* =========================================================
+   [1] GAME FEEL & INTERACTION (All Viewports)
+   Interaction สั้น แข็ง กดแล้วมีน้ำหนักแบบ Pixel Craft
+   ========================================================= */
+
+.choice, .action-slot, .skill-card {
+  transition: transform 80ms steps(3), box-shadow 80ms steps(3), background-color 80ms steps(3);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.6);
+  position: relative;
+}
+
+.choice:hover, .action-slot:hover, .skill-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.6);
+}
+
+.choice:active, .action-slot:active, .skill-card:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.6);
+}
+
+.choice:hover .action-slot__icon,
+.action-slot:hover .action-slot__icon {
+  transform: translateY(-1px);
+  filter: brightness(1.2);
+}
+
+.choice:hover .action-slot__tradeoff,
+.choice:hover .action-slot__unlock,
+.action-slot:hover .action-slot__tradeoff {
+  background-color: #ffd700;
+  color: #111;
+}
+
+/* =========================================================
+   [2] PRESSURE STATES & VISUAL FEEDBACK
+   ใช้ State Selector ท้ายไฟล์ป้องกันการถูก Override
+   ========================================================= */
+
+/* Shell Pressure */
+.shell.shell--tense .panel,
+.shell.shell--tense .result {
+  border: 4px solid #c45b00;
+  box-shadow: inset 0 0 24px rgba(196, 91, 0, 0.25);
+}
+
+.shell.shell--critical .panel,
+.shell.shell--critical .result {
+  border: 4px solid #b30000;
+  box-shadow: inset 0 0 40px rgba(179, 0, 0, 0.4);
+}
+
+/* Resource Meters */
+.resource-meter--warn .resource-meter__track { background-color: #4a2a00; }
+.resource-meter--warn .resource-meter__fill { background-color: #ff9900; }
+
+.resource-meter--danger .resource-meter__track { background-color: #4a0000; }
+.resource-meter--danger .resource-meter__fill { background-color: #ff3333; }
+
+/* Finite Shake/Pulse Animation สำหรับ Danger State (สั่น 2 รอบแล้วหยุด) */
+@keyframes finiteShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+.resource-meter--danger {
+  animation: finiteShake 250ms steps(4) 2;
+}
+
+/* เคารพผู้ใช้ที่ตั้งค่า Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .choice, .action-slot, .skill-card, .resource-meter--danger {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* Responsive contract: desktop stays one-screen; smaller screens use
+   document flow without horizontal scrolling or clipped controls. */
+html,
+body,
+#app,
+.app {
+  max-width: 100%;
+}
+
+img,
+svg,
+canvas {
+  max-width: 100%;
+}
+
+.app:has(> .start-scene) {
+  display: grid;
+  place-items: center;
+}
+
+.app > .start-scene {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.app > .start-scene > .start-board {
+  align-self: center;
+  justify-self: center;
+  margin: auto;
+}
+
+.panel,
+.result,
+.brief-card,
+.event,
+.resource-bar,
+.superpower-hand,
+.choice,
+.skill-card,
+.resolution-card,
+.report-list-card,
+.timeline-item {
+  min-width: 0;
+}
+
+.phase-title,
+.result-title,
+.action-slot__title,
+.inventory-slot strong,
+.skill-detail-meta strong,
+.timeline-item h4 {
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 900px) and (max-width: 1199px) {
+  .shell {
+    width: 100vw;
+    padding: 5px 6px 8px;
+  }
+
+  .phasebar,
+  .playfield {
+    margin-inline: 5px;
+  }
+
+  .phasebar {
+    padding: 3px 5px 4px;
+  }
+
+  .phase-tab {
+    gap: 3px;
+    padding: 3px 4px;
+  }
+
+  .phase-label {
+    display: none;
+  }
+
+  .phase-text {
+    font-size: 0.64rem;
+  }
+
+  .sound-toggle {
+    min-width: 58px;
+    padding-inline: 5px;
+  }
+
+  .playfield {
+    padding: 4px 5px 6px;
+  }
+
+  .panel,
+  .result {
+    padding: 6px 8px;
+  }
+
+  .phase-title,
+  .result-title {
+    font-size: clamp(1.45rem, 2.5vw, 1.9rem);
+  }
+
+  .phase-objective p,
+  .brief-copy p,
+  .phase-body p {
+    font-size: 0.62rem;
+  }
+
+  .event {
+    grid-template-columns: 48px 34px minmax(0, 1fr) 110px;
+  }
+
+  .event-copy {
+    -webkit-line-clamp: 1;
+  }
+
+  .superpower-hand {
+    grid-template-columns: 98px minmax(0, 1fr);
+  }
+
+  .superpower-hand__ready {
+    display: none;
+  }
+
+  .choices,
+  .action-grid,
+  .choices--adaptive.action-grid {
+    gap: 5px;
+    padding: 1px 0 2px;
+  }
+
+  .action-slot {
+    grid-template-columns: 32px minmax(0, 1fr);
+    padding: 5px 6px;
+  }
+
+  .action-slot__icon {
+    width: 29px;
+    height: 29px;
+  }
+
+  .action-slot__title {
+    font-size: 0.78rem;
+  }
+
+  .action-slot__helper,
+  .action-slot__tradeoff {
+    font-size: 0.54rem;
+  }
+
+  .action-slot__meaning {
+    font-size: 0.5rem;
+  }
+
+  .skill-grid.inventory-grid {
+    gap: 5px;
+    padding: 6px;
+  }
+
+  .inventory-slot {
+    grid-template-columns: 31px minmax(0, 1fr);
+    padding: 5px;
+  }
+
+  .inventory-slot__icon {
+    width: 29px;
+    height: 29px;
+  }
+
+  .inventory-slot strong {
+    font-size: 0.68rem;
+  }
+
+  .inventory-slot__copy {
+    font-size: 0.54rem;
+  }
+
+  .mission-report__body {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  }
+}
+
+@media (min-width: 600px) and (max-width: 899px) {
+  html,
+  body,
+  #app,
+  .app {
+    width: 100%;
+    height: auto;
+    min-height: 100%;
+    overflow-x: hidden;
+    overflow-y: visible;
+  }
+
+  .app {
+    padding: 8px;
+  }
+
+  .app:has(> .start-scene) {
+    min-height: 100dvh;
+  }
+
+  .app > .start-scene {
+    min-height: calc(100dvh - 16px);
+  }
+
+  .shell {
+    width: 100%;
+    min-height: calc(100vh - 16px);
+    margin: 0;
+    padding: 7px;
+    overflow: visible;
+  }
+
+  .phasebar,
+  .playfield {
+    margin-inline: 5px;
+  }
+
+  .phasebar {
+    gap: 5px;
+    padding: 5px;
+  }
+
+  .phase-tab {
+    gap: 3px;
+    padding: 4px;
+  }
+
+  .phase-label {
+    display: none;
+  }
+
+  .phase-text {
+    font-size: 0.62rem;
+  }
+
+  .phase-num {
+    min-width: 20px;
+    height: 20px;
+    font-size: 0.66rem;
+  }
+
+  .sound-toggle {
+    min-width: 58px;
+    padding: 5px;
+  }
+
+  .playfield,
+  .panel,
+  .result,
+  .mission-report {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .playfield {
+    padding: 6px;
+  }
+
+  .panel,
+  .result {
+    padding: 10px;
+  }
+
+  .phase-title,
+  .result-title {
+    font-size: clamp(1.7rem, 5vw, 2.35rem);
+  }
+
+  .resource-bar {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 5px;
+    padding: 5px;
+  }
+
+  .resource-meter {
+    padding: 5px 6px;
+  }
+
+  .resource-meter__helper {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .superpower-hand {
+    grid-template-columns: 1fr;
+  }
+
+  .superpower-hand__cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    max-height: none;
+    overflow: visible;
+  }
+
+  .superpower-hand__card {
+    grid-template-columns: 28px minmax(0, 1fr);
+  }
+
+  .superpower-hand__ready {
+    display: none;
+  }
+
+  .event {
+    grid-template-columns: 58px 42px minmax(0, 1fr);
+  }
+
+  .event-impact {
+    grid-column: 1 / -1;
+  }
+
+  .choices,
+  .choices--adaptive,
+  .choices--adaptive.action-grid {
+    height: auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: auto;
+    gap: 8px;
+    overflow: visible;
+    padding: 3px 0;
+  }
+
+  .choice,
+  .action-slot,
+  .choices--adaptive.action-grid .action-slot {
+    height: auto;
+    min-height: 148px;
+  }
+
+  .skill-grid,
+  .skill-grid.inventory-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: none;
+    grid-auto-rows: minmax(132px, auto);
+    overflow: visible;
+  }
+
+  .skill-card,
+  .inventory-slot {
+    height: auto;
+    min-height: 132px;
+  }
+
+  .resolution-layout {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .resolution-card--primary {
+    grid-column: 1 / -1;
+  }
+
+  .mission-report__body,
+  .mission-report__summary,
+  .mission-report__footer {
+    display: grid;
+    grid-template-columns: 1fr;
+    overflow: visible;
+  }
+
+  .mission-report__timeline,
+  .report-lists {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: visible;
+  }
+
+  .report-list-card {
+    max-height: none;
+  }
+
+  .hero-popup-overlay {
+    overflow-y: auto;
+  }
+
+  .skill-detail-card {
+    max-height: calc(100vh - 28px);
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 599px) {
+  html,
+  body,
+  #app,
+  .app {
+    width: 100%;
+    height: auto;
+    min-height: 100%;
+    overflow-x: hidden;
+    overflow-y: visible;
+  }
+
+  .app {
+    display: block;
+    padding: 4px;
+  }
+
+  .app:has(> .start-scene) {
+    display: grid;
+    min-height: 100dvh;
+  }
+
+  .app > .start-scene {
+    min-height: calc(100dvh - 8px);
+  }
+
+  .shell {
+    width: 100%;
+    min-height: calc(100vh - 8px);
+    margin: 0;
+    padding: 5px;
+    border-width: 4px;
+    overflow: visible;
+  }
+
+  .shell::after {
+    inset: 10px;
+    border-width: 3px;
+  }
+
+  .phasebar,
+  .playfield {
+    width: auto;
+    margin-inline: 3px;
+    border-width: 3px;
+  }
+
+  .phasebar {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 46px;
+    align-items: stretch !important;
+    justify-content: stretch !important;
+    gap: 3px;
+    padding: 4px;
+  }
+
+  .phases {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 2px;
+  }
+
+  .phase {
+    display: block;
+    min-width: 0;
+    gap: 0;
+  }
+
+  .phase-link,
+  .phase-copy {
+    display: none;
+  }
+
+  .phase-tab {
+    height: 100%;
+    justify-content: center;
+    padding: 3px 2px;
+    border-width: 2px;
+  }
+
+  .phase-num {
+    min-width: 22px;
+    height: 22px;
+    padding: 0 3px;
+    font-size: 0.7rem;
+  }
+
+  .sound-toggle {
+    min-width: 46px;
+    padding: 5px 4px;
+    border-width: 3px;
+  }
+
+  .playfield,
+  .panel,
+  .result,
+  .mission-report {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .playfield {
+    padding: 4px;
+  }
+
+  .panel,
+  .result {
+    padding: 8px;
+    border-width: 4px;
+  }
+
+  .panel::before,
+  .result::before {
+    inset: 5px;
+    border-width: 2px;
+  }
+
+  .panel-title-row {
+    gap: 6px;
+  }
+
+  .phase-title,
+  .result-title {
+    font-size: clamp(1.45rem, 9vw, 2rem);
+  }
+
+  .setup-panel .phase-title {
+    font-size: clamp(1.35rem, 7.4vw, 1.8rem);
+    line-height: 0.95;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+
+  .phase-badge {
+    width: 31px;
+    height: 31px;
+    border-width: 3px;
+  }
+
+  .phase-objective,
+  .brief-card {
+    padding: 5px 6px;
+  }
+
+  .phase-objective p,
+  .brief-copy p,
+  .phase-body p {
+    font-size: 0.72rem;
+  }
+
+  .resource-bar {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 3px;
+    padding: 4px;
+    border-width: 3px;
+  }
+
+  .resource-meter {
+    padding: 4px;
+    border-width: 2px;
+  }
+
+  .resource-meter__topline {
+    gap: 2px;
+  }
+
+  .resource-meter__label {
+    font-size: 0.5rem;
+  }
+
+  .resource-meter__value {
+    font-size: 0.84rem;
+  }
+
+  .resource-meter__track {
+    height: 6px;
+    margin-top: 3px;
+  }
+
+  .resource-meter__helper {
+    display: none;
+  }
+
+  .superpower-hand {
+    grid-template-columns: 1fr;
+    gap: 4px;
+    padding: 4px;
+    border-width: 3px;
+  }
+
+  .superpower-hand__label {
+    grid-template-columns: 1fr auto;
+    padding: 3px 5px;
+  }
+
+  .superpower-hand__cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 3px;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .superpower-hand__card {
+    grid-template-columns: 25px minmax(0, 1fr);
+    gap: 3px;
+    min-height: 34px;
+    padding: 3px;
+    border-width: 2px;
+  }
+
+  .superpower-hand__icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .superpower-hand__meta span,
+  .superpower-hand__ready {
+    display: none;
+  }
+
+  .superpower-hand__meta strong {
+    font-size: 0.6rem;
+  }
+
+  .progress-bar-container {
+    padding: 5px;
+    margin-bottom: 6px;
+  }
+
+  .progress-bar-header {
+    font-size: 0.62rem;
+  }
+
+  .progress-bar-track {
+    height: 14px;
+    border-width: 2px;
+  }
+
+  .event {
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: 5px;
+    padding: 5px;
+  }
+
+  .event-label {
+    grid-column: 1 / -1;
+    min-height: 26px;
+  }
+
+  .event-icon {
+    width: 42px;
+    height: 42px;
+  }
+
+  .event-impact {
+    grid-column: 1 / -1;
+  }
+
+  .choices,
+  .choices--adaptive,
+  .choices--adaptive.action-grid {
+    height: auto;
+    grid-template-columns: 1fr;
+    grid-auto-rows: auto;
+    gap: 7px;
+    padding: 3px 0;
+    overflow: visible;
+  }
+
+  .choice,
+  .action-slot,
+  .choices--adaptive.action-grid .action-slot {
+    height: auto;
+    min-height: 0;
+    padding: 8px;
+  }
+
+  .action-slot {
+    grid-template-columns: 38px minmax(0, 1fr);
+  }
+
+  .action-slot__icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .action-slot__title {
+    font-size: 0.92rem;
+  }
+
+  .action-slot__helper {
+    font-size: 0.68rem;
+  }
+
+  .action-slot__tradeoff {
+    font-size: 0.62rem;
+  }
+
+  .skill-grid,
+  .skill-grid.inventory-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: none;
+    grid-auto-rows: minmax(128px, auto);
+    gap: 5px;
+    padding: 5px;
+    overflow: visible;
+  }
+
+  .skill-card,
+  .inventory-slot {
+    height: auto;
+    min-height: 128px;
+    grid-template-columns: 32px minmax(0, 1fr);
+    padding: 5px;
+  }
+
+  .inventory-slot__icon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .inventory-slot strong {
+    font-size: 0.7rem;
+  }
+
+  .inventory-slot__copy {
+    font-size: 0.58rem;
+  }
+
+  .setup-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .setup-actions .restart {
+    width: 100%;
+  }
+
+  .resolution-layout,
+  .mission-report__body,
+  .mission-report__summary,
+  .mission-report__footer,
+  .report-lists,
+  .mission-report__timeline {
+    display: grid;
+    grid-template-columns: 1fr;
+    overflow: visible;
+  }
+
+  .resolution-card--primary {
+    grid-column: auto;
+  }
+
+  .mission-report__meters,
+  .mission-report__evidence {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .report-list-card {
+    max-height: none;
+  }
+
+  .mission-report__header > p:not(.phase-tag) {
+    white-space: normal;
+  }
+
+  .hero-popup-overlay {
+    align-items: flex-start;
+    padding: 8px;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .hero-popup-content,
+  .skill-detail-popup {
+    width: 100%;
+    max-width: 100%;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .start-board {
+    width: 100%;
+    max-height: none;
+    padding: 12px;
+  }
+
+  .start-logo {
+    width: 100%;
+    transform: none;
+  }
+
+  .start-stage {
+    flex-wrap: wrap;
+  }
+
+  .skill-detail-card {
+    width: 100%;
+    max-height: calc(100vh - 16px);
+    padding: 10px;
+    overflow-y: auto;
+  }
+
+  .skill-detail-head {
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+
+  .skill-detail-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .skill-detail-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .skill-detail-actions .restart {
+    width: 100%;
+  }
+}
+
+@media (max-width: 379px) {
+  .app {
+    padding: 2px;
+  }
+
+  .app > .start-scene {
+    min-height: calc(100dvh - 4px);
+  }
+
+  .setup-panel .phase-title {
+    font-size: clamp(0.95rem, 4.6vw, 1.05rem);
+    line-height: 1.05;
+  }
+
+  .shell {
+    padding: 3px;
+    border-width: 3px;
+  }
+
+  .phasebar,
+  .playfield {
+    margin-inline: 1px;
+  }
+
+  .sound-toggle {
+    min-width: 40px;
+    font-size: 0.58rem;
+  }
+
+  .resource-meter {
+    padding-inline: 3px;
+  }
+
+  .resource-meter__label {
+    font-size: 0.46rem;
+  }
+
+  .superpower-hand__label strong {
+    font-size: 0.5rem;
+  }
+
+  .superpower-hand__meta strong {
+    font-size: 0.54rem;
+  }
+
+  .skill-grid,
+  .skill-grid.inventory-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Choice actions start with the decision itself; letter-rune tiles added
+   visual noise without helping players compare consequences. */
+.action-slot {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.action-slot__body,
+.action-slot__footer {
+  grid-column: 1;
+}
+
+.action-slot__meaning b {
+  display: inline;
+  margin: 0 4px 0 0;
+}
+
+.action-slot__meaning span {
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+@media (min-width: 900px) {
+  .setup-panel {
+    display: grid;
+    grid-template-rows: auto auto auto;
+    align-content: center;
+  }
+
+  .skill-grid.inventory-grid {
+    flex: 0 0 auto;
+    grid-template-rows: repeat(2, minmax(150px, 190px));
+    align-content: stretch;
+    margin-top: 10px;
+  }
+
+  .skill-card,
+  .inventory-slot {
+    grid-template-columns: 46px minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    column-gap: 8px;
+    padding: 9px;
+  }
+
+  .inventory-slot__icon {
+    width: 43px;
+    height: 43px;
+    font-size: 0.66rem;
+  }
+
+  .inventory-slot__type {
+    font-size: 0.58rem;
+  }
+
+  .inventory-slot strong {
+    padding-right: 12px;
+    font-size: clamp(0.86rem, 1vw, 1.02rem);
+    line-height: 1.02;
+  }
+
+  .inventory-slot__copy {
+    min-height: 0;
+    font-size: clamp(0.66rem, 0.75vw, 0.76rem);
+    line-height: 1.12;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+
+  .inventory-slot__detail {
+    padding-top: 5px;
+    border-top: 2px dashed rgba(72, 49, 25, 0.2);
+    font-size: 0.58rem;
+  }
+
+  .setup-actions {
+    margin-top: 6px;
+    margin-bottom: 0;
+  }
+
+  .action-slot__body {
+    gap: 4px;
+  }
+
+  .action-slot__title {
+    font-size: clamp(1rem, 1.25vw, 1.2rem);
+    line-height: 1.02;
+  }
+
+  .action-slot__helper {
+    font-size: clamp(0.76rem, 0.9vw, 0.88rem);
+    line-height: 1.14;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+
+  .action-slot__meaning {
+    font-size: clamp(0.7rem, 0.78vw, 0.78rem);
+    line-height: 1.14;
+  }
+
+  .action-slot__meaning span {
+    padding: 4px 6px;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+
+  .action-slot__meaning b {
+    font-size: 0.62rem;
+  }
+
+  .action-slot__tags span {
+    font-size: 0.54rem;
+  }
+
+  .action-slot__unlock {
+    font-size: 0.56rem;
+  }
+
+  .action-slot__tradeoff {
+    font-size: clamp(0.68rem, 0.75vw, 0.76rem);
+    line-height: 1.12;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+}
+
+@media (min-width: 1200px) {
+  .inventory-slot__type,
+  .inventory-slot__detail {
+    font-size: 0.62rem;
+  }
+
+  .inventory-slot strong {
+    font-size: 1rem;
+  }
+
+  .inventory-slot__copy {
+    font-size: 0.78rem;
+    line-height: 1.14;
+  }
+}
+
+@media (min-width: 900px) and (max-height: 739px) {
+  .skill-grid.inventory-grid {
+    grid-template-rows: repeat(2, minmax(128px, 154px));
+  }
+
+  .skill-card,
+  .inventory-slot {
+    grid-template-columns: 36px minmax(0, 1fr);
+    padding: 6px;
+  }
+
+  .inventory-slot__icon {
+    width: 34px;
+    height: 34px;
+    font-size: 0.56rem;
+  }
+
+  .inventory-slot strong {
+    font-size: 0.78rem;
+  }
+
+  .inventory-slot__copy {
+    font-size: 0.6rem;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+
+  .action-slot__title {
+    font-size: 0.86rem;
+  }
+
+  .action-slot__helper {
+    font-size: 0.62rem;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+
+  .action-slot__meaning {
+    font-size: 0.58rem;
+  }
+
+  .action-slot__meaning span,
+  .action-slot__tradeoff {
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+}
+
+@media (max-width: 899px) {
+  .action-slot__title {
+    font-size: 1rem;
+    line-height: 1.04;
+  }
+
+  .action-slot__helper {
+    display: block;
+    overflow: visible;
+    font-size: 0.78rem;
+    line-height: 1.18;
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+  }
+
+  .action-slot__meaning {
+    font-size: 0.72rem;
+    line-height: 1.16;
+  }
+
+  .action-slot__meaning span {
+    display: block;
+    overflow: visible;
+    padding: 4px 6px;
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+  }
+
+  .action-slot__meaning b {
+    font-size: 0.64rem;
+  }
+
+  .action-slot__tags {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .action-slot__tags span {
+    font-size: 0.56rem;
+  }
+
+  .action-slot__tradeoff {
+    display: block;
+    overflow: visible;
+    font-size: 0.72rem;
+    line-height: 1.16;
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+  }
+}
+
+.phase-goal-overlay {
+  z-index: 9000;
+  padding: 16px;
+  background: rgba(31, 45, 35, 0.78);
+  backdrop-filter: none;
+}
+
+.phase-goal-popup {
+  width: min(620px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  overflow: hidden;
+  padding: 20px 22px;
+  border: 6px solid #3f2d1c;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.42), transparent 24%),
+    linear-gradient(180deg, #fff4d2, #d8bd7d);
+  box-shadow:
+    0 0 0 7px rgba(113, 68, 32, 0.9),
+    0 12px 0 rgba(45, 28, 15, 0.34),
+    inset 0 0 0 4px rgba(255, 246, 207, 0.55);
+  color: #382718;
+}
+
+.phase-goal-popup__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.phase-goal-popup__head > span {
+  color: #735128;
+  font-family: var(--font-pixel);
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.phase-goal-popup h2 {
+  margin: 14px 0 7px;
+  color: #26722a;
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  line-height: 0.96;
+  text-transform: uppercase;
+}
+
+.phase-goal-popup__copy {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.24;
+}
+
+.phase-goal-popup__guidance {
+  margin-top: 14px;
+  padding: 10px 12px;
+  border: 3px solid #8e6737;
+  background: rgba(255, 250, 229, 0.68);
+}
+
+.phase-goal-popup__guidance ol {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0 0;
+  padding-left: 24px;
+}
+
+.phase-goal-popup__guidance li {
+  padding-left: 3px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1.16;
+}
+
+.phase-goal-popup .phase-goal-start {
+  display: block;
+  min-width: 160px;
+  margin: 16px auto 0;
+}
+
+@media (max-width: 599px) {
+  .phase-goal-overlay {
+    align-items: center;
+    padding: 8px;
+    overflow-y: auto;
+  }
+
+  .phase-goal-popup {
+    width: 100%;
+    max-height: calc(100dvh - 16px);
+    padding: 14px;
+    border-width: 4px;
+    overflow-y: auto;
+  }
+
+  .phase-goal-popup__head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .phase-goal-popup h2 {
+    margin-top: 10px;
+    font-size: clamp(1.55rem, 9vw, 2.1rem);
+  }
+
+  .phase-goal-popup__copy {
+    font-size: 0.92rem;
+  }
+
+  .phase-goal-popup__guidance {
+    margin-top: 10px;
+    padding: 8px 9px;
+  }
+
+  .phase-goal-popup__guidance li {
+    font-size: 0.8rem;
+  }
+}
+
+@media (hover: none) {
+  .choice:hover,
+  .action-slot:hover,
+  .skill-card:hover:not(:disabled),
+  .superpower-hand__card:hover {
+    transform: none;
+    filter: none;
+  }
+}
