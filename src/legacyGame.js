@@ -770,9 +770,19 @@ function advanceAfterNormalDecision({ allowRandomModifier = true, allowMicroEven
 
   if (state.progress >= step.requiredProgress) {
     state.phaseSummaries = [...state.phaseSummaries, buildPhaseSummary(step)];
+    const oldLevel = Math.min(5, state.index + 1);
     state.index += 1;
+    const newLevel = Math.min(5, state.index + 1);
     state.progress = 0;
-    state.screen = state.index >= game.steps.length ? "result" : "step";
+    
+    if (oldLevel !== newLevel) {
+      state.screen = "evolution";
+      state.evolutionOldLevel = oldLevel;
+      state.evolutionNewLevel = newLevel;
+    } else {
+      state.screen = state.index >= game.steps.length ? "result" : "step";
+    }
+    
     state.lastSignalTone = getProjectSignalTone();
     render();
     return;
@@ -1268,6 +1278,9 @@ function heroMarkup() {
         <span class="cloud cloud--two"></span>
       </div>
       <div class="start-board">
+        <div class="start-character" aria-hidden="true">
+          <img src="/assets/character/lv1.gif" alt="Hero Lv1" class="hero-character-img" />
+        </div>
         <div class="start-emblem">${titleGlyphMarkup()}</div>
         <p class="start-kicker">Project Survival Game</p>
         <h1 class="start-logo" aria-label="SUPERPOWER WORKFLOW">
@@ -1418,8 +1431,12 @@ function renderSkillDetailPopup() {
 }
 
 function renderSetup() {
+  const characterLevel = Math.min(5, (state.index || 0) + 1);
   root.innerHTML = `
     <main class="app">
+      <div class="phase-character" aria-hidden="true">
+        <img src="/assets/character/lv${characterLevel}.gif" alt="Hero Lv${characterLevel}" class="phase-character-img" />
+      </div>
       <section class="${shellClass()}">
         <section class="phasebar" style="display: flex; align-items: center; justify-content: space-between;">
           <ol class="phases" style="flex: 1;">${phaseMarkup(0)}</ol>
@@ -1463,6 +1480,7 @@ function renderTitle() {
 
 function renderStep(step, isEmergency = false) {
   const options = getAvailableOptions(step);
+  const characterLevel = Math.min(5, (state.index || 0) + 1);
   const isChaos = !!state.activeChaos;
   const issueLabel = `${step.title} Issue`;
 
@@ -1506,6 +1524,9 @@ function renderStep(step, isEmergency = false) {
 
   root.innerHTML = `
     <main class="app">
+      <div class="phase-character" aria-hidden="true">
+        <img src="/assets/character/lv${characterLevel}.gif" alt="Hero Lv${characterLevel}" class="phase-character-img" />
+      </div>
       <section class="${shellClass()}">
         <section class="phasebar" style="display: flex; align-items: center; justify-content: space-between;">
           <ol class="phases" style="flex: 1;">${phaseMarkup(state.index)}</ol>
@@ -1572,8 +1593,12 @@ function renderResolution() {
     ? `resolution-panel--random resolution-panel--${result.reaction?.tone || "warn"}`
     : result.countered ? "resolution-panel--safe" : "resolution-panel--warn";
 
+  const characterLevel = Math.min(5, (state.index || 0) + 1);
   root.innerHTML = `
     <main class="app">
+      <div class="phase-character" aria-hidden="true">
+        <img src="/assets/character/lv${characterLevel}.gif" alt="Hero Lv${characterLevel}" class="phase-character-img" />
+      </div>
       <section class="${shellClass()}">
         <section class="phasebar" style="display: flex; align-items: center; justify-content: space-between;">
           <ol class="phases" style="flex: 1;">${phaseMarkup(state.index)}</ol>
@@ -2151,8 +2176,12 @@ function renderResult() {
     ? `AI budget exceeded by ${result.tokenDebt}`
     : "AI budget remained within limits.";
 
+  const characterLevel = 5;
   root.innerHTML = `
     <main class="app">
+      <div class="phase-character" aria-hidden="true">
+        <img src="/assets/character/lv${characterLevel}.gif" alt="Hero Lv${characterLevel}" class="phase-character-img" />
+      </div>
       <section class="${shellClass()}">
         <section class="phasebar" style="display: flex; align-items: center; justify-content: space-between;">
           <ol class="phases" style="flex: 1;">${phaseMarkup(game.steps.length)}</ol>
@@ -2311,6 +2340,53 @@ function tutorialMarkup() {
     </div>
   `;
 }
+function renderEvolution() {
+  root.innerHTML = `
+    <main class="app evolution-scene">
+      <div class="evolution-container">
+        <div class="evolution-flash" aria-hidden="true"></div>
+        <div class="evolution-character old-character" aria-hidden="true">
+          <img src="/assets/character/lv${state.evolutionOldLevel}.gif" alt="Evolving..." />
+        </div>
+        <div class="evolution-character new-character" aria-hidden="true">
+          <img src="/assets/character/lv${state.evolutionNewLevel}.gif" alt="Evolution Complete!" />
+        </div>
+      </div>
+      <div class="evolution-text">
+        <h2>Cat is evolving...</h2>
+      </div>
+      <button class="evolution-next-btn btn primary-btn" style="display:none; position: absolute; bottom: 15%; z-index: 100;">Continue to Next Workflow</button>
+    </main>
+  `;
+
+  // Start sequence
+  setTimeout(() => {
+    const flash = root.querySelector('.evolution-flash');
+    if (flash) flash.classList.add('flash-active');
+
+    setTimeout(() => {
+      // Swap midway through flash
+      const oldChar = root.querySelector('.old-character');
+      const newChar = root.querySelector('.new-character');
+      if (oldChar) oldChar.style.opacity = '0';
+      if (newChar) newChar.style.opacity = '1';
+      
+      const title = root.querySelector('.evolution-text h2');
+      if (title) {
+        title.innerText = `Level ${state.evolutionNewLevel} Reached!`;
+        title.classList.add('glow-text');
+      }
+      
+      const btn = root.querySelector('.evolution-next-btn');
+      if (btn) btn.style.display = 'block';
+    }, 1000); // 1s into the flash
+  }, 2000); // 2s of shaking before flash
+
+  root.querySelector('.evolution-next-btn')?.addEventListener('click', () => {
+    state.screen = state.index >= game.steps.length ? "result" : "step";
+    render();
+  });
+}
 
 function render() {
   if (state.screen === "title") {
@@ -2321,6 +2397,8 @@ function render() {
     renderResolution();
   } else if (state.screen === "result") {
     renderResult();
+  } else if (state.screen === "evolution") {
+    renderEvolution();
   } else if (state.screen === "emergency_step") {
     renderStep(game.emergencyStep, true);
   } else if (state.screen === "emergency_resolution") {

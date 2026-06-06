@@ -5094,6 +5094,7 @@ body::before {
 }
 
 .start-board {
+  position: relative;
   width: min(560px, 100%);
   margin: 0 auto;
   padding: 22px 26px 24px;
@@ -5393,6 +5394,138 @@ body::before {
   padding: 9px 24px;
   border-width: 4px;
   font-size: 0.92rem;
+}
+
+/* Character Image Styles */
+
+.start-character {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  pointer-events: none;
+  margin-bottom: -110px; /* Bring it down to step exactly on the edge */
+}
+
+.hero-character-img {
+  height: min(450px, 50vh);
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 15px 15px rgba(0,0,0,0.4));
+}
+
+.phase-character {
+  position: absolute;
+  bottom: 0px;
+  left: max(0px, calc(50% - 700px)); /* Overlap the left edge of the 1320px board slightly */
+  z-index: 20;
+  pointer-events: none;
+}
+
+.phase-character-img {
+  height: min(400px, 45vh);
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 12px rgba(0,0,0,0.5));
+}
+
+/* Evolution Scene Styles */
+.evolution-scene {
+  background-color: #111;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.evolution-container {
+  position: relative;
+  width: 450px;
+  height: 450px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.evolution-character {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.5s ease-in-out;
+}
+
+.evolution-character img {
+  height: min(450px, 50vh);
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.2));
+}
+
+.old-character {
+  opacity: 1;
+  animation: evolution-shake 2s ease-in-out forwards;
+}
+
+.new-character {
+  opacity: 0;
+}
+
+.evolution-flash {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: white;
+  opacity: 0;
+  z-index: 50;
+  pointer-events: none;
+  transition: opacity 1s ease-in-out;
+}
+
+.evolution-flash.flash-active {
+  animation: evolution-flash-anim 2s ease-in-out forwards;
+}
+
+.evolution-text {
+  margin-top: 40px;
+  color: #fff;
+  text-align: center;
+  z-index: 60;
+}
+
+.evolution-text h2 {
+  font-size: 2rem;
+  font-family: inherit;
+  margin: 0;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+  transition: all 0.5s ease;
+}
+
+.glow-text {
+  color: #ffd700;
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.4) !important;
+  transform: scale(1.1);
+}
+
+@keyframes evolution-shake {
+  0% { transform: translate(-50%, -50%) scale(1); filter: brightness(1); }
+  20% { transform: translate(-52%, -50%) scale(1.05); }
+  40% { transform: translate(-48%, -50%) scale(1.05); }
+  60% { transform: translate(-52%, -50%) scale(1.1); filter: brightness(1.5); }
+  80% { transform: translate(-48%, -50%) scale(1.1); }
+  100% { transform: translate(-50%, -50%) scale(1.15); filter: brightness(2); }
+}
+
+@keyframes evolution-flash-anim {
+  0% { opacity: 0; }
+  40% { opacity: 1; }
+  60% { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 /* Desktop game-board contract: every game state fits one viewport without
@@ -7873,4 +8006,136 @@ canvas {
   display: flex;
   justify-content: center;
   gap: 15px;
+}
+
+/* Character Image Styles */
+
+.start-character {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  pointer-events: none;
+  margin-bottom: -110px; /* Bring it down to step exactly on the edge */
+}
+
+.hero-character-img {
+  height: min(450px, 50vh);
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 15px 15px rgba(0,0,0,0.4));
+}
+
+.phase-character {
+  position: absolute;
+  bottom: 0px;
+  left: max(0px, calc(50% - 700px)); /* Overlap the left edge of the 1320px board slightly */
+  z-index: 20;
+  pointer-events: none;
+}
+
+.phase-character-img {
+  height: min(400px, 45vh);
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 12px rgba(0,0,0,0.5));
+}
+
+/* Evolution Scene Styles */
+.evolution-scene {
+  background-color: #111;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.evolution-container {
+  position: relative;
+  width: 450px;
+  height: 450px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.evolution-character {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.5s ease-in-out;
+}
+
+.evolution-character img {
+  height: min(450px, 50vh);
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.2));
+}
+
+.old-character {
+  opacity: 1;
+  animation: evolution-shake 2s ease-in-out forwards;
+}
+
+.new-character {
+  opacity: 0;
+}
+
+.evolution-flash {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: white;
+  opacity: 0;
+  z-index: 50;
+  pointer-events: none;
+  transition: opacity 1s ease-in-out;
+}
+
+.evolution-flash.flash-active {
+  animation: evolution-flash-anim 2s ease-in-out forwards;
+}
+
+.evolution-text {
+  margin-top: 40px;
+  color: #fff;
+  text-align: center;
+  z-index: 60;
+}
+
+.evolution-text h2 {
+  font-size: 2rem;
+  font-family: inherit;
+  margin: 0;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+  transition: all 0.5s ease;
+}
+
+.glow-text {
+  color: #ffd700;
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.4) !important;
+  transform: scale(1.1);
+}
+
+@keyframes evolution-shake {
+  0% { transform: translate(-50%, -50%) scale(1); filter: brightness(1); }
+  20% { transform: translate(-52%, -50%) scale(1.05); }
+  40% { transform: translate(-48%, -50%) scale(1.05); }
+  60% { transform: translate(-52%, -50%) scale(1.1); filter: brightness(1.5); }
+  80% { transform: translate(-48%, -50%) scale(1.1); }
+  100% { transform: translate(-50%, -50%) scale(1.15); filter: brightness(2); }
+}
+
+@keyframes evolution-flash-anim {
+  0% { opacity: 0; }
+  40% { opacity: 1; }
+  60% { opacity: 1; }
+  100% { opacity: 0; }
 }
