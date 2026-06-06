@@ -1343,9 +1343,10 @@ function choiceCardMarkup(option, index) {
     : isSynergy
       ? `Combo Tool: ${option.requires.map((req) => getSkill(req)?.name).join(" + ")}`
       : "";
+  const visualTone = isSynergy ? "combo" : isSkill ? "skill" : "base";
 
   return `
-    <button class="choice action-slot action-slot--${option.tone} ${isSkill ? "choice--skill" : ""} ${isSynergy ? "choice--synergy" : ""}" data-option="${option.id}" style="--choice-delay:${index * 65}ms">
+    <button class="choice action-slot action-slot--${visualTone} ${isSkill ? "choice--skill" : ""} ${isSynergy ? "choice--synergy" : ""}" data-option="${option.id}" style="--choice-delay:${index * 65}ms">
       <span class="action-slot__body">
         <strong class="action-slot__title">${option.label}</strong>
         <span class="action-slot__helper">${option.helper || ""}</span>
