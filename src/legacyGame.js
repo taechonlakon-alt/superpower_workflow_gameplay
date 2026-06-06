@@ -32,6 +32,7 @@ function createInitialState() {
     emergencyTriggered: false,
     microEventTriggered: false,
     lastSignalTone: "stable",
+    emergencyCharacterFailed: false,
   };
 }
 
@@ -755,6 +756,7 @@ function advanceAfterNormalDecision({ allowRandomModifier = true, allowMicroEven
     state.emergencyTriggered = true;
     state.resolution = null;
     state.screen = "emergency_step";
+    state.emergencyCharacterFailed = false;
     render();
     return;
   }
@@ -776,9 +778,8 @@ function advanceAfterNormalDecision({ allowRandomModifier = true, allowMicroEven
     state.progress = 0;
     
     if (oldLevel !== newLevel) {
-      state.screen = "evolution";
-      state.evolutionOldLevel = oldLevel;
-      state.evolutionNewLevel = newLevel;
+      triggerEvolutionTransition(oldLevel, newLevel);
+      return;
     } else {
       state.screen = state.index >= game.steps.length ? "result" : "step";
     }
@@ -823,12 +824,42 @@ function advanceAfterNormalDecision({ allowRandomModifier = true, allowMicroEven
   render();
 }
 
+function triggerEvolutionTransition(oldLevel, newLevel) {
+  // Hide UI elements to focus on the cat
+  const uiElements = document.querySelectorAll('.phase-container, .phasebar, .resolution-panel, .start-board');
+  uiElements.forEach(el => {
+    if (el) {
+      el.style.transition = 'opacity 0.6s ease';
+      el.style.opacity = '0';
+    }
+  });
+
+  setTimeout(() => {
+    state.screen = "evolution";
+    state.evolutionOldLevel = oldLevel;
+    state.evolutionNewLevel = newLevel;
+    render();
+  }, 650);
+}
+
 function continueAfterResolution() {
   if (state.screen === "emergency_resolution") {
     state.resolution = null;
+    const step = getCurrentStep();
+    if (step) {
+      state.phaseSummaries = [...state.phaseSummaries, buildPhaseSummary(step)];
+    }
+    const oldLevel = Math.min(5, state.index + 1);
     state.index += 1;
+    const newLevel = Math.min(5, state.index + 1);
     state.progress = 0;
-    state.screen = state.index >= game.steps.length ? "result" : "step";
+
+    if (oldLevel !== newLevel) {
+      triggerEvolutionTransition(oldLevel, newLevel);
+      return;
+    } else {
+      state.screen = state.index >= game.steps.length ? "result" : "step";
+    }
     state.lastSignalTone = getProjectSignalTone();
     render();
     return;
@@ -845,6 +876,7 @@ function continueAfterResolution() {
     if (state.risk >= EMERGENCY_RISK_THRESHOLD && !state.emergencyTriggered) {
       state.emergencyTriggered = true;
       state.screen = "emergency_step";
+      state.emergencyCharacterFailed = false;
       render();
       return;
     }
@@ -1484,6 +1516,13 @@ function renderStep(step, isEmergency = false) {
   const isChaos = !!state.activeChaos;
   const issueLabel = `${step.title} Issue`;
 
+  const characterSrc = isEmergency && state.emergencyCharacterFailed
+    ? `/assets/character_fail/lv${characterLevel}fail.gif`
+    : `/assets/character/lv${characterLevel}.gif`;
+  const characterFallback = isEmergency && state.emergencyCharacterFailed
+    ? `/assets/character_fail/lv${characterLevel}fail.gif`
+    : `/assets/character/lv${characterLevel}.png`;
+
   const eventContent = isChaos ? `
     <section class="event event--active event--issue">
       <div class="event-label">${issueLabel}</div>
@@ -1525,7 +1564,7 @@ function renderStep(step, isEmergency = false) {
   root.innerHTML = `
     <main class="app">
       <div class="phase-character" aria-hidden="true">
-        <img src="/assets/character/lv${characterLevel}.gif" alt="Hero Lv${characterLevel}" class="phase-character-img" onerror="this.onerror=null; this.src='/assets/character/lv${characterLevel}.png';" />
+        <img src="${characterSrc}" alt="Hero Lv${characterLevel}" class="phase-character-img" onerror="this.onerror=null; this.src='${characterFallback}';" />
       </div>
       <section class="${shellClass()}">
         <section class="phasebar" style="display: flex; align-items: center; justify-content: space-between;">
@@ -1557,6 +1596,18 @@ function renderStep(step, isEmergency = false) {
       </section>
     </main>
   `;
+
+  if (isEmergency && !state.emergencyCharacterFailed) {
+    setTimeout(() => {
+      state.emergencyCharacterFailed = true;
+      const img = root.querySelector('.phase-character-img');
+      if (img) {
+        img.classList.add('character-glitch-active');
+        img.src = `/assets/character_fail/lv${characterLevel}fail.gif`;
+        img.onerror = () => { img.src = `/assets/character_fail/lv${characterLevel}fail.gif`; };
+      }
+    }, 1500);
+  }
 }
 
 function resolutionChoiceMeaningMarkup(result) {
@@ -1594,10 +1645,18 @@ function renderResolution() {
     : result.countered ? "resolution-panel--safe" : "resolution-panel--warn";
 
   const characterLevel = Math.min(5, (state.index || 0) + 1);
+  const isEmergency = state.screen === "emergency_resolution";
+  const characterSrc = isEmergency
+    ? `/assets/character_fail/lv${characterLevel}fail.gif`
+    : `/assets/character/lv${characterLevel}.gif`;
+  const characterFallback = isEmergency
+    ? `/assets/character_fail/lv${characterLevel}fail.gif`
+    : `/assets/character/lv${characterLevel}.png`;
+
   root.innerHTML = `
     <main class="app">
       <div class="phase-character" aria-hidden="true">
-        <img src="/assets/character/lv${characterLevel}.gif" alt="Hero Lv${characterLevel}" class="phase-character-img" onerror="this.onerror=null; this.src='/assets/character/lv${characterLevel}.png';" />
+        <img src="${characterSrc}" alt="Hero Lv${characterLevel}" class="phase-character-img" onerror="this.onerror=null; this.src='${characterFallback}';" />
       </div>
       <section class="${shellClass()}">
         <section class="phasebar" style="display: flex; align-items: center; justify-content: space-between;">
@@ -1650,6 +1709,17 @@ function renderResolution() {
       </section>
     </main>
   `;
+
+  if (resolutionToneClass.includes("--warn") && !isEmergency) {
+    setTimeout(() => {
+      const img = root.querySelector('.phase-character-img');
+      if (img) {
+        img.classList.add('character-glitch-active');
+        img.src = `/assets/character_fail/lv${characterLevel}fail.gif`;
+        img.onerror = () => { img.src = `/assets/character_fail/lv${characterLevel}fail.gif`; };
+      }
+    }, 600);
+  }
 }
 
 function getTitleBadge({ failed, protectedEvents, riskyChoices, skillUses, problemsTriggered, overBudget, overtime, workflowScore }) {
@@ -2348,21 +2418,55 @@ function tutorialMarkup() {
   `;
 }
 function renderEvolution() {
+  const getEvolutionSpriteLayout = (lv) => {
+    const spriteMetrics = {
+      1: { width: 1774, height: 887, bbox: [350, 300, 689, 681] },
+      2: { width: 1774, height: 887, bbox: [587, 289, 1038, 694] },
+      3: { width: 1774, height: 887, bbox: [757, 210, 1062, 719] },
+      4: { width: 1774, height: 887, bbox: [410, 135, 1009, 819] },
+      5: { width: 1419, height: 709, bbox: [512, 148, 906, 615] },
+    };
+    const metrics = spriteMetrics[lv];
+    if (!metrics) {
+      return { height: 360, shiftX: 0, shiftY: 0 };
+    }
+
+    const [left, top, right, bottom] = metrics.bbox;
+    const spriteWidth = right - left;
+    const spriteHeight = bottom - top;
+    const targetVisibleHeight = 210;
+    const scale = targetVisibleHeight / spriteHeight;
+    const renderHeight = metrics.height * scale;
+    const spriteCenterX = left + spriteWidth / 2;
+    const spriteCenterY = top + spriteHeight / 2;
+    const canvasCenterX = metrics.width / 2;
+    const canvasCenterY = metrics.height / 2;
+
+    return {
+      height: renderHeight,
+      shiftX: (canvasCenterX - spriteCenterX) * scale,
+      shiftY: (canvasCenterY - spriteCenterY) * scale,
+    };
+  };
+
+  const oldLayout = getEvolutionSpriteLayout(state.evolutionOldLevel);
+  const newLayout = getEvolutionSpriteLayout(state.evolutionNewLevel);
+
   root.innerHTML = `
     <main class="app evolution-scene">
       <div class="evolution-container">
         <div class="evolution-flash" aria-hidden="true"></div>
-        <div class="evolution-character old-character" aria-hidden="true">
+        <div class="evolution-character old-character" aria-hidden="true" style="--evo-shift-x:${oldLayout.shiftX.toFixed(2)}px; --evo-shift-y:${oldLayout.shiftY.toFixed(2)}px; --evo-height:${oldLayout.height.toFixed(2)}px;">
           <img src="/assets/character/lv${state.evolutionOldLevel}.gif" alt="Evolving..." onerror="this.onerror=null; this.src='/assets/character/lv${state.evolutionOldLevel}.png';" />
         </div>
-        <div class="evolution-character new-character" aria-hidden="true">
+        <div class="evolution-character new-character" aria-hidden="true" style="--evo-shift-x:${newLayout.shiftX.toFixed(2)}px; --evo-shift-y:${newLayout.shiftY.toFixed(2)}px; --evo-height:${newLayout.height.toFixed(2)}px;">
           <img src="/assets/character/lv${state.evolutionNewLevel}.gif" alt="Evolution Complete!" onerror="this.onerror=null; this.src='/assets/character/lv${state.evolutionNewLevel}.png';" />
         </div>
       </div>
-      <div class="evolution-text">
+      <div class="evolution-text" style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
         <h2>Cat is evolving...</h2>
+        <button class="evolution-next-btn btn primary-btn" style="display:none; z-index: 100;">Continue to Next Workflow</button>
       </div>
-      <button class="evolution-next-btn btn primary-btn" style="display:none; position: absolute; bottom: 15%; z-index: 100;">Continue to Next Workflow</button>
     </main>
   `;
 
@@ -2376,7 +2480,10 @@ function renderEvolution() {
       const oldChar = root.querySelector('.old-character');
       const newChar = root.querySelector('.new-character');
       if (oldChar) oldChar.style.opacity = '0';
-      if (newChar) newChar.style.opacity = '1';
+      if (newChar) {
+        newChar.style.opacity = '1';
+        newChar.classList.add('pop-active');
+      }
       
       const title = root.querySelector('.evolution-text h2');
       if (title) {
