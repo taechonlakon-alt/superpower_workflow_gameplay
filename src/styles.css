@@ -5417,17 +5417,45 @@ body::before {
 
 .phase-character {
   position: absolute;
-  bottom: 0px;
-  left: max(0px, calc(50% - 700px)); /* Overlap the left edge of the 1320px board slightly */
+  bottom: 30px;
+  left: calc(50% - 660px - 130px);
   z-index: 20;
   pointer-events: none;
+  transition: all 0.3s ease-in-out;
 }
 
 .phase-character-img {
-  height: min(400px, 45vh);
+  height: min(380px, 42vh);
   width: auto;
   object-fit: contain;
-  filter: drop-shadow(0 8px 12px rgba(0,0,0,0.5));
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.6));
+}
+
+@media (max-width: 1439px) {
+  .phase-character {
+    left: 10px;
+    bottom: 20px;
+  }
+  .phase-character-img {
+    height: min(280px, 32vh);
+  }
+}
+
+@media (max-width: 1023px) {
+  .phase-character {
+    left: 5px;
+    bottom: 15px;
+  }
+  .phase-character-img {
+    height: min(200px, 25vh);
+    opacity: 0.85;
+  }
+}
+
+@media (max-width: 767px) {
+  .phase-character {
+    display: none;
+  }
 }
 
 /* Evolution Scene Styles */
@@ -5443,8 +5471,8 @@ body::before {
 
 .evolution-container {
   position: relative;
-  width: 450px;
-  height: 450px;
+  width: min(640px, 90vw);
+  height: min(640px, 90vw);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -5459,10 +5487,10 @@ body::before {
 }
 
 .evolution-character img {
-  height: min(450px, 50vh);
+  height: min(600px, 65vh);
   width: auto;
   object-fit: contain;
-  filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.2));
+  filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.35));
 }
 
 .old-character {
@@ -8029,17 +8057,45 @@ canvas {
 
 .phase-character {
   position: absolute;
-  bottom: 0px;
-  left: max(0px, calc(50% - 700px)); /* Overlap the left edge of the 1320px board slightly */
+  bottom: 30px;
+  left: calc(50% - 660px - 130px);
   z-index: 20;
   pointer-events: none;
+  transition: all 0.3s ease-in-out;
 }
 
 .phase-character-img {
-  height: min(400px, 45vh);
+  height: min(380px, 42vh);
   width: auto;
   object-fit: contain;
-  filter: drop-shadow(0 8px 12px rgba(0,0,0,0.5));
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.6));
+}
+
+@media (max-width: 1439px) {
+  .phase-character {
+    left: 10px;
+    bottom: 20px;
+  }
+  .phase-character-img {
+    height: min(280px, 32vh);
+  }
+}
+
+@media (max-width: 1023px) {
+  .phase-character {
+    left: 5px;
+    bottom: 15px;
+  }
+  .phase-character-img {
+    height: min(200px, 25vh);
+    opacity: 0.85;
+  }
+}
+
+@media (max-width: 767px) {
+  .phase-character {
+    display: none;
+  }
 }
 
 /* Evolution Scene Styles */
@@ -8055,8 +8111,8 @@ canvas {
 
 .evolution-container {
   position: relative;
-  width: 450px;
-  height: 450px;
+  width: min(640px, 90vw);
+  height: min(640px, 90vw);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -8071,10 +8127,10 @@ canvas {
 }
 
 .evolution-character img {
-  height: min(450px, 50vh);
+  height: min(600px, 65vh);
   width: auto;
   object-fit: contain;
-  filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.2));
+  filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.35));
 }
 
 .old-character {

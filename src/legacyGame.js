@@ -2176,11 +2176,18 @@ function renderResult() {
     ? `AI budget exceeded by ${result.tokenDebt}`
     : "AI budget remained within limits.";
 
-  const characterLevel = 5;
+  const characterLevel = Math.min(5, (state.index || 0) + 1);
+  const characterSrc = result.failed
+    ? `/assets/character_fail/${characterLevel}.png`
+    : `/assets/character/lv${characterLevel}.gif`;
+  const characterFallback = result.failed
+    ? `/assets/character_fail/${characterLevel}.png`
+    : `/assets/character/lv${characterLevel}.png`;
+
   root.innerHTML = `
     <main class="app">
       <div class="phase-character" aria-hidden="true">
-        <img src="/assets/character/lv${characterLevel}.gif" alt="Hero Lv${characterLevel}" class="phase-character-img" onerror="this.onerror=null; this.src='/assets/character/lv${characterLevel}.png';" />
+        <img src="${characterSrc}" alt="Hero Lv${characterLevel}" class="phase-character-img" onerror="this.onerror=null; this.src='${characterFallback}';" />
       </div>
       <section class="${shellClass()}">
         <section class="phasebar" style="display: flex; align-items: center; justify-content: space-between;">
