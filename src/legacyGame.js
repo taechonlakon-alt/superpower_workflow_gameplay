@@ -2188,8 +2188,8 @@ function renderResult() {
       characterSrc = "/assets/character_fail/lv2fail.gif";
       characterFallback = "/assets/character_fail/2.png";
     } else if (characterLevel === 3) {
-      characterSrc = "/assets/character_fail/lv3fail.png";
-      characterFallback = "/assets/character_fail/lv3fail.png";
+      characterSrc = "/assets/character_fail/lv3fail.gif";
+      characterFallback = "/assets/character_fail/lv3fail.gif";
     } else {
       characterSrc = `/assets/character_fail/lv${characterLevel}fail.png`;
       characterFallback = `/assets/character_fail/${characterLevel}.png`;
