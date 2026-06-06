@@ -2190,9 +2190,12 @@ function renderResult() {
     } else if (characterLevel === 3) {
       characterSrc = "/assets/character_fail/lv3fail.gif";
       characterFallback = "/assets/character_fail/lv3fail.gif";
-    } else {
-      characterSrc = `/assets/character_fail/lv${characterLevel}fail.png`;
-      characterFallback = `/assets/character_fail/${characterLevel}.png`;
+    } else if (characterLevel === 4) {
+      characterSrc = "/assets/character_fail/lv4fail.gif";
+      characterFallback = "/assets/character_fail/4.png";
+    } else if (characterLevel === 5) {
+      characterSrc = "/assets/character_fail/lv5fail.png";
+      characterFallback = "/assets/character_fail/lv5fail.png";
     }
   }
 
