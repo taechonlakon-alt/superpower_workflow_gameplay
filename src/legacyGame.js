@@ -9,6 +9,8 @@ let state = createInitialState();
 
 function createInitialState() {
   return {
+    showTutorial: false,
+    tutorialPage: 0,
     showHeroPopup: false,
     screen: "title",
     index: 0,
@@ -115,7 +117,7 @@ function getChoiceReaction(option, countered) {
   if (countered) {
     return {
       tone: "recovery",
-      title: "Workflow รับแรงกระแทกไว้ได้",
+      title: "Workflow Absorbed the Impact",
       copy: option.outcome,
     };
   }
@@ -123,7 +125,7 @@ function getChoiceReaction(option, countered) {
   if (option.effects.risk >= 4 || option.effects.quality < 0) {
     return {
       tone: "danger",
-      title: "ความเร็วเริ่มกลายเป็นหนี้งาน",
+      title: "Speed Becomes Technical Debt",
       copy: option.outcome,
     };
   }
@@ -131,7 +133,7 @@ function getChoiceReaction(option, countered) {
   if (option.effects.risk >= 2 || option.effects.token >= 3) {
     return {
       tone: "warn",
-      title: "โปรเจกต์เดินหน้า แต่เริ่มมีแรงกด",
+      title: "Project Advances, Pressure Builds",
       copy: option.outcome,
     };
   }
@@ -139,14 +141,14 @@ function getChoiceReaction(option, countered) {
   if (option.effects.risk < 0 || option.effects.quality >= 3) {
     return {
       tone: "recovery",
-      title: "ทีมสร้างหลักยึดก่อนเร่งงาน",
+      title: "Team Secures Foothold Before Sprinting",
       copy: option.outcome,
     };
   }
 
   return {
     tone: "safe",
-    title: "ทางเลือกนี้ยังคุมเกมได้",
+    title: "Choice Keeps Workflow Controlled",
     copy: option.outcome,
   };
 }
@@ -157,40 +159,40 @@ function inferChoiceSolves(option) {
   const solves = [];
 
   if (progress >= 100) {
-    solves.push("ปิด phase ได้ครบในจังหวะเดียว");
+    solves.push("Closed phase in one move");
   } else if (progress >= 60) {
-    solves.push("เร่ง progress ของ phase อย่างชัดเจน");
+    solves.push("Accelerated phase progress clearly");
   } else if (progress >= 40) {
-    solves.push("ขยับงานไปข้างหน้าโดยยังเหลือ room ให้ปรับ");
+    solves.push("Advanced work while leaving room for adjustments");
   }
 
   if (effects.risk <= -5) {
-    solves.push("ลด risk หนักและเพิ่มความมั่นใจก่อนส่งต่อ");
+    solves.push("Heavily reduced risk, gaining confidence before handoff");
   } else if (effects.risk < 0) {
-    solves.push("ลด risk ที่กำลังสะสมใน workflow");
+    solves.push("Reduced accumulated risk in workflow");
   }
 
   if (effects.quality >= 5) {
-    solves.push("เพิ่ม evidence และ quality ของงาน");
+    solves.push("Increased evidence and work quality");
   } else if (effects.quality > 0) {
-    solves.push("ทำให้งานตรวจสอบได้มากขึ้น");
+    solves.push("Made work more verifiable");
   }
 
   if (option.preventPenalty) {
-    solves.push("counter issue ที่เกิดขึ้นใน phase นี้");
+    solves.push("Countered issue occurring in this phase");
   }
 
   if (option.requires?.length) {
-    solves.push("รวมหลาย superpower เพื่อปิด gap หลายด้านพร้อมกัน");
+    solves.push("Combined superpowers to close multiple gaps simultaneously");
   } else if (option.skill) {
-    solves.push("ใช้ superpower เฉพาะทางแก้ pressure จุดนี้");
+    solves.push("Used specific superpower to resolve current pressure");
   }
 
   if (!solves.length && effects.risk >= 3) {
-    solves.push("ซื้อความเร็วหรือ momentum แต่ยอมรับ risk เพิ่ม");
+    solves.push("Bought speed or momentum, but accepted increased risk");
   }
 
-  return solves.length ? solves.join(" / ") : "ให้ทางเลือกเชิง tactical สำหรับสถานการณ์นี้";
+  return solves.length ? solves.join(" / ") : "Provided tactical option for this situation";
 }
 
 function inferChoiceMisses(option) {
@@ -198,35 +200,35 @@ function inferChoiceMisses(option) {
   const misses = [];
 
   if (effects.risk >= 4) {
-    misses.push("เพิ่ม risk สูง อาจเปิด phase issue ทันที");
+    misses.push("Highly increased risk, might open phase issue immediately");
   } else if (effects.risk >= 2) {
-    misses.push("ยังมี risk ที่ต้องปิดด้วย guardrail ต่อ");
+    misses.push("Still has risk that needs guardrails later");
   }
 
   if (effects.quality <= -2) {
-    misses.push("quality debt สูง อาจทำให้ review หนักขึ้น");
+    misses.push("High quality debt, might cause heavy reviews");
   } else if (effects.quality < 0) {
-    misses.push("งานเดินหน้าแต่คุณภาพลดลง");
+    misses.push("Work advanced but quality dropped");
   }
 
   if (effects.token >= 3) {
-    misses.push("ใช้ AI budget หนัก");
+    misses.push("Heavily consumed AI budget");
   }
 
   if (effects.time >= 3) {
-    misses.push("ใช้เวลามากและอาจบีบ deadline");
+    misses.push("Consumed a lot of time, might squeeze deadline");
   }
 
   if (!misses.length && option.tradeoff) {
     misses.push(option.tradeoff);
   }
 
-  return misses.length ? misses.join(" / ") : "ยังต้อง verify ต่อใน phase ถัดไป";
+  return misses.length ? misses.join(" / ") : "Still needs verification in next phase";
 }
 
 function getChoiceMeaning(option) {
   return {
-    purpose: option.purpose || option.helper || "เลือกแนวทางนี้เพื่อจัดการ pressure เฉพาะหน้าของ phase",
+    purpose: option.purpose || option.helper || "Choose this approach to handle immediate phase pressure",
     solves: option.solves || inferChoiceSolves(option),
     misses: option.misses || inferChoiceMisses(option),
   };
@@ -238,26 +240,26 @@ function getInPlayHint(step, option, countered) {
   const effects = normalizeEffects(option.effects);
 
   if (countered) {
-    return "Hint: เลือก tool ถูกกับ edge case แล้ว รอบต่อไปให้ดูว่า cost ด้านเวลา/token คุ้มกับ risk ที่ลดลงไหม";
+    return "Hint: Used the right tool for the edge case. Next, check if time/token cost is worth the risk reduction.";
   }
 
   if (option.requires?.length) {
-    return "Hint: combo ช่วยปิดหลาย gap ได้เร็ว แต่ยังต้องดูว่า phase นี้ต้องการ combo ทั้งชุดจริงหรือไม่";
+    return "Hint: Combos close gaps quickly, but check if the phase really needed the entire combo.";
   }
 
   if (effects.risk >= 4 || effects.quality <= -2) {
-    return "Hint: ทางลัดนี้มีเหตุผลเรื่องความเร็ว แต่กำลังเปลี่ยนเป็นหนี้ risk/quality ที่ต้องจ่ายตอน Review";
+    return "Hint: This shortcut provides speed but creates risk/quality debt to pay during Review.";
   }
 
   if (effects.token >= 3 || effects.time >= 3) {
-    return "Hint: choice นี้ซื้อความมั่นใจด้วย budget/time ถ้าใช้ซ้ำต้องมี evidence กลับมาคุ้มค่า";
+    return "Hint: This choice bought confidence with budget/time. Reusing it needs evidence of return.";
   }
 
   if (effects.risk < 0 || effects.quality >= 3) {
-    return "Hint: guardrail ที่ดีควรลดความไม่แน่นอนของ phase ไม่ใช่แค่เพิ่มขั้นตอนให้ดูครบ";
+    return "Hint: Good guardrails reduce phase uncertainty, not just add ritualistic steps.";
   }
 
-  return step?.goal?.copy || option.lesson || "Hint: ดูผล resource แล้วตัดสินว่าควรเร่งต่อหรือวาง guardrail เพิ่ม";
+  return step?.goal?.copy || option.lesson || "Hint: Look at resource outcomes to decide whether to push or add guardrails.";
 }
 
 function buildMicroEvent({ id, title, icon, tags, tradeoff, outcome, lesson, effects, reaction }) {
@@ -276,7 +278,7 @@ function buildMicroEvent({ id, title, icon, tags, tradeoff, outcome, lesson, eff
     lesson,
     countered: false,
     effects,
-    lines: ["สัญญาณนี้เกิดจากทรัพยากรที่สะสมระหว่างเล่น ไม่ใช่เหตุการณ์สุ่ม"],
+    lines: ["This signal stems from cumulative resources, not a random event."],
     reaction,
     isMicroEvent: true,
   };
@@ -319,22 +321,22 @@ function buildRandomModifierEvent(modifier, step) {
     optionTone: tone === "danger" ? "gray" : "mint",
     skillName: null,
     tags: modifier.tags || ["external"],
-    tradeoff: "External pressure แทรกหลัง decision เพื่อทดสอบว่า workflow รับแรงกดจริงได้ไหม",
+    tradeoff: "External pressure inserted after a decision to test workflow resilience.",
     outcome: modifier.copy,
-    lesson: "นี่เป็น external signal ไม่ใช่ Problems Triggered จาก choice โดยตรง แต่ resource delta ยังสะท้อนแรงกดของ run นี้",
-    hint: modifier.hint || "Hint: ถ้า signal นี้เริ่มกัด resource ให้ใช้ choice ถัดไปปิด pressure ด้วยหลักฐาน ไม่ใช่เร่งแบบเดิม",
+    lesson: "This is an external signal, not a Problems Triggered by your choice directly, but the resource delta reflects the pressure of this run.",
+    hint: modifier.hint || "Hint: If this signal drains resources, use the next choice to mitigate pressure with evidence, rather than rushing.",
     countered: false,
     effects,
     progress: 0,
     lines: [
-      `External signal หลัง decision ใน phase ${step?.title || "current"}`,
+      `External signal after decision in phase ${step?.title || "current"}`,
       modifier.copy,
       formatRandomEffectDelta(effects),
     ],
     reaction: {
       tone,
-      title: tone === "safe" ? "Workflow รับแรงกดได้" : "แรงกดนอกแผนเริ่มโผล่",
-      copy: "เกมโยน external signal เข้ามาให้ adapt โดยไม่เปลี่ยนโจทย์หลักของ phase",
+      title: tone === "safe" ? "Workflow Resilient" : "External Pressure Building",
+      copy: "The game throws an external signal to test your adaptability without changing the phase goal.",
     },
     isRandomModifier: true,
   };
@@ -510,11 +512,11 @@ function buildResolution(step, option) {
   const hiddenPenalty = [];
 
   if (state.token - optionEffects.token < 0) {
-    hiddenPenalty.push("ทีมใช้ AI budget หนักเกินไป คำตอบเริ่มต้องคัดกรองมากขึ้น");
+    hiddenPenalty.push("Team is burning through AI budget. Answers require heavier filtering.");
   }
 
   if (state.time + optionEffects.time > game.caps.time) {
-    hiddenPenalty.push("deadline เริ่มบีบ ทีมต้องตัดสินใจเร็วขึ้นในช่วงท้าย");
+    hiddenPenalty.push("Deadline crunch: team is forced to make rushed decisions late in the game.");
   }
 
   let eventTitle = "";
@@ -526,11 +528,11 @@ function buildResolution(step, option) {
     eventTitle = state.activeChaos.title;
     if (option.preventPenalty) {
       countered = true;
-      eventLine = `Chaos คลี่คลาย: ${state.activeChaos.title} ถูกจัดการได้ทัน`;
-      projectMood = "ความเสียหายถูกหยุดไว้ได้";
+      eventLine = `Chaos Averted: ${state.activeChaos.title} was mitigated in time.`;
+      projectMood = "Damage was successfully blocked.";
     } else {
-      eventLine = `Chaos ส่งผลกระทบ: ${state.activeChaos.title}`;
-      projectMood = `เสีย Progress ${state.activeChaos.progressPenalty}%`;
+      eventLine = `Chaos Impact: ${state.activeChaos.title}`;
+      projectMood = `Lost Progress ${state.activeChaos.progressPenalty}%`;
     }
   } else if (step.event) {
     eventTitle = step.event.title;
@@ -1025,7 +1027,30 @@ function handleRootClick(event) {
       return;
     }
 
-    startSkillDraft();
+    state.showTutorial = true;
+    state.tutorialPage = 0;
+    render();
+    return;
+  }
+
+  const tutNext = target.closest(".tutorial-next");
+  if (tutNext) {
+    if (state.tutorialPage < 2) {
+      state.tutorialPage++;
+      render();
+    } else {
+      state.showTutorial = false;
+      startSkillDraft();
+    }
+    return;
+  }
+
+  const tutPrev = target.closest(".tutorial-prev");
+  if (tutPrev) {
+    if (state.tutorialPage > 0) {
+      state.tutorialPage--;
+      render();
+    }
     return;
   }
 
@@ -1124,7 +1149,7 @@ function getResourceBarState() {
       label: "Risk",
       value: riskValue,
       fill: clamp(riskValue, 0, 100),
-      helper: "เสี่ยงพัง",
+      helper: "Fragility",
       tone: getPressureResourceTone(riskValue, 50, 80),
     },
   ];
@@ -1162,17 +1187,17 @@ function selectedSkillHandMarkup() {
     <section class="superpower-hand" aria-label="Superpower Hand">
       <div class="superpower-hand__label">
         <span>Superpower Hand</span>
-        <strong>ถืออยู่ ${selectedSkills.length}/${game.maxSkills}</strong>
+        <strong>Holding ${selectedSkills.length}/${game.maxSkills}</strong>
       </div>
       <div class="superpower-hand__cards">
         ${selectedSkills.map((skill) => `
-          <button class="superpower-hand__card" type="button" data-skill="${escapeHtml(skill.id)}" aria-label="ดูรายละเอียด ${escapeHtml(skill.name)}">
+          <button class="superpower-hand__card" type="button" data-skill="${escapeHtml(skill.id)}" aria-label="View details ${escapeHtml(skill.name)}">
             <span class="superpower-hand__icon">${escapeHtml(skill.icon)}</span>
             <span class="superpower-hand__meta">
               <span>${escapeHtml(skill.type)}</span>
               <strong>${escapeHtml(skill.name)}</strong>
             </span>
-            <span class="superpower-hand__ready">พร้อมใช้</span>
+            <span class="superpower-hand__ready">Ready</span>
           </button>
         `).join("")}
       </div>
@@ -1254,7 +1279,7 @@ function heroMarkup() {
           <strong>${game.stage}</strong>
         </div>
         <p class="start-copy">${game.intro}</p>
-        <button class="hero-start-btn restart" type="button">เริ่มภารกิจ</button>
+        <button class="hero-start-btn restart" type="button">Start Mission</button>
       </div>
       <div class="start-ground" aria-hidden="true"></div>
     </header>
@@ -1284,12 +1309,12 @@ function skillCardMarkup(skill) {
 function skillDetailPopupMarkup(skill, allowEdit = state.screen === "setup") {
   const selected = state.skills.includes(skill.id);
   const locked = !selected && state.skills.length >= game.maxSkills;
-  const actionLabel = selected ? "ถอดสกิล" : locked ? "เลือกครบ 3 ใบแล้ว" : "เลือกสกิล";
+  const actionLabel = selected ? "Remove Skill" : locked ? "Max 3 Skills Selected" : "Select Skill";
   const summary = skill.summary || skill.description;
   const teaches = skill.teaches
     ? `
       <div class="skill-detail-section">
-        <p class="skill-detail-label">สอนอะไร</p>
+        <p class="skill-detail-label">Teaches</p>
         <p>${escapeHtml(skill.teaches)}</p>
       </div>
     `
@@ -1297,7 +1322,7 @@ function skillDetailPopupMarkup(skill, allowEdit = state.screen === "setup") {
   const warning = skill.warning
     ? `
       <div class="skill-detail-warning">
-        <p class="skill-detail-label">ข้อควรระวัง</p>
+        <p class="skill-detail-label">Warning</p>
         <p>${escapeHtml(skill.warning)}</p>
       </div>
     `
@@ -1317,14 +1342,14 @@ function skillDetailPopupMarkup(skill, allowEdit = state.screen === "setup") {
           </div>
           <p class="skill-detail-summary">${escapeHtml(summary)}</p>
           <div class="skill-detail-section">
-            <p class="skill-detail-label">รายละเอียด</p>
+            <p class="skill-detail-label">Description</p>
             <p>${escapeHtml(skill.description)}</p>
           </div>
           ${teaches}
           ${warning}
           <div class="skill-detail-actions">
             ${allowEdit ? `<button class="restart skill-detail-toggle" type="button" data-skill="${escapeHtml(skill.id)}" ${locked ? "disabled" : ""}>${actionLabel}</button>` : ""}
-            <button class="restart skill-detail-close" type="button">ปิด</button>
+            <button class="restart skill-detail-close" type="button">Close</button>
           </div>
         </section>
       </div>
@@ -1348,21 +1373,21 @@ function choiceCardMarkup(option, index) {
   return `
     <button class="choice action-slot action-slot--${visualTone} ${isSkill ? "choice--skill" : ""} ${isSynergy ? "choice--synergy" : ""}" data-option="${option.id}" style="--choice-delay:${index * 65}ms">
       <span class="action-slot__body">
-        <strong class="action-slot__title">${option.label}</strong>
-        <span class="action-slot__helper">${option.helper || ""}</span>
-        <span class="action-slot__meaning">
-          <span><b>แก้ปัญหา</b> ${escapeHtml(meaning.solves)}</span>
-        </span>
+        <strong class="action-slot__title">${escapeHtml(option.label)}</strong>
+        <span class="action-slot__helper">${escapeHtml(option.helper || "")}</span>
         <span class="action-slot__tags">
           ${visibleTags.length ? tagMarkup(visibleTags) : ""}
           ${hiddenTagCount ? `<span>+${hiddenTagCount}</span>` : ""}
         </span>
       </span>
       <span class="action-slot__footer">
-        ${unlock ? `<span class="action-slot__unlock">${unlock}</span>` : ""}
-        <span class="action-slot__tradeoff">${option.tradeoff}</span>
+        ${unlock ? `<span class="action-slot__unlock">${escapeHtml(unlock)}</span>` : ""}
         <span class="action-slot__select">Select</span>
       </span>
+      <div class="action-slot__tooltip">
+        <p><strong>Solves:</strong> ${escapeHtml(meaning.solves)}</p>
+        <p><strong>Tradeoff:</strong> ${escapeHtml(option.tradeoff || meaning.misses)}</p>
+      </div>
     </button>
   `;
 }
@@ -1405,11 +1430,11 @@ function renderSetup() {
             <div class="panel-head">
               <p class="phase-tag">Superpower Draft</p>
               <div class="panel-title-row">
-                <h2 class="phase-title">เลือก Superpowers ${game.maxSkills} ใบ</h2>
+                <h2 class="phase-title">Select ${game.maxSkills} Superpowers</h2>
                 <span class="phase-badge" aria-hidden="true">${eventIconMarkup()}</span>
               </div>
               <div class="phase-body">
-                <p>คลิกการ์ดเพื่อดูรายละเอียด แล้วเลือกให้ครบ ${game.maxSkills} ใบก่อนเริ่ม Brainstorm</p>
+                <p>Click a card for details, and select ${game.maxSkills} tools before starting Brainstorm.</p>
               </div>
             </div>
 
@@ -1418,7 +1443,7 @@ function renderSetup() {
             </div>
 
             <div class="setup-actions">
-              <p class="draft-count">เลือกแล้ว ${state.skills.length} / ${game.maxSkills}</p>
+              <p class="draft-count">Selected ${state.skills.length} / ${game.maxSkills}</p>
               <button class="restart start-mission" ${state.skills.length === game.maxSkills ? "" : "disabled"}>Start Mission</button>
             </div>
           </section>
@@ -1517,12 +1542,14 @@ function resolutionChoiceMeaningMarkup(result) {
   if (!result?.purpose && !result?.solves && !result?.misses) return "";
 
   return `
-              <div class="resolution-card resolution-card--meaning">
-                <p class="mini-label">Choice Meaning</p>
-                ${result.purpose ? `<p><strong>สำคัญเพราะ</strong> ${escapeHtml(result.purpose)}</p>` : ""}
-                ${result.solves ? `<p><strong>แก้ปัญหา</strong> ${escapeHtml(result.solves)}</p>` : ""}
-                ${result.misses ? `<p><strong>ยังพลาด</strong> ${escapeHtml(result.misses)}</p>` : ""}
-              </div>
+              <details class="resolution-card resolution-card--meaning">
+                <summary class="mini-label" style="cursor:pointer; display:list-item;">Choice Meaning</summary>
+                <div style="margin-top: 8px;">
+                  ${result.purpose ? `<p><strong>Important because:</strong> ${escapeHtml(result.purpose)}</p>` : ""}
+                  ${result.solves ? `<p><strong>Solves:</strong> ${escapeHtml(result.solves)}</p>` : ""}
+                  ${result.misses ? `<p><strong>Tradeoffs:</strong> ${escapeHtml(result.misses)}</p>` : ""}
+                </div>
+              </details>
   `;
 }
 
@@ -1530,10 +1557,10 @@ function resolutionHintMarkup(result) {
   if (!result?.hint) return "";
 
   return `
-              <div class="resolution-card resolution-card--hint">
-                <p class="mini-label">In-Play Hint</p>
-                <p>${escapeHtml(result.hint)}</p>
-              </div>
+              <details class="resolution-card resolution-card--hint">
+                <summary class="mini-label" style="cursor:pointer; display:list-item;">In-Play Hint</summary>
+                <p style="margin-top: 8px;">${escapeHtml(result.hint)}</p>
+              </details>
   `;
 }
 
@@ -1615,76 +1642,76 @@ function getTitleBadge({ failed, protectedEvents, riskyChoices, skillUses, probl
   if (masterReady) {
     return {
       label: "Workflow Master",
-      helper: "คุณใช้ guardrail หลายชั้นจน AI กลายเป็นแรงเสริม ไม่ใช่แหล่งความเสี่ยง",
+      helper: "Applied multiple guardrails effectively; AI acted as a force multiplier, not a liability.",
     };
   }
 
   if (problemsTriggered.includes("Hardcoded Secrets Leak") && state.risk >= 6) {
     return {
       label: "Security Oops",
-      helper: "Secret หรือ security risk โผล่ระหว่างทาง และ workflow ยังจับได้ไม่แน่นพอ",
+      helper: "Secret or security risk slipped through the workflow cracks.",
     };
   }
 
   if (problemsTriggered.includes("Shadow IT Discovery") && (failed || state.risk >= 6)) {
     return {
       label: "Shadow IT Casualty",
-      helper: "โปรเจกต์เร็วมาก แต่หลักฐานและมาตรฐานยังไม่พอรับการตรวจจากองค์กร",
+      helper: "Built fast, but lacked evidence and standards to pass organizational review.",
     };
   }
 
   if (problemsTriggered.includes("Reprompting Loop Trap") && state.time >= 12) {
     return {
       label: "Debugging Victim",
-      helper: "ทีมเสียแรงกับการ reprompt ซ้ำจน debugging กลายเป็น rework",
+      helper: "Wasted resources on endless reprompting until debugging turned into rework.",
     };
   }
 
   if (!failed && !overBudget && !overtime && skillUses >= 3 && tokenSpent >= 7 && state.risk <= 5) {
     return {
       label: "AI Conductor",
-      helper: "คุณใช้หลายเครื่องมือได้เร็ว แต่ยังมีคนคุมทิศทางและรวมงานให้เข้ากัน",
+      helper: "Managed multiple tools rapidly while maintaining direction and integration.",
     };
   }
 
   if (state.time <= 8 && riskyChoices >= 2) {
     return {
-      label: "เดอะแฟลชงานหยาบ",
-      helper: "คุณประหยัดเวลาได้จริง แต่จ่ายด้วยความเสี่ยงและงานแก้ท้ายเกม",
+      label: "Sloppy Speedster",
+      helper: "Saved time upfront, but paid for it with risk and late-game rework.",
     };
   }
 
   if (state.time <= 10 && state.risk >= 6) {
     return {
       label: "Fast but Fragile",
-      helper: "คุณไปถึงเส้นชัยเร็วมาก แต่โปรเจกต์ยังมีรอยร้าวที่พร้อมแตก",
+      helper: "Reached the finish line quickly, but the project is filled with cracks.",
     };
   }
 
   if (tokenSpent >= 12) {
     return {
-      label: "AI Simp",
-      helper: "คุณพึ่ง AI หนักจนทุกคำตอบต้องมีคนช่วยคัดกรองซ้ำ",
+      label: "AI Dependent",
+      helper: "Relied so heavily on AI that every answer required intensive human filtering.",
     };
   }
 
   if (failed) {
     return {
       label: "Victim of Chaos",
-      helper: "ความเร็วชนะ workflow ชั่วคราว แต่ความเสียหายตามทันตอนส่งงาน",
+      helper: "Speed defeated workflow temporarily, but the damage caught up at delivery.",
     };
   }
 
   if (state.emergencyTriggered) {
     return {
       label: "Project Survivor",
-      helper: "โปรเจกต์เกือบหลุดมือ แต่คุณยังดับไฟและพากลับเข้าเส้นทางได้",
+      helper: "Project almost derailed, but you managed to put out the fires and recover.",
     };
   }
 
   return {
     label: "Project Survivor",
-    helper: "คุณส่งงานรอดโดยยังมีพื้นที่ให้ปรับ workflow ให้คมขึ้นในรอบต่อไป",
+    helper: "Delivered the project successfully, but there's room to sharpen the workflow next time.",
   };
 }
 
@@ -1694,34 +1721,34 @@ function getWorkflowPattern({ failed, protectedEvents, riskyChoices, skillUses }
   if (failed && riskyChoices >= 2) {
     return {
       label: "Risk-heavy Run",
-      helper: "เลือกทางลัดหลายครั้งจน risk สะสมเกิน workflow จะรับไหว",
+      helper: "Took too many shortcuts; accumulated risk overwhelmed the workflow.",
     };
   }
 
   if (protectedEvents >= 2 && riskyChoices <= 1 && getTokenDebt() === 0) {
     return {
       label: "Guarded Run",
-      helper: "ใช้ guardrail และ review รับมือเหตุเสี่ยงได้ดี",
+      helper: "Used guardrails effectively to mitigate risky events without going over budget.",
     };
   }
 
   if (skillUses >= 3 && tokenSpent >= 9) {
     return {
       label: "Tool-heavy Run",
-      helper: "ใช้เครื่องมือช่วยเยอะ งานเดินเร็ว แต่ AI budget ตึง",
+      helper: "Relied heavily on AI tools. Fast progress, but AI budget was strained.",
     };
   }
 
   if (state.time <= 8 && riskyChoices >= 2) {
     return {
       label: "Fast but Fragile",
-      helper: "ไปเร็ว แต่มีความเสี่ยงซ่อนอยู่หลายจุด",
+      helper: "Fast completion, but left behind dangerous technical debt.",
     };
   }
 
   return {
     label: "Balanced Run",
-    helper: "คุมเวลา เครื่องมือ และความเสี่ยงได้ค่อนข้างสมดุล",
+    helper: "Managed time, AI tools, and risks in a relatively balanced manner.",
   };
 }
 
@@ -1922,12 +1949,12 @@ function getFinalResult() {
 
   const title = failed ? "Project Shipped With Damage" : "Project Survived";
   const summary = failed
-    ? "งานอาจดูเหมือนเสร็จ แต่ workflow ป้องกันความเสี่ยงไม่พอ ทำให้ bug/rework หลุดถึงช่วงส่งงาน"
-    : "ทีมใช้ workflow ช่วยคุม AI ได้ดีพอ โปรเจกต์ส่งได้โดยไม่พังตอนท้าย";
+    ? "The project looks done, but inadequate guardrails allowed bugs and rework to reach the delivery phase."
+    : "The team used workflow effectively to control AI risk. The project was delivered without late-stage meltdowns.";
 
   const lesson = failed
-    ? "บทเรียนหลัก: AI ช่วยให้เร็วขึ้น แต่ถ้าไม่มี Spec, Check และ Review ความเร็วจะเปลี่ยนเป็น rework"
-    : "บทเรียนหลัก: Workflow ที่ดีไม่ได้ทำให้งานช้าลงเฉย ๆ แต่มันซื้อความมั่นใจและลดความเสียหายตอนท้าย";
+    ? "Key Lesson: AI provides speed, but without Specs, Checks, and Reviews, that speed turns into rework."
+    : "Key Lesson: Good workflow doesn't slow you down; it buys confidence and minimizes late-stage damage.";
 
   const workflowScore = calculateWorkflowScore({ failed, protectedEvents, riskyChoices, skillUses, overBudget, overtime });
   const scoreTier = getScoreTier(workflowScore);
@@ -2023,12 +2050,29 @@ function reportListMarkup(label, items, emptyText) {
 
 function phaseLearningsMarkup(summaries) {
   const items = summaries.map((summary) => `${summary.phase}: ${summary.grade.label} - ${summary.focus}`);
-  return reportListMarkup("Phase Learnings", items, "ยังไม่มี phase learning ถูกบันทึก");
+  return reportListMarkup("Phase Learnings", items, "No phase learnings recorded.");
 }
 
 function randomModifiersMarkup(modifiers) {
   const items = modifiers.map((modifier) => `${modifier.phase}: ${modifier.title} (${formatRandomEffectDelta(modifier.effects)})`);
-  return reportListMarkup("Random Modifiers", items, "รอบนี้ไม่มี External Signal แทรก");
+  return reportListMarkup("Random Modifiers", items, "No external signals encountered this run.");
+}
+
+function decisionHistoryMarkup(history) {
+  if (!history || history.length === 0) return "";
+  const items = history.map((item, i) => {
+    const label = item.optionLabel || item.title || "Unknown Decision";
+    const desc = item.outcome || item.copy || "";
+    return `<li><strong>${i + 1}. ${escapeHtml(label)}</strong><br><small>${escapeHtml(desc)}</small></li>`;
+  });
+  return `
+    <article class="report-list-card decision-history-card">
+      <span class="mini-label">Play Log / Decision History</span>
+      <ul style="max-height: 200px; overflow-y: auto;">
+        ${items.join("")}
+      </ul>
+    </article>
+  `;
 }
 
 function scoreSlotMarkup(score, verdict) {
@@ -2104,8 +2148,8 @@ function renderResult() {
   const tokenTone = result.overBudget ? "danger" : getTokenResourceTone(tokenFill);
   const riskTone = getRiskTone(state.risk);
   const tokenHelper = result.overBudget
-    ? `AI budget เกิน ${result.tokenDebt}`
-    : "AI budget ยังเหลือให้คุมงาน";
+    ? `AI budget exceeded by ${result.tokenDebt}`
+    : "AI budget remained within limits.";
 
   root.innerHTML = `
     <main class="app">
@@ -2240,6 +2284,34 @@ function phaseGoalPopupMarkup() {
   `;
 }
 
+function tutorialMarkup() {
+  if (!state.showTutorial) return "";
+  const pages = [
+    { title: "Welcome to Project Survival", content: "You are a developer handling a critical project. Your choices will determine whether the project ships successfully or crashes and burns." },
+    { title: "Managing Resources", content: "Pay attention to your Resource Bar:<br><br><b>Time:</b> Runs out as you work. Overtime increases Risk.<br><b>Token:</b> Your AI Budget. Using too much reduces code Quality.<br><b>Risk:</b> If Risk reaches 100%, the project fails." },
+    { title: "Make the Right Decisions", content: "Each phase presents different challenges. You will select 3 Workflow Superpowers before starting. Use them wisely to manage your resources and protect the project." }
+  ];
+  const page = pages[state.tutorialPage];
+  
+  return `
+    <div class="hero-popup-overlay tutorial-overlay">
+      <div class="hero-popup-content tutorial-popup">
+        <div class="tutorial-header">
+          <p class="phase-tag">Tutorial ${state.tutorialPage + 1}/3</p>
+          <h2>${page.title}</h2>
+        </div>
+        <div class="tutorial-body">
+          <p>${page.content}</p>
+        </div>
+        <div class="tutorial-actions">
+          ${state.tutorialPage > 0 ? '<button class="restart tutorial-prev" type="button">Back</button>' : ''}
+          <button class="restart tutorial-next" type="button">${state.tutorialPage === 2 ? "Start Draft" : "Next"}</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 function render() {
   if (state.screen === "title") {
     renderTitle();
@@ -2272,6 +2344,11 @@ function render() {
       </div>
     `;
     root.insertAdjacentHTML("beforeend", popupHtml);
+  }
+
+  const tutorialHtml = tutorialMarkup();
+  if (tutorialHtml) {
+    root.insertAdjacentHTML("beforeend", tutorialHtml);
   }
 
   const phaseGoalPopup = phaseGoalPopupMarkup();
