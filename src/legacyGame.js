@@ -2177,27 +2177,12 @@ function renderResult() {
     : "AI budget remained within limits.";
 
   const characterLevel = Math.min(5, (state.index || 0) + 1);
-  let characterSrc = `/assets/character/lv${characterLevel}.gif`;
-  let characterFallback = `/assets/character/lv${characterLevel}.png`;
-
-  if (result.failed) {
-    if (characterLevel === 1) {
-      characterSrc = "/assets/character_fail/lv1fail.gif";
-      characterFallback = "/assets/character_fail/lv1fail.gif";
-    } else if (characterLevel === 2) {
-      characterSrc = "/assets/character_fail/lv2fail.gif";
-      characterFallback = "/assets/character_fail/2.png";
-    } else if (characterLevel === 3) {
-      characterSrc = "/assets/character_fail/lv3fail.gif";
-      characterFallback = "/assets/character_fail/lv3fail.gif";
-    } else if (characterLevel === 4) {
-      characterSrc = "/assets/character_fail/lv4fail.gif";
-      characterFallback = "/assets/character_fail/4.png";
-    } else if (characterLevel === 5) {
-      characterSrc = "/assets/character_fail/lv5fail.png";
-      characterFallback = "/assets/character_fail/lv5fail.png";
-    }
-  }
+  const characterSrc = result.failed
+    ? `/assets/character_fail/lv${characterLevel}fail.gif`
+    : `/assets/character/lv${characterLevel}.gif`;
+  const characterFallback = result.failed
+    ? `/assets/character_fail/lv${characterLevel}fail.gif`
+    : `/assets/character/lv${characterLevel}.png`;
 
   root.innerHTML = `
     <main class="app">
