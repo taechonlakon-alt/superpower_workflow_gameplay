@@ -6663,7 +6663,7 @@ body::before {
 
 /* =========================================================
    [1] GAME FEEL & INTERACTION (All Viewports)
-   Interaction สั้น แข็ง กดแล้วมีน้ำหนักแบบ Pixel Craft
+   Short, firm interactions with a solid pixel craft feel
    ========================================================= */
 
 .choice, .action-slot, .skill-card {
@@ -6697,7 +6697,7 @@ body::before {
 
 /* =========================================================
    [2] PRESSURE STATES & VISUAL FEEDBACK
-   ใช้ State Selector ท้ายไฟล์ป้องกันการถูก Override
+   Use state selectors at the end of the file to prevent overrides
    ========================================================= */
 
 /* Shell Pressure */
@@ -6720,7 +6720,7 @@ body::before {
 .resource-meter--danger .resource-meter__track { background-color: #4a0000; }
 .resource-meter--danger .resource-meter__fill { background-color: #ff3333; }
 
-/* Finite Shake/Pulse Animation สำหรับ Danger State (สั่น 2 รอบแล้วหยุด) */
+/* Finite Shake/Pulse Animation for Danger State (shakes twice then stops) */
 @keyframes finiteShake {
   0%, 100% { transform: translateX(0); }
   25% { transform: translateX(-4px); }
@@ -6731,7 +6731,7 @@ body::before {
   animation: finiteShake 250ms steps(4) 2;
 }
 
-/* เคารพผู้ใช้ที่ตั้งค่า Reduced Motion */
+/* Respect users who prefer reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .choice, .action-slot, .skill-card, .resource-meter--danger {
     transition: none;

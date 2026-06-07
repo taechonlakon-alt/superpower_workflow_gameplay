@@ -431,15 +431,15 @@ function maybeTriggerMicroEvent() {
       id: "context_drift",
       title: "AI Context Drift",
       icon: "AI",
-      tags: ["AI ล้า", "ต้องคัดกรอง", "risk เพิ่ม"],
-      tradeoff: "ใช้ AI หนักจนคำตอบเริ่มต้องตรวจละเอียดขึ้น",
-      outcome: "AI เริ่มย้ำ pattern เดิมและเสนอข้อความที่ดูดีแต่ไม่ค่อยตรงโจทย์ลูกค้า",
-      lesson: "AI budget ไม่ใช่คะแนน ยิ่งใช้หนักยิ่งต้องมีระบบตรวจ",
+      tags: ["AI Fatigue", "Needs Filtering", "Risk Increase"],
+      tradeoff: "Using AI heavily makes answers require closer scrutiny.",
+      outcome: "AI starts repeating the same patterns and proposing good-looking but off-brief text.",
+      lesson: "AI budget is not a score. The more you use it, the more verification systems you need.",
       effects: { time: 0, token: 0, risk: 1, quality: -1 },
       reaction: {
         tone: "warn",
-        title: "AI เริ่ม drift จากโจทย์",
-        copy: "คำตอบยังดูมีเหตุผล แต่ทีมต้องใช้แรงคัดกรองมากขึ้นเพราะบริบทเริ่มล้น",
+        title: "AI starts drifting from the brief",
+        copy: "Answers still look reasonable, but the team needs more effort to filter them as context overflows.",
       },
     });
   } else if (state.risk >= 5) {
@@ -447,15 +447,15 @@ function maybeTriggerMicroEvent() {
       id: "client_trust_shake",
       title: "Client Trust Shakes",
       icon: "!",
-      tags: ["ลูกค้ากังวล", "ความเชื่อมั่นสั่น", "ต้องมีหลักฐาน"],
-      tradeoff: "ความเสี่ยงสะสมทำให้ทุกคำตอบต้องมีหลักฐานรองรับ",
-      outcome: "ลูกค้าเริ่มถามว่าทำไมข้อความบนหน้าเว็บไม่ตรงกับฟีเจอร์ที่คุยกันไว้",
-      lesson: "ความเสี่ยงที่ไม่ถูกจัดการจะกลายเป็นคำถามเรื่องความน่าเชื่อถือ",
+      tags: ["Client Anxious", "Trust Shaken", "Needs Evidence"],
+      tradeoff: "Accumulated risk forces every answer to be backed by solid evidence.",
+      outcome: "Client starts questioning why the website copy doesn't match the agreed features.",
+      lesson: "Unmanaged risk inevitably leads to credibility questions.",
       effects: { time: 0, token: 0, risk: 1, quality: 0 },
       reaction: {
         tone: "danger",
-        title: "Trust เริ่มแตกร้าว",
-        copy: "ทีมยังเดินต่อได้ แต่ลูกค้าเริ่มมองหาหลักฐานว่าเว็บนี้พูดความจริง",
+        title: "Trust begins to crack",
+        copy: "The team can still move forward, but the client starts looking for proof that this website is telling the truth.",
       },
     });
   } else if (state.time >= 14) {
@@ -463,15 +463,15 @@ function maybeTriggerMicroEvent() {
       id: "deadline_squeeze",
       title: "Deadline Squeeze",
       icon: "CLK",
-      tags: ["เวลาเริ่มบีบ", "ตัดสินใจยากขึ้น", "risk เพิ่ม"],
-      tradeoff: "เวลาที่ใช้ไปทำให้ทางเลือกช่วงท้ายแคบลง",
-      outcome: "ทีมเริ่มตัด scope บางอย่างเพื่อให้ทัน demo ทำให้ review ต้องคมกว่าเดิม",
-      lesson: "เวลาที่ใช้กับ workflow ต้องซื้อความมั่นใจกลับมา ไม่ใช่แค่เพิ่มพิธีกรรม",
+      tags: ["Time Squeeze", "Harder Decisions", "Risk Increase"],
+      tradeoff: "Time spent narrows down your late-game options.",
+      outcome: "The team starts cutting scope to meet the demo deadline, requiring sharper reviews.",
+      lesson: "Time spent on workflow should buy back confidence, not just add ritualistic steps.",
       effects: { time: 0, token: 0, risk: 1, quality: 0 },
       reaction: {
         tone: "warn",
-        title: "Deadline เริ่มบีบ decision",
-        copy: "ทางเลือกช่วงท้ายเริ่มแคบลง ทีมต้องเลือกสิ่งที่ลดความเสี่ยงจริง ๆ",
+        title: "Deadline starts squeezing decisions",
+        copy: "Late-game options are narrowing. The team must choose options that truly reduce risk.",
       },
     });
   }
@@ -587,26 +587,26 @@ function sumEffects(entries) {
 
 function getPhaseFocus({ riskDelta, tokenDelta, timeDelta, qualityDelta, riskyChoices, counteredEvents, problems }) {
   if (riskDelta >= 4 || riskyChoices >= 2) {
-    return "โฟกัส Spec, guardrail และ Review ให้เร็วขึ้นก่อน risk สะสมเกินควบคุม";
+    return "Focus on Spec, guardrails, and Reviews faster before risk accumulates out of control.";
   }
 
   if (qualityDelta < 0) {
-    return "โฟกัส acceptance criteria และ test/checklist เพื่อไม่ให้งานดูเสร็จแต่คุณภาพถอย";
+    return "Focus on acceptance criteria and tests/checklists so work doesn't look finished while quality drops.";
   }
 
   if (tokenDelta >= 6) {
-    return "โฟกัสการใช้ AI แบบมีขอบเขต ลดการ reprompt และเพิ่มเครื่องมือคัดกรอง";
+    return "Focus on bounded AI usage, reducing reprompt loops, and adding filtering tools.";
   }
 
   if (timeDelta >= 5) {
-    return "โฟกัสแตกงานให้เล็กและเลือก workflow ที่ซื้อความมั่นใจจริง ไม่ใช่เพิ่มขั้นตอนลอย ๆ";
+    return "Focus on breaking down tasks and choosing workflows that buy back real confidence rather than adding arbitrary steps.";
   }
 
   if (problems.length && counteredEvents === 0) {
-    return "โฟกัสเลือก Superpower ที่ counter edge case ของ phase นี้ให้ตรงจังหวะ";
+    return "Focus on selecting the right Superpower to counter the edge cases of this phase at the right moment.";
   }
 
-  return "รักษาจังหวะนี้ไว้ แล้วใช้ Review/Scanner ตรวจหลักฐานก่อนส่งต่อ";
+  return "Maintain this pace and use Review/Scanner to verify evidence before handoff.";
 }
 
 function getPhaseGrade(score) {
@@ -615,7 +615,7 @@ function getPhaseGrade(score) {
       label: "A",
       title: "Phase Cleared",
       tone: "safe",
-      helper: "เล่น phase นี้แข็งแรง ใช้ workflow ช่วยลดความเสี่ยงได้ชัด",
+      helper: "Cleared this phase cleanly, using workflow to clearly reduce risk.",
     };
   }
 
@@ -624,7 +624,7 @@ function getPhaseGrade(score) {
       label: "B",
       title: "Solid Control",
       tone: "safe",
-      helper: "คุม phase ได้ดี แม้ยังมีค่าใช้จ่ายด้านเวลา หรือ AI budget อยู่บ้าง",
+      helper: "Controlled the phase well, though with some time or AI budget costs.",
     };
   }
 
@@ -633,7 +633,7 @@ function getPhaseGrade(score) {
       label: "C",
       title: "Working but Fragile",
       tone: "warn",
-      helper: "phase นี้เดินต่อได้ แต่ยังมี risk หรือ quality debt ซ่อนอยู่",
+      helper: "This phase keeps moving, but has hidden risk or quality debt.",
     };
   }
 
@@ -642,7 +642,7 @@ function getPhaseGrade(score) {
       label: "D",
       title: "Barely Controlled",
       tone: "warn",
-      helper: "รอดแบบตึงมือ ทางลัดเริ่มกินความน่าเชื่อถือของ workflow",
+      helper: "Barely survived; shortcuts are starting to erode workflow credibility.",
     };
   }
 
@@ -650,7 +650,7 @@ function getPhaseGrade(score) {
     label: "F",
     title: "Phase Breakdown",
     tone: "danger",
-    helper: "phase นี้เสียหายหนัก ต้องกลับไปตั้ง guardrail ก่อนเร่งงานต่อ",
+    helper: "Severe damage in this phase; must re-establish guardrails before accelerating further.",
   };
 }
 
@@ -1175,7 +1175,7 @@ function getResourceBarState() {
       label: "Time",
       value: timeRemaining,
       fill: timeFill,
-      helper: "เวลาเหลือ",
+      helper: "Time remaining",
       tone: getTimeResourceTone(timeFill),
     },
     {
@@ -1183,7 +1183,7 @@ function getResourceBarState() {
       label: "Token",
       value: tokenRemaining,
       fill: tokenFill,
-      helper: "AI budget เหลือ",
+      helper: "AI budget remaining",
       tone: getTokenResourceTone(tokenFill),
     },
     {
@@ -1850,16 +1850,16 @@ function getWorkflowPattern({ failed, protectedEvents, riskyChoices, skillUses }
 function getScoreVerdict(score, failed, pressure = {}) {
   const tier = getScoreTier(score);
   if (pressure.overBudget && pressure.overtime) {
-    return "Workflow พอพาโปรเจกต์รอดได้ แต่ใช้ทั้งเวลาและ AI budget เกินแผน ควรลดการ reprompt และเลือก guardrail ที่คุ้มกว่า";
+    return "Workflow kept the project afloat, but spent both time and AI budget over plan. Try reducing reprompts and selecting more cost-effective guardrails.";
   }
   if (pressure.overBudget) {
-    return "คุม risk ได้บางส่วน แต่ใช้ AI หนักเกินไป ควรกำหนดขอบเขต prompt และใช้ tool เฉพาะจุด";
+    return "Mitigated some risk, but used AI too heavily. Bound your prompts and apply tools only where necessary.";
   }
   if (pressure.overtime) {
-    return "คุณภาพงานดีขึ้น แต่ deadline ถูกใช้เกินแผน ควรตัด scope และ review ให้เร็วขึ้น";
+    return "Work quality improved, but deadline was exceeded. Try cutting scope and performing reviews faster.";
   }
   if (state.risk >= game.caps.risk * 0.8) {
-    return "Risk ยังสูงเกินไป ควรกลับไปย้ำ Spec, guardrail และ Review ก่อนส่งงาน";
+    return "Risk remains too high. Go back to reinforce Specs, guardrails, and Reviews before shipping.";
   }
   if (failed && score <= 50) return tier.helper;
   return tier.helper;
@@ -1871,8 +1871,8 @@ function getScoreTier(score) {
       label: "Workflow Breakdown",
       range: "0-30",
       tone: "danger",
-      helper: "แย่ตรง risk หรือ quality พังจน workflow รับไม่ทัน",
-      focus: "ควรโฟกัส Spec + Review ก่อนใช้ AI เร่งงานต่อ",
+      helper: "Poor control; risk or quality failures overwhelmed the workflow.",
+      focus: "Should focus on Spec + Review before using AI to accelerate further.",
     };
   }
 
@@ -1881,8 +1881,8 @@ function getScoreTier(score) {
       label: "Barely Survived",
       range: "31-50",
       tone: "danger",
-      helper: "รอดแบบมีแผล ทางลัดเริ่มชนะ workflow หลายจุด",
-      focus: "ควรลดทางลัด เพิ่ม guardrail และตรวจเทียบ requirement ให้เร็วขึ้น",
+      helper: "Survived with scars; shortcuts won over workflow in several places.",
+      focus: "Should reduce shortcuts, add guardrails, and crosscheck requirements faster.",
     };
   }
 
@@ -1891,8 +1891,8 @@ function getScoreTier(score) {
       label: "Working but Fragile",
       range: "51-70",
       tone: "warn",
-      helper: "เริ่มคุมเกมได้ แต่เวลา, token หรือ risk ยังไม่สมดุล",
-      focus: "ควรใช้ AI แบบมีขอบเขต และเลือก tool/check ให้ตรงปัญหา",
+      helper: "Starting to gain control, but time, tokens, or risk are still unbalanced.",
+      focus: "Should use bounded AI prompts and choose the right tools/checks for the problem.",
     };
   }
 
@@ -1901,8 +1901,8 @@ function getScoreTier(score) {
       label: "Solid Workflow",
       range: "71-85",
       tone: "safe",
-      helper: "เล่นดี ใช้ workflow ถูกจังหวะ โปรเจกต์ไม่หลุดมือ",
-      focus: "ควร refine tool usage และเก็บหลักฐาน review ให้แน่นขึ้น",
+      helper: "Well played; used workflow at the right moments, keeping the project under control.",
+      focus: "Should refine tool usage and gather stronger review evidence.",
     };
   }
 
@@ -1910,8 +1910,8 @@ function getScoreTier(score) {
     label: "Workflow Master",
     range: "86-100",
     tone: "safe",
-    helper: "เก่งมาก คุม AI, risk, review และ delivery ได้ครบ",
-    focus: "รักษา workflow นี้ไว้ แล้วใช้เป็น baseline สำหรับ stage ที่ยากขึ้น",
+    helper: "Excellent; fully controlled AI, risk, review, and delivery.",
+    focus: "Maintain this workflow and use it as a baseline for harder stages.",
   };
 }
 
@@ -2292,13 +2292,13 @@ function renderResult() {
                     icon: "CLK",
                     label: "Time",
                     value: `${state.time} / ${game.caps.time}`,
-                    helper: result.overtime ? "deadline ถูกใช้เกินแผน" : "ยังคุมเวลาได้",
+                    helper: result.overtime ? "Deadline exceeded plan" : "Time kept under control",
                     tone: timeTone,
                   })}
                   ${reportSignalMarkup({
-                  icon: "AI",
-                  label: "Token Left",
-                  value: `${result.tokenRemaining} / ${game.caps.token}`,
+                    icon: "AI",
+                    label: "Token Left",
+                    value: `${result.tokenRemaining} / ${game.caps.token}`,
                     helper: tokenHelper,
                     tone: tokenTone,
                   })}
@@ -2306,22 +2306,22 @@ function renderResult() {
                     icon: "RISK",
                     label: "Risk",
                     value: `${state.risk} / ${game.caps.risk}`,
-                    helper: state.risk >= 8 ? "โปรเจกต์เปราะบาง" : "ความเสี่ยงยังไม่แตก",
+                    helper: state.risk >= 8 ? "Project is fragile" : "Risks kept under control",
                     tone: riskTone,
                   })}
                 </div>
 
                 <div class="report-evidence-row mission-report__evidence">
-                  ${reportEvidenceMarkup("Guardrails", result.protectedEvents, "จำนวน event ที่ workflow กันไว้ได้", result.protectedEvents > 0 ? "safe" : "neutral")}
-                  ${reportEvidenceMarkup("Risky Calls", result.riskyChoices, "จำนวนทางลัดที่เพิ่มความเสี่ยง", result.riskyChoices >= 2 ? "danger" : "neutral")}
-                  ${reportEvidenceMarkup("Tool Uses", result.skillUses, "จำนวนครั้งที่ใช้ skill ช่วยตัดสินใจ", result.skillUses >= 2 ? "safe" : "neutral")}
+                  ${reportEvidenceMarkup("Guardrails", result.protectedEvents, "Number of events prevented by workflow", result.protectedEvents > 0 ? "safe" : "neutral")}
+                  ${reportEvidenceMarkup("Risky Calls", result.riskyChoices, "Number of shortcuts that increased risk", result.riskyChoices >= 2 ? "danger" : "neutral")}
+                  ${reportEvidenceMarkup("Tool Uses", result.skillUses, "Number of times a superpower was used to make decisions", result.skillUses >= 2 ? "safe" : "neutral")}
                 </div>
 
                 <div class="report-lists">
-                  ${reportListMarkup("Drafted Superpowers", result.draftedSuperpowers, "ไม่ได้เลือก Superpower")}
-                  ${reportListMarkup("Superpowers Used", result.superpowersUsed, "ยังไม่ได้ใช้ Superpower ที่เลือก")}
-                  ${reportListMarkup("Problems Triggered", result.problemsTriggered, "ไม่มีปัญหาหลักถูก trigger")}
-                  ${reportListMarkup("Score Limits", result.scoreCeilingReasons, "ไม่มี score ceiling เพิ่มเติม")}
+                  ${reportListMarkup("Drafted Superpowers", result.draftedSuperpowers, "No superpowers drafted")}
+                  ${reportListMarkup("Superpowers Used", result.superpowersUsed, "Superpowers selected but not used")}
+                  ${reportListMarkup("Problems Triggered", result.problemsTriggered, "No major problems triggered")}
+                  ${reportListMarkup("Score Limits", result.scoreCeilingReasons, "No additional score ceiling reasons")}
                   ${randomModifiersMarkup(result.randomModifiers)}
                   ${phaseLearningsMarkup(result.phaseSummaries)}
                 </div>
@@ -2336,7 +2336,7 @@ function renderResult() {
                       <span>${index + 1}</span>
                       <div>
                         <h4>${item.phase}: ${item.optionLabel}</h4>
-                        <p>${item.isRandomModifier ? "Random modifier" : item.isMicroEvent ? "สัญญาณโปรเจกต์" : item.countered ? "คุม Event ได้" : "เดินหน้าต่อ แต่มีความเสี่ยงซ่อนอยู่"} — ${item.lesson}</p>
+                        <p>${item.isRandomModifier ? "Random modifier" : item.isMicroEvent ? "Project Signal" : item.countered ? "Event Controlled" : "Moved forward but with hidden risk"} — ${item.lesson}</p>
                       </div>
                     </article>
                   `,
@@ -2377,14 +2377,14 @@ function phaseGoalPopupMarkup() {
         ${guidance.length
           ? `
             <div class="phase-goal-popup__guidance">
-              <p class="mini-label">คำแนะนำ</p>
+              <p class="mini-label">Guidance</p>
               <ol>
                 ${guidance.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
               </ol>
             </div>
           `
           : ""}
-        <button class="restart phase-goal-start" type="button">เริ่มต่อไป</button>
+        <button class="restart phase-goal-start" type="button">Continue</button>
       </section>
     </div>
   `;
