@@ -9,10 +9,15 @@ const starterWorkflowSkills = [];
 const EMERGENCY_RISK_THRESHOLD = 8;
 let audioContext = null;
 let soundEnabled = true;
-let state = createInitialState();
+let state = null;
+function getCharacterInlineStyle() {
+  if (!state || !state.characterPos) return "cursor: grab; touch-action: none; pointer-events: auto;";
+  return `position: fixed; left: ${state.characterPos.x}px; top: ${state.characterPos.y}px; z-index: 9999; margin: 0; transform: none; transition: none; cursor: grab; touch-action: none; pointer-events: auto;`;
+}
 
 function createInitialState() {
   return {
+    characterPos: null,
     showTutorial: false,
     tutorialPage: 0,
     showHeroPopup: false,
@@ -757,6 +762,7 @@ function chooseOption(optionId) {
 
 function advanceAfterNormalDecision({ allowRandomModifier = true, allowMicroEvent = true, allowPhaseIssue = true, lastResult = null } = {}) {
   if (state.risk >= game.caps.risk) {
+    state.characterPos = null;
     state.screen = "result";
     state.lastSignalTone = getProjectSignalTone();
     render();
@@ -775,6 +781,7 @@ function advanceAfterNormalDecision({ allowRandomModifier = true, allowMicroEven
   const step = getCurrentStep();
 
   if (!step) {
+    state.characterPos = null;
     state.screen = "result";
     state.lastSignalTone = getProjectSignalTone();
     render();
@@ -836,6 +843,7 @@ function advanceAfterNormalDecision({ allowRandomModifier = true, allowMicroEven
 }
 
 function triggerEvolutionTransition(oldLevel, newLevel) {
+  state.characterPos = null;
   // Hide UI elements to focus on the cat
   const uiElements = document.querySelectorAll('.phase-container, .phasebar, .resolution-panel, .start-board');
   uiElements.forEach(el => {
@@ -1490,8 +1498,8 @@ function heroMarkup() {
         <span class="cloud cloud--two"></span>
       </div>
       <div class="start-board">
-        <div class="start-character" aria-hidden="true">
-          <img src="/assets/character/lv1.gif" alt="Hero Lv1" class="hero-character-img" onerror="this.onerror=null; this.src='/assets/character/lv1.png';" />
+        <div class="start-character" aria-hidden="true" style="${getCharacterInlineStyle()}">
+          <img src="/assets/character/lv1.gif" alt="Hero Lv1" class="hero-character-img" draggable="false" onerror="this.onerror=null; this.src='/assets/character/lv1.png';" />
         </div>
         <div class="start-emblem">${titleGlyphMarkup()}</div>
         <p class="start-kicker">${lang.projectSurvivalGame}</p>
@@ -1664,8 +1672,8 @@ function renderStageSelect() {
   const lang = i18n[currentLang];
   root.innerHTML = `
     <main class="app">
-      <div class="phase-character" aria-hidden="true">
-        <img src="/assets/character/lv1.gif" alt="Hero" class="phase-character-img" onerror="this.onerror=null; this.src='/assets/character/lv1.png';" />
+      <div class="phase-character" aria-hidden="true" style="${getCharacterInlineStyle()}">
+        <img src="/assets/character/lv1.gif" alt="Hero" class="phase-character-img" draggable="false" onerror="this.onerror=null; this.src='/assets/character/lv1.png';" />
       </div>
       <section class="${shellClass()}">
         <section class="phasebar" style="display: flex; align-items: center; justify-content: space-between;">
@@ -1699,8 +1707,8 @@ function renderSetup() {
   const characterLevel = Math.min(5, (state.index || 0) + 1);
   root.innerHTML = `
     <main class="app">
-      <div class="phase-character" aria-hidden="true">
-        <img src="/assets/character/lv${characterLevel}.gif" alt="Hero Lv${characterLevel}" class="phase-character-img" onerror="this.onerror=null; this.src='/assets/character/lv${characterLevel}.png';" />
+      <div class="phase-character" aria-hidden="true" style="${getCharacterInlineStyle()}">
+        <img src="/assets/character/lv${characterLevel}.gif" alt="Hero Lv${characterLevel}" class="phase-character-img" draggable="false" onerror="this.onerror=null; this.src='/assets/character/lv${characterLevel}.png';" />
       </div>
       <section class="${shellClass()}">
         <section class="phasebar" style="display: flex; align-items: center; justify-content: space-between;">
@@ -1796,8 +1804,8 @@ function renderStep(step, isEmergency = false) {
 
   root.innerHTML = `
     <main class="app">
-      <div class="phase-character" aria-hidden="true">
-        <img src="${characterSrc}" alt="Hero Lv${characterLevel}" class="phase-character-img" onerror="this.onerror=null; this.src='${characterFallback}';" />
+      <div class="phase-character" aria-hidden="true" style="${getCharacterInlineStyle()}">
+        <img src="${characterSrc}" alt="Hero Lv${characterLevel}" class="phase-character-img" draggable="false" onerror="this.onerror=null; this.src='${characterFallback}';" />
       </div>
       <section class="${shellClass()}">
         <section class="phasebar" style="display: flex; align-items: center; justify-content: space-between;">
@@ -1888,8 +1896,8 @@ function renderResolution() {
 
   root.innerHTML = `
     <main class="app">
-      <div class="phase-character" aria-hidden="true">
-        <img src="${characterSrc}" alt="Hero Lv${characterLevel}" class="phase-character-img" onerror="this.onerror=null; this.src='${characterFallback}';" />
+      <div class="phase-character" aria-hidden="true" style="${getCharacterInlineStyle()}">
+        <img src="${characterSrc}" alt="Hero Lv${characterLevel}" class="phase-character-img" draggable="false" onerror="this.onerror=null; this.src='${characterFallback}';" />
       </div>
       <section class="${shellClass()}">
         <section class="phasebar" style="display: flex; align-items: center; justify-content: space-between;">
@@ -2494,8 +2502,8 @@ function renderResult() {
 
   root.innerHTML = `
     <main class="app">
-      <div class="phase-character" aria-hidden="true">
-        <img src="${characterSrc}" alt="Hero Lv${characterLevel}" class="phase-character-img" onerror="this.onerror=null; this.src='${characterFallback}';" />
+      <div class="phase-character" aria-hidden="true" style="${getCharacterInlineStyle()}">
+        <img src="${characterSrc}" alt="Hero Lv${characterLevel}" class="phase-character-img" draggable="false" onerror="this.onerror=null; this.src='${characterFallback}';" />
       </div>
       <section class="${shellClass()}">
         <section class="phasebar" style="display: flex; align-items: center; justify-content: space-between;">
@@ -2634,7 +2642,7 @@ function tutorialMarkup() {
   const pages = currentLang === 'th' ? [
     { title: "ยินดีต้อนรับสู่ Project Survival", content: "คุณคือผู้พัฒนาที่ต้องรับผิดชอบโปรเจกต์สำคัญ การตัดสินใจของคุณจะชี้ชะตาว่าโปรเจกต์นี้จะรอดหรือจะร่วง" },
     { title: "บริหารจัดการทรัพยากร", content: "สังเกตแถบสถานะของคุณให้ดี:<br><br><b>เวลา (Time):</b> จะลดลงเมื่อคุณทำงาน หากใช้เวลาเกินกำหนด ความเสี่ยงจะเพิ่มขึ้น<br><b>Token:</b> งบประมาณ AI ของคุณ หากใช้มากเกินไป คุณภาพโค้ดจะแย่ลง<br><b>ความเสี่ยง (Risk):</b> หากความเสี่ยงถึง 100% โปรเจกต์จะล่มทันที" },
-    { title: "ตัดสินใจให้ถูกต้อง", content: "แต่ละเฟสจะมีความท้าทายที่แตกต่างกัน คุณจะต้องเลือก 3 Workflow Superpowers ก่อนเริ่มงาน จงใช้มันอย่างชาญฉลาดเพื่อบริหารทรัพยากรและปกป้องโปรเจกต์ของคุณ" }
+    { title: "ตัดสินใจให้ถูกต้อง", content: "แต่ละเฟสจะมีความท้าทายที่แตกต่างกัน คุณจะต้องเลือก 3 Workflow Superpowers ก่อนเริ่มงาน จงใช้มันอย่างฉลาดเพื่อบริหารทรัพยากรและปกป้องโปรเจกต์ของคุณ" }
   ] : [
     { title: "Welcome to Project Survival", content: "You are a developer handling a critical project. Your choices will determine whether the project ships successfully or crashes and burns." },
     { title: "Managing Resources", content: "Pay attention to your Resource Bar:<br><br><b>Time:</b> Runs out as you work. Overtime increases Risk.<br><b>Token:</b> Your AI Budget. Using too much reduces code Quality.<br><b>Risk:</b> If Risk reaches 100%, the project fails." },
@@ -2740,6 +2748,7 @@ function renderEvolution() {
   }, 2000); // 2s of shaking before flash
 
   root.querySelector('.evolution-next-btn')?.addEventListener('click', () => {
+    state.characterPos = null;
     state.screen = state.index >= game.steps.length ? "result" : "step";
     render();
   });
@@ -2765,6 +2774,7 @@ function render() {
   } else {
     const step = getCurrentStep();
     if (!step) {
+      state.characterPos = null;
       state.screen = "result";
       renderResult();
     } else {
@@ -2799,10 +2809,86 @@ function render() {
 export function mountLegacyGame(container) {
   root = container;
   state = createInitialState();
+  
+  let isDraggingCat = false;
+  let catDragOffsetX = 0;
+  let catDragOffsetY = 0;
+
+  const onPointerDown = (e) => {
+    const imgTarget = e.target;
+    if (imgTarget.classList.contains("phase-character-img") || imgTarget.classList.contains("hero-character-img")) {
+      isDraggingCat = true;
+      const target = imgTarget.parentElement;
+      const rect = target.getBoundingClientRect();
+      
+      if (!state.characterPos) {
+        state.characterPos = { x: rect.left, y: rect.top };
+      }
+      
+      catDragOffsetX = e.clientX - state.characterPos.x;
+      catDragOffsetY = e.clientY - state.characterPos.y;
+      target.setPointerCapture(e.pointerId);
+      
+      target.style.position = "fixed";
+      target.style.left = state.characterPos.x + "px";
+      target.style.top = state.characterPos.y + "px";
+      target.style.zIndex = "9999";
+      target.style.margin = "0";
+      target.style.transform = "none";
+      target.style.transition = "none";
+      target.style.cursor = "grabbing";
+      document.body.style.cursor = "grabbing";
+    }
+  };
+
+  const onPointerMove = (e) => {
+    if (isDraggingCat) {
+      let newX = e.clientX - catDragOffsetX;
+      let newY = e.clientY - catDragOffsetY;
+      
+      state.characterPos = { x: newX, y: newY };
+      
+      const catEls = document.querySelectorAll(".phase-character, .start-character");
+      catEls.forEach(el => {
+        el.style.position = "fixed";
+        el.style.left = newX + "px";
+        el.style.top = newY + "px";
+        el.style.zIndex = "9999";
+        el.style.margin = "0";
+        el.style.transform = "none";
+        el.style.transition = "none";
+        el.style.cursor = "grabbing";
+      });
+    }
+  };
+
+  const onPointerUp = (e) => {
+    if (isDraggingCat) {
+      isDraggingCat = false;
+      document.body.style.cursor = "";
+      const target = e.target;
+      if (target.releasePointerCapture) {
+        target.releasePointerCapture(e.pointerId);
+      }
+      const catEls = document.querySelectorAll(".phase-character, .start-character");
+      catEls.forEach(el => {
+        el.style.cursor = "grab";
+      });
+    }
+  };
+
+  document.addEventListener("pointerdown", onPointerDown);
+  document.addEventListener("pointermove", onPointerMove);
+  document.addEventListener("pointerup", onPointerUp);
+
   root.addEventListener("click", handleRootClick);
   render();
 
   return () => {
+    document.removeEventListener("pointerdown", onPointerDown);
+    document.removeEventListener("pointermove", onPointerMove);
+    document.removeEventListener("pointerup", onPointerUp);
+
     if (root === container) {
       root.removeEventListener("click", handleRootClick);
       root.innerHTML = "";

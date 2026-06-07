@@ -5435,6 +5435,7 @@ body::before {
   width: auto;
   object-fit: contain;
   filter: drop-shadow(0 15px 15px rgba(0, 0, 0, 0.4));
+  pointer-events: auto;
 }
 
 .phase-character {
@@ -5451,6 +5452,7 @@ body::before {
   width: auto;
   object-fit: contain;
   filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.6));
+  pointer-events: auto;
 }
 
 @media (max-width: 1439px) {
