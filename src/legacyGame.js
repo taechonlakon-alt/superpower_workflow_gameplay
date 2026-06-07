@@ -756,6 +756,13 @@ function chooseOption(optionId) {
 }
 
 function advanceAfterNormalDecision({ allowRandomModifier = true, allowMicroEvent = true, allowPhaseIssue = true, lastResult = null } = {}) {
+  if (state.risk >= game.caps.risk) {
+    state.screen = "result";
+    state.lastSignalTone = getProjectSignalTone();
+    render();
+    return;
+  }
+
   if (state.risk >= EMERGENCY_RISK_THRESHOLD && !state.emergencyTriggered) {
     state.emergencyTriggered = true;
     state.resolution = null;
@@ -1037,6 +1044,121 @@ function playRestartSound() {
   beep({ frequency: 680, duration: 0.08, volume: 0.025, delay: 0.05 });
 }
 
+let bgmInterval = null;
+let bgmNextNoteTime = 0;
+let bgmCurrentStep = 0;
+let bgmStarted = false;
+const BGM_TEMPO = 140; // BPM
+const SECONDS_PER_BEAT = 60 / BGM_TEMPO;
+const NOTE_LENGTH = SECONDS_PER_BEAT / 2; // 8th notes
+
+// C Major / A Minor upbeat progression
+const bgmNotes = [
+  261.63, 329.63, 392.00, 523.25, 392.00, 329.63, 261.63, 392.00,
+  349.23, 440.00, 523.25, 698.46, 523.25, 440.00, 349.23, 523.25,
+  392.00, 493.88, 587.33, 783.99, 587.33, 493.88, 392.00, 587.33,
+  440.00, 523.25, 659.25, 880.00, 659.25, 523.25, 440.00, 659.25
+];
+
+const bgmBass = [
+  130.81, 130.81, 130.81, 130.81,
+  174.61, 174.61, 174.61, 174.61,
+  196.00, 196.00, 196.00, 196.00,
+  220.00, 220.00, 220.00, 220.00
+];
+
+function scheduleBGM() {
+  const ctx = ensureAudio();
+  if (!ctx || !soundEnabled) {
+    if (bgmInterval) {
+      clearInterval(bgmInterval);
+      bgmInterval = null;
+    }
+    return;
+  }
+
+  while (bgmNextNoteTime < ctx.currentTime + 0.1) {
+    const freq = bgmNotes[bgmCurrentStep % bgmNotes.length];
+    
+    // Melody
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "square";
+    osc.frequency.setValueAtTime(freq, bgmNextNoteTime);
+    gain.gain.setValueAtTime(0.0001, bgmNextNoteTime);
+    gain.gain.linearRampToValueAtTime(0.015, bgmNextNoteTime + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, bgmNextNoteTime + NOTE_LENGTH - 0.02);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(bgmNextNoteTime);
+    osc.stop(bgmNextNoteTime + NOTE_LENGTH);
+
+    // Bass
+    if (bgmCurrentStep % 2 === 0) {
+      const bassFreq = bgmBass[Math.floor((bgmCurrentStep % 32) / 2)];
+      const bOsc = ctx.createOscillator();
+      const bGain = ctx.createGain();
+      bOsc.type = "sawtooth";
+      bOsc.frequency.setValueAtTime(bassFreq, bgmNextNoteTime);
+      
+      const filter = ctx.createBiquadFilter();
+      filter.type = "lowpass";
+      filter.frequency.value = 400;
+      
+      bGain.gain.setValueAtTime(0.0001, bgmNextNoteTime);
+      bGain.gain.linearRampToValueAtTime(0.025, bgmNextNoteTime + 0.01);
+      bGain.gain.exponentialRampToValueAtTime(0.0001, bgmNextNoteTime + (NOTE_LENGTH * 2) - 0.02);
+      
+      bOsc.connect(filter);
+      filter.connect(bGain);
+      bGain.connect(ctx.destination);
+      bOsc.start(bgmNextNoteTime);
+      bOsc.stop(bgmNextNoteTime + (NOTE_LENGTH * 2));
+    }
+
+    bgmNextNoteTime += NOTE_LENGTH;
+    bgmCurrentStep++;
+  }
+}
+
+function startBGM() {
+  if (!soundEnabled) return;
+  const ctx = ensureAudio();
+  if (!ctx) return;
+  
+  if (!bgmInterval) {
+    bgmNextNoteTime = ctx.currentTime + 0.05;
+    bgmCurrentStep = 0;
+    bgmInterval = setInterval(scheduleBGM, 25);
+  }
+}
+
+function stopBGM() {
+  if (bgmInterval) {
+    clearInterval(bgmInterval);
+    bgmInterval = null;
+  }
+}
+
+function playHoverSound() {
+  if (!soundEnabled) return;
+  beep({ frequency: 800, duration: 0.02, volume: 0.015, type: "sine" });
+}
+
+function playClickSound() {
+  if (!soundEnabled) return;
+  beep({ frequency: 600, duration: 0.04, volume: 0.025, type: "square" });
+  beep({ frequency: 800, duration: 0.04, volume: 0.02, delay: 0.02, type: "square" });
+}
+
+document.addEventListener("mouseover", (event) => {
+  const target = event.target;
+  if (!(target instanceof Element)) return;
+  if (target.closest("button, .choice, .stage-card, .skill-card, .superpower-hand__card, .phase-goal-start, .lang-btn")) {
+    playHoverSound();
+  }
+});
+
 function soundButtonMarkup() {
   return `
     <button class="sound-toggle ${soundEnabled ? "on" : "off"}" type="button" aria-label="Toggle sound">
@@ -1047,8 +1169,18 @@ function soundButtonMarkup() {
 
 
 function handleRootClick(event) {
+  if (!bgmStarted && soundEnabled) {
+    bgmStarted = true;
+    startBGM();
+  }
+
   const target = event.target;
   if (!(target instanceof Element) || !root?.contains(target)) return;
+
+  const isInteractive = target.closest("button, .choice, .stage-card, .skill-card, .superpower-hand__card, .phase-goal-start, .lang-btn");
+  if (isInteractive && !target.closest(".sound-toggle")) {
+    playClickSound();
+  }
 
   const langBtn = target.closest(".lang-btn");
   if (langBtn) {
@@ -1080,7 +1212,13 @@ function handleRootClick(event) {
   const soundButton = target.closest(".sound-toggle");
   if (soundButton) {
     soundEnabled = !soundEnabled;
-    if (soundEnabled) beep({ frequency: 640, duration: 0.06, volume: 0.02 });
+    if (soundEnabled) {
+      beep({ frequency: 640, duration: 0.06, volume: 0.02 });
+      startBGM();
+      bgmStarted = true;
+    } else {
+      stopBGM();
+    }
     render();
     return;
   }
@@ -1202,9 +1340,10 @@ function getResourceBarState() {
   const tokenFill = game.caps.token > 0
     ? clamp(Math.round((tokenRemaining / game.caps.token) * 100), 0, 100)
     : 0;
-  const riskValue = game.caps.risk > 0
+  const rawRiskValue = game.caps.risk > 0
     ? Math.round((state.risk / game.caps.risk) * 100)
     : 0;
+  const riskValue = clamp(rawRiskValue, 0, 100);
   const qualityStars = Math.min(5, Math.max(0, Math.floor(state.quality / 4)));
 
   return [
@@ -2134,16 +2273,21 @@ function getFinalResult() {
   const phaseSummaries = state.phaseSummaries || [];
   const randomModifiers = state.randomModifiersTriggered || [];
   const shippedRiskyShortcut = state.history.some((item) => item.optionId === "ship_now") && state.risk >= 6;
-  const failed = state.risk >= game.caps.risk || state.quality < 1 || shippedRiskyShortcut;
+  const crashed = state.risk >= game.caps.risk && state.index < game.steps.length;
+  const failed = crashed || state.risk >= game.caps.risk || state.quality < 1 || shippedRiskyShortcut;
 
-  const title = failed ? "Project Shipped With Damage" : "Project Survived";
-  const summary = failed
-    ? "The project looks done, but inadequate guardrails allowed bugs and rework to reach the delivery phase."
-    : "The team used workflow effectively to control AI risk. The project was delivered without late-stage meltdowns.";
+  const title = crashed ? "Project Crashed" : failed ? "Project Shipped With Damage" : "Project Survived";
+  const summary = crashed
+    ? "The project collapsed mid-way because the accumulated risk overwhelmed the workflow. Guardrails were needed sooner."
+    : failed
+      ? "The project looks done, but inadequate guardrails allowed bugs and rework to reach the delivery phase."
+      : "The team used workflow effectively to control AI risk. The project was delivered without late-stage meltdowns.";
 
-  const lesson = failed
-    ? "Key Lesson: AI provides speed, but without Specs, Checks, and Reviews, that speed turns into rework."
-    : "Key Lesson: Good workflow doesn't slow you down; it buys confidence and minimizes late-stage damage.";
+  const lesson = crashed
+    ? "Key Lesson: Ignoring warning signals and pushing for speed without checks will ultimately derail the project."
+    : failed
+      ? "Key Lesson: AI provides speed, but without Specs, Checks, and Reviews, that speed turns into rework."
+      : "Key Lesson: Good workflow doesn't slow you down; it buys confidence and minimizes late-stage damage.";
 
   const workflowScore = calculateWorkflowScore({ failed, protectedEvents, riskyChoices, skillUses, overBudget, overtime });
   const scoreTier = getScoreTier(workflowScore);
