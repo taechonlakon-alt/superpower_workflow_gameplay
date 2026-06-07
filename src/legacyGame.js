@@ -1,6 +1,10 @@
-import game from "./data/gameData.js";
+import { allStagesEN, allStagesTH } from "./data/gameData.js";
+import { i18n } from "./data/i18n.js";
 
 let root = null;
+let currentLang = localStorage.getItem("sp_workflow_lang") || "th";
+let allStages = currentLang === "th" ? allStagesTH : allStagesEN;
+let game = allStages[0];
 const starterWorkflowSkills = [];
 const EMERGENCY_RISK_THRESHOLD = 8;
 let audioContext = null;
@@ -945,6 +949,15 @@ function startMission() {
 
 function startSkillDraft() {
   state.activeSkillDetail = null;
+  // TODO: Randomize when more stages are available. For now, lock to stage 01.
+  selectStage(allStages[0].id);
+}
+
+function selectStage(stageId) {
+  const stage = allStages.find((s) => s.id === stageId);
+  if (!stage || stage.status === "coming_soon") return;
+  game = stage;
+  state = createInitialState();
   state.screen = "setup";
   render();
 }
@@ -1032,9 +1045,20 @@ function soundButtonMarkup() {
   `;
 }
 
+
 function handleRootClick(event) {
   const target = event.target;
   if (!(target instanceof Element) || !root?.contains(target)) return;
+
+  const langBtn = target.closest(".lang-btn");
+  if (langBtn) {
+    currentLang = langBtn.dataset.lang;
+    localStorage.setItem("sp_workflow_lang", currentLang);
+    allStages = currentLang === "th" ? allStagesTH : allStagesEN;
+    game = allStages[0];
+    render();
+    return;
+  }
 
   if (target.classList.contains("skill-detail-overlay")) {
     closeSkillDetail();
@@ -1096,6 +1120,12 @@ function handleRootClick(event) {
     return;
   }
 
+  const stageCard = target.closest(".stage-card");
+  if (stageCard && !stageCard.disabled) {
+    selectStage(stageCard.dataset.stage);
+    return;
+  }
+
   const skillCard = target.closest(".skill-card");
   if (skillCard) {
     openSkillDetail(skillCard.dataset.skill);
@@ -1138,6 +1168,13 @@ function handleRootClick(event) {
   }
 }
 
+function truncateHelper(text, maxWords = 12) {
+  if (!text) return "";
+  const words = text.split(/\s+/);
+  if (words.length <= maxWords) return text;
+  return words.slice(0, maxWords).join(" ") + "\u2026";
+}
+
 function getPressureResourceTone(value, warnAt, dangerAt) {
   if (value >= dangerAt) return "danger";
   if (value >= warnAt) return "warn";
@@ -1168,6 +1205,7 @@ function getResourceBarState() {
   const riskValue = game.caps.risk > 0
     ? Math.round((state.risk / game.caps.risk) * 100)
     : 0;
+  const qualityStars = Math.min(5, Math.max(0, Math.floor(state.quality / 4)));
 
   return [
     {
@@ -1202,8 +1240,7 @@ function resourceBarMarkup() {
   return `
     <div class="resource-bar" aria-label="Resource Bar">
       ${resources
-        .map(
-          (resource) => `
+        .map((resource) => `
             <div class="resource-meter resource-meter--${resource.key} resource-meter--${resource.tone}" aria-label="${resource.label}: ${resource.value}">
               <span class="resource-meter__topline">
                 <span class="resource-meter__label">${resource.label}</span>
@@ -1214,8 +1251,7 @@ function resourceBarMarkup() {
               </span>
               <span class="resource-meter__helper">${resource.helper}</span>
             </div>
-          `,
-        )
+          `)
         .join("")}
       </div>
   `;
@@ -1303,8 +1339,13 @@ function eventIconMarkup() {
 }
 
 function heroMarkup() {
+  const lang = i18n[currentLang];
   return `
     <header class="start-scene">
+      <div class="lang-selection">
+         <button class="lang-btn ${currentLang === 'th' ? 'active-lang' : ''}" data-lang="th">ภาษาไทย</button>
+         <button class="lang-btn ${currentLang === 'en' ? 'active-lang' : ''}" data-lang="en">English</button>
+      </div>
       <div class="start-sky" aria-hidden="true">
         <span class="cloud cloud--one"></span>
         <span class="cloud cloud--two"></span>
@@ -1314,7 +1355,7 @@ function heroMarkup() {
           <img src="/assets/character/lv1.gif" alt="Hero Lv1" class="hero-character-img" onerror="this.onerror=null; this.src='/assets/character/lv1.png';" />
         </div>
         <div class="start-emblem">${titleGlyphMarkup()}</div>
-        <p class="start-kicker">Project Survival Game</p>
+        <p class="start-kicker">${lang.projectSurvivalGame}</p>
         <h1 class="start-logo" aria-label="SUPERPOWER WORKFLOW">
           <span>SUPER</span><span>POWER</span>
           <strong>WORKFLOW</strong>
@@ -1324,7 +1365,7 @@ function heroMarkup() {
           <strong>${game.stage}</strong>
         </div>
         <p class="start-copy">${game.intro}</p>
-        <button class="hero-start-btn restart" type="button">Start Mission</button>
+        <button class="hero-start-btn restart" type="button">${lang.startMission}</button>
       </div>
       <div class="start-ground" aria-hidden="true"></div>
     </header>
@@ -1336,6 +1377,7 @@ function tagMarkup(tags) {
 }
 
 function skillCardMarkup(skill) {
+  const lang = i18n[currentLang];
   const selected = state.skills.includes(skill.id);
   const locked = !selected && state.skills.length >= game.maxSkills;
   const summary = skill.summary || skill.description;
@@ -1346,20 +1388,21 @@ function skillCardMarkup(skill) {
       <span class="inventory-slot__type">${escapeHtml(skill.type)}</span>
       <strong>${escapeHtml(skill.name)}</strong>
       <span class="inventory-slot__copy">${escapeHtml(summary)}</span>
-      <span class="inventory-slot__detail">Details</span>
+      <span class="inventory-slot__detail">${lang.details}</span>
     </button>
   `;
 }
 
 function skillDetailPopupMarkup(skill, allowEdit = state.screen === "setup") {
+  const lang = i18n[currentLang];
   const selected = state.skills.includes(skill.id);
   const locked = !selected && state.skills.length >= game.maxSkills;
-  const actionLabel = selected ? "Remove Skill" : locked ? "Max 3 Skills Selected" : "Select Skill";
+  const actionLabel = selected ? lang.removeSkill : locked ? lang.maxSkillsSelected.replace('{max}', game.maxSkills) : lang.selectSkill;
   const summary = skill.summary || skill.description;
   const teaches = skill.teaches
     ? `
       <div class="skill-detail-section">
-        <p class="skill-detail-label">Teaches</p>
+        <p class="skill-detail-label">${lang.teaches}</p>
         <p>${escapeHtml(skill.teaches)}</p>
       </div>
     `
@@ -1367,7 +1410,7 @@ function skillDetailPopupMarkup(skill, allowEdit = state.screen === "setup") {
   const warning = skill.warning
     ? `
       <div class="skill-detail-warning">
-        <p class="skill-detail-label">Warning</p>
+        <p class="skill-detail-label">${lang.warning}</p>
         <p>${escapeHtml(skill.warning)}</p>
       </div>
     `
@@ -1377,7 +1420,7 @@ function skillDetailPopupMarkup(skill, allowEdit = state.screen === "setup") {
     <div class="hero-popup-overlay skill-detail-overlay">
       <div class="hero-popup-content skill-detail-popup">
         <section class="brief-card skill-detail-card">
-          <p class="brief-label">Skill Detail</p>
+          <p class="brief-label">${lang.details}</p>
           <div class="skill-detail-head">
             <span class="skill-detail-icon">${escapeHtml(skill.icon)}</span>
             <span class="skill-detail-meta">
@@ -1387,14 +1430,14 @@ function skillDetailPopupMarkup(skill, allowEdit = state.screen === "setup") {
           </div>
           <p class="skill-detail-summary">${escapeHtml(summary)}</p>
           <div class="skill-detail-section">
-            <p class="skill-detail-label">Description</p>
+            <p class="skill-detail-label">${lang.description}</p>
             <p>${escapeHtml(skill.description)}</p>
           </div>
           ${teaches}
           ${warning}
           <div class="skill-detail-actions">
             ${allowEdit ? `<button class="restart skill-detail-toggle" type="button" data-skill="${escapeHtml(skill.id)}" ${locked ? "disabled" : ""}>${actionLabel}</button>` : ""}
-            <button class="restart skill-detail-close" type="button">Close</button>
+            <button class="restart skill-detail-close" type="button">${lang.close}</button>
           </div>
         </section>
       </div>
@@ -1419,7 +1462,7 @@ function choiceCardMarkup(option, index) {
     <button class="choice action-slot action-slot--${visualTone} ${isSkill ? "choice--skill" : ""} ${isSynergy ? "choice--synergy" : ""}" data-option="${option.id}" style="--choice-delay:${index * 65}ms">
       <span class="action-slot__body">
         <strong class="action-slot__title">${escapeHtml(option.label)}</strong>
-        <span class="action-slot__helper">${escapeHtml(option.helper || "")}</span>
+        <span class="action-slot__helper">${escapeHtml(truncateHelper(option.helper || ""))}</span>
         <span class="action-slot__tags">
           ${visibleTags.length ? tagMarkup(visibleTags) : ""}
           ${hiddenTagCount ? `<span>+${hiddenTagCount}</span>` : ""}
@@ -1462,7 +1505,58 @@ function renderSkillDetailPopup() {
   root.insertAdjacentHTML("beforeend", skillDetailPopupMarkup(skill));
 }
 
+function stageCardMarkup(stage) {
+  const lang = i18n[currentLang];
+  const isAvailable = stage.status !== "coming_soon";
+  return `
+    <button
+      class="stage-card ${isAvailable ? "" : "stage-card--locked"}"
+      data-stage="${escapeHtml(stage.id)}"
+      type="button"
+      ${isAvailable ? "" : "disabled"}>
+      <span class="stage-card__badge">${isAvailable ? lang.available : lang.comingSoon}</span>
+      <strong class="stage-card__title">${escapeHtml(stage.stage || stage.title)}</strong>
+      <p class="stage-card__intro">${escapeHtml(stage.intro || "")}</p>
+    </button>
+  `;
+}
+
+function renderStageSelect() {
+  const lang = i18n[currentLang];
+  root.innerHTML = `
+    <main class="app">
+      <div class="phase-character" aria-hidden="true">
+        <img src="/assets/character/lv1.gif" alt="Hero" class="phase-character-img" onerror="this.onerror=null; this.src='/assets/character/lv1.png';" />
+      </div>
+      <section class="${shellClass()}">
+        <section class="phasebar" style="display: flex; align-items: center; justify-content: space-between;">
+          <ol class="phases" style="flex: 1;">${phaseMarkup(0)}</ol>
+          ${soundButtonMarkup()}
+        </section>
+        <section class="playfield">
+          <section class="panel setup-panel">
+            <div class="panel-head">
+              <p class="phase-tag">${lang.missionSelect}</p>
+              <div class="panel-title-row">
+                <h2 class="phase-title">${lang.chooseStage}</h2>
+                <span class="phase-badge" aria-hidden="true">${eventIconMarkup()}</span>
+              </div>
+              <div class="phase-body">
+                <p>${lang.selectStageToDraft}</p>
+              </div>
+            </div>
+            <div class="stage-select-grid">
+              ${allStages.map(stageCardMarkup).join("")}
+            </div>
+          </section>
+        </section>
+      </section>
+    </main>
+  `;
+}
+
 function renderSetup() {
+  const lang = i18n[currentLang];
   const characterLevel = Math.min(5, (state.index || 0) + 1);
   root.innerHTML = `
     <main class="app">
@@ -1477,13 +1571,13 @@ function renderSetup() {
         <section class="playfield">
           <section class="panel setup-panel">
             <div class="panel-head">
-              <p class="phase-tag">Superpower Draft</p>
+              <p class="phase-tag">${lang.superpowerDraft}</p>
               <div class="panel-title-row">
-                <h2 class="phase-title">Select ${game.maxSkills} Superpowers</h2>
+                <h2 class="phase-title">${lang.selectSuperpowers.replace('{max}', game.maxSkills)}</h2>
                 <span class="phase-badge" aria-hidden="true">${eventIconMarkup()}</span>
               </div>
               <div class="phase-body">
-                <p>Click a card for details, and select ${game.maxSkills} tools before starting Brainstorm.</p>
+                <p>${lang.clickCardForDetails.replace('{max}', game.maxSkills)}</p>
               </div>
             </div>
 
@@ -1492,8 +1586,8 @@ function renderSetup() {
             </div>
 
             <div class="setup-actions">
-              <p class="draft-count">Selected ${state.skills.length} / ${game.maxSkills}</p>
-              <button class="restart start-mission" ${state.skills.length === game.maxSkills ? "" : "disabled"}>Start Mission</button>
+              <p class="draft-count">${lang.selected} ${state.skills.length} / ${game.maxSkills}</p>
+              <button class="restart start-mission" ${state.skills.length === game.maxSkills ? "" : "disabled"}>${lang.startMission}</button>
             </div>
           </section>
         </section>
@@ -2392,7 +2486,12 @@ function phaseGoalPopupMarkup() {
 
 function tutorialMarkup() {
   if (!state.showTutorial) return "";
-  const pages = [
+  const lang = i18n[currentLang];
+  const pages = currentLang === 'th' ? [
+    { title: "ยินดีต้อนรับสู่ Project Survival", content: "คุณคือผู้พัฒนาที่ต้องรับผิดชอบโปรเจกต์สำคัญ การตัดสินใจของคุณจะชี้ชะตาว่าโปรเจกต์นี้จะรอดหรือจะร่วง" },
+    { title: "บริหารจัดการทรัพยากร", content: "สังเกตแถบสถานะของคุณให้ดี:<br><br><b>เวลา (Time):</b> จะลดลงเมื่อคุณทำงาน หากใช้เวลาเกินกำหนด ความเสี่ยงจะเพิ่มขึ้น<br><b>Token:</b> งบประมาณ AI ของคุณ หากใช้มากเกินไป คุณภาพโค้ดจะแย่ลง<br><b>ความเสี่ยง (Risk):</b> หากความเสี่ยงถึง 100% โปรเจกต์จะล่มทันที" },
+    { title: "ตัดสินใจให้ถูกต้อง", content: "แต่ละเฟสจะมีความท้าทายที่แตกต่างกัน คุณจะต้องเลือก 3 Workflow Superpowers ก่อนเริ่มงาน จงใช้มันอย่างชาญฉลาดเพื่อบริหารทรัพยากรและปกป้องโปรเจกต์ของคุณ" }
+  ] : [
     { title: "Welcome to Project Survival", content: "You are a developer handling a critical project. Your choices will determine whether the project ships successfully or crashes and burns." },
     { title: "Managing Resources", content: "Pay attention to your Resource Bar:<br><br><b>Time:</b> Runs out as you work. Overtime increases Risk.<br><b>Token:</b> Your AI Budget. Using too much reduces code Quality.<br><b>Risk:</b> If Risk reaches 100%, the project fails." },
     { title: "Make the Right Decisions", content: "Each phase presents different challenges. You will select 3 Workflow Superpowers before starting. Use them wisely to manage your resources and protect the project." }
@@ -2403,15 +2502,15 @@ function tutorialMarkup() {
     <div class="hero-popup-overlay tutorial-overlay">
       <div class="hero-popup-content tutorial-popup">
         <div class="tutorial-header">
-          <p class="phase-tag">Tutorial ${state.tutorialPage + 1}/3</p>
+          <p class="phase-tag">${lang.tutorial} ${state.tutorialPage + 1}/3</p>
           <h2>${page.title}</h2>
         </div>
         <div class="tutorial-body">
           <p>${page.content}</p>
         </div>
         <div class="tutorial-actions">
-          ${state.tutorialPage > 0 ? '<button class="restart tutorial-prev" type="button">Back</button>' : ''}
-          <button class="restart tutorial-next" type="button">${state.tutorialPage === 2 ? "Start Draft" : "Next"}</button>
+          ${state.tutorialPage > 0 ? `<button class="restart tutorial-prev" type="button">${lang.back}</button>` : ''}
+          <button class="restart tutorial-next" type="button">${state.tutorialPage === 2 ? lang.startDraft : lang.next}</button>
         </div>
       </div>
     </div>
@@ -2505,6 +2604,8 @@ function renderEvolution() {
 function render() {
   if (state.screen === "title") {
     renderTitle();
+  } else if (state.screen === "stage_select") {
+    renderStageSelect();
   } else if (state.screen === "setup") {
     renderSetup();
   } else if (state.screen === "resolution") {
