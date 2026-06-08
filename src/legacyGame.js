@@ -1642,10 +1642,6 @@ function choiceCardMarkup(option, index) {
         ${unlock ? `<span class="action-slot__unlock">${escapeHtml(unlock)}</span>` : ""}
         <span class="action-slot__select">${lang.select}</span>
       </span>
-      <div class="action-slot__tooltip">
-        <p><strong>${lang.solves}:</strong> ${escapeHtml(meaning.solves)}</p>
-        <p><strong>${lang.tradeoff}:</strong> ${escapeHtml(option.tradeoff || meaning.misses)}</p>
-      </div>
     </button>
   `;
 }
