@@ -5427,15 +5427,18 @@ body::before {
   z-index: 5;
   pointer-events: none;
   transition: all 0.3s ease-in-out;
+  width: calc(2 * min(380px, 45vh));
+  height: min(380px, 45vh);
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .hero-character-img {
-  height: min(380px, 45vh);
-  max-width: none;
-  width: auto;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
   filter: drop-shadow(0 15px 15px rgba(0, 0, 0, 0.4));
-  pointer-events: auto;
+  pointer-events: none;
 }
 
 .phase-character {
@@ -5445,22 +5448,39 @@ body::before {
   z-index: 20;
   pointer-events: none;
   transition: all 0.3s ease-in-out;
+  width: calc(2 * min(350px, 40vh));
+  height: min(350px, 40vh);
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .phase-character-img {
-  height: min(350px, 40vh);
-  width: auto;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
   filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.6));
+  pointer-events: none;
+}
+
+/* Character Drag Hitbox */
+.character-hitbox {
+  position: absolute;
+  cursor: grab;
   pointer-events: auto;
+  z-index: 10;
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.character-hitbox:active {
+  cursor: grabbing;
 }
 
 @media (max-width: 1439px) {
   .phase-character {
     left: max(10px, calc(50vw - 660px - 20px));
-  }
-
-  .phase-character-img {
+    width: calc(2 * min(280px, 35vh));
     height: min(280px, 35vh);
   }
 }
@@ -5468,11 +5488,8 @@ body::before {
 @media (max-width: 1023px) {
   .phase-character {
     left: 15px;
-  }
-
-  .phase-character-img {
+    width: calc(2 * min(200px, 25vh));
     height: min(200px, 25vh);
-    opacity: 0.85;
   }
 }
 
