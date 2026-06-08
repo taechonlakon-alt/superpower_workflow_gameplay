@@ -764,9 +764,9 @@ function chooseOption(optionId) {
 
   playChoiceSound(option);
   const resolution = buildResolution(step, option);
-  applyEffects(option.effects || {time:0, token:0, risk:0, quality:0});
+  applyEffects(option.effects || { time: 0, token: 0, risk: 0, quality: 0 });
   state.progress = clamp(state.progress + resolution.progress, 0, 100);
-  
+
   if (state.activeChaos) {
     state.activeChaos = null; // Cleared
   }
@@ -812,14 +812,14 @@ function advanceAfterNormalDecision({ allowRandomModifier = true, allowMicroEven
     state.index += 1;
     const newLevel = Math.min(5, state.index + 1);
     state.progress = 0;
-    
+
     if (oldLevel !== newLevel) {
       triggerEvolutionTransition(oldLevel, newLevel);
       return;
     } else {
       state.screen = state.index >= game.steps.length ? "result" : "step";
     }
-    
+
     state.lastSignalTone = getProjectSignalTone();
     render();
     return;
@@ -1105,7 +1105,7 @@ function scheduleBGM() {
 
   while (bgmNextNoteTime < ctx.currentTime + 0.1) {
     const freq = bgmNotes[bgmCurrentStep % bgmNotes.length];
-    
+
     // Melody
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
@@ -1126,15 +1126,15 @@ function scheduleBGM() {
       const bGain = ctx.createGain();
       bOsc.type = "sawtooth";
       bOsc.frequency.setValueAtTime(bassFreq, bgmNextNoteTime);
-      
+
       const filter = ctx.createBiquadFilter();
       filter.type = "lowpass";
       filter.frequency.value = 400;
-      
+
       bGain.gain.setValueAtTime(0.0001, bgmNextNoteTime);
       bGain.gain.linearRampToValueAtTime(0.025, bgmNextNoteTime + 0.01);
       bGain.gain.exponentialRampToValueAtTime(0.0001, bgmNextNoteTime + (NOTE_LENGTH * 2) - 0.02);
-      
+
       bOsc.connect(filter);
       filter.connect(bGain);
       bGain.connect(ctx.destination);
@@ -1151,7 +1151,7 @@ function startBGM() {
   if (!soundEnabled) return;
   const ctx = ensureAudio();
   if (!ctx) return;
-  
+
   if (!bgmInterval) {
     bgmNextNoteTime = ctx.currentTime + 0.05;
     bgmCurrentStep = 0;
@@ -1405,7 +1405,7 @@ function resourceBarMarkup() {
   return `
     <div class="resource-bar" aria-label="Resource Bar">
       ${resources
-        .map((resource) => `
+      .map((resource) => `
             <div class="resource-meter resource-meter--${resource.key} resource-meter--${resource.tone}" aria-label="${resource.label}: ${resource.value}">
               <span class="resource-meter__topline">
                 <span class="resource-meter__label">${resource.label}</span>
@@ -1417,7 +1417,7 @@ function resourceBarMarkup() {
               <span class="resource-meter__helper">${resource.helper}</span>
             </div>
           `)
-        .join("")}
+      .join("")}
       </div>
   `;
 }
@@ -2559,26 +2559,26 @@ function renderResult() {
 
                 <div class="report-signals mission-report__meters">
                   ${reportSignalMarkup({
-                    icon: "CLK",
-                    label: "Time",
-                    value: `${state.time} / ${game.caps.time}`,
-                    helper: result.overtime ? "Deadline exceeded plan" : "Time kept under control",
-                    tone: timeTone,
-                  })}
+    icon: "CLK",
+    label: "Time",
+    value: `${state.time} / ${game.caps.time}`,
+    helper: result.overtime ? "Deadline exceeded plan" : "Time kept under control",
+    tone: timeTone,
+  })}
                   ${reportSignalMarkup({
-                    icon: "AI",
-                    label: "Token Left",
-                    value: `${result.tokenRemaining} / ${game.caps.token}`,
-                    helper: tokenHelper,
-                    tone: tokenTone,
-                  })}
+    icon: "AI",
+    label: "Token Left",
+    value: `${result.tokenRemaining} / ${game.caps.token}`,
+    helper: tokenHelper,
+    tone: tokenTone,
+  })}
                   ${reportSignalMarkup({
-                    icon: "RISK",
-                    label: "Risk",
-                    value: `${state.risk} / ${game.caps.risk}`,
-                    helper: state.risk >= 8 ? "Project is fragile" : "Risks kept under control",
-                    tone: riskTone,
-                  })}
+    icon: "RISK",
+    label: "Risk",
+    value: `${state.risk} / ${game.caps.risk}`,
+    helper: state.risk >= 8 ? "Project is fragile" : "Risks kept under control",
+    tone: riskTone,
+  })}
                 </div>
 
                 <div class="report-evidence-row mission-report__evidence">
@@ -2645,7 +2645,7 @@ function phaseGoalPopupMarkup() {
         <h2 id="phase-goal-title">${escapeHtml(step.goal.title)}</h2>
         <p class="phase-goal-popup__copy">${escapeHtml(step.goal.copy)}</p>
         ${guidance.length
-          ? `
+      ? `
             <div class="phase-goal-popup__guidance">
               <p class="mini-label">Guidance</p>
               <ol>
@@ -2653,7 +2653,7 @@ function phaseGoalPopupMarkup() {
               </ol>
             </div>
           `
-          : ""}
+      : ""}
         <button class="restart phase-goal-start" type="button">Continue</button>
       </section>
     </div>
@@ -2673,7 +2673,7 @@ function tutorialMarkup() {
     { title: "Make the Right Decisions", content: "Each phase presents different challenges. You will select 3 Workflow Superpowers before starting. Use them wisely to manage your resources and protect the project." }
   ];
   const page = pages[state.tutorialPage];
-  
+
   return `
     <div class="hero-popup-overlay tutorial-overlay">
       <div class="hero-popup-content tutorial-popup">
@@ -2759,13 +2759,13 @@ function renderEvolution() {
         newChar.style.opacity = '1';
         newChar.classList.add('pop-active');
       }
-      
+
       const title = root.querySelector('.evolution-text h2');
       if (title) {
         title.innerText = `Level ${state.evolutionNewLevel} Reached!`;
         title.classList.add('glow-text');
       }
-      
+
       const btn = root.querySelector('.evolution-next-btn');
       if (btn) btn.style.display = 'block';
     }, 1000); // 1s into the flash
@@ -2833,7 +2833,7 @@ function render() {
 export function mountLegacyGame(container) {
   root = container;
   state = createInitialState();
-  
+
   let isDraggingCat = false;
   let catDragOffsetX = 0;
   let catDragOffsetY = 0;
@@ -2845,15 +2845,15 @@ export function mountLegacyGame(container) {
       isDraggingCat = true;
       draggedElement = hitboxTarget.parentElement;
       const rect = draggedElement.getBoundingClientRect();
-      
+
       if (!state.characterPos) {
         state.characterPos = { x: rect.left, y: rect.top };
       }
-      
+
       catDragOffsetX = e.clientX - state.characterPos.x;
       catDragOffsetY = e.clientY - state.characterPos.y;
       draggedElement.setPointerCapture(e.pointerId);
-      
+
       draggedElement.style.position = "fixed";
       draggedElement.style.left = state.characterPos.x + "px";
       draggedElement.style.top = state.characterPos.y + "px";
@@ -2870,7 +2870,7 @@ export function mountLegacyGame(container) {
     if (isDraggingCat && draggedElement) {
       let newX = e.clientX - catDragOffsetX;
       let newY = e.clientY - catDragOffsetY;
-      
+
       const hitbox = draggedElement.querySelector(".character-hitbox");
       if (hitbox) {
         const rect = draggedElement.getBoundingClientRect();
@@ -2895,9 +2895,9 @@ export function mountLegacyGame(container) {
         newX = clamp(newX, minX, maxX);
         newY = clamp(newY, minY, maxY);
       }
-      
+
       state.characterPos = { x: newX, y: newY };
-      
+
       const catEls = document.querySelectorAll(".phase-character, .start-character");
       catEls.forEach(el => {
         el.style.position = "fixed";
@@ -2920,7 +2920,7 @@ export function mountLegacyGame(container) {
         if (draggedElement.releasePointerCapture) {
           try {
             draggedElement.releasePointerCapture(e.pointerId);
-          } catch(err) {}
+          } catch (err) { }
         }
         draggedElement = null;
       }
