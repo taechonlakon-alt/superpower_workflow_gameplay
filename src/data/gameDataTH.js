@@ -230,7 +230,7 @@ const stage01 = {
         {
           "id": "vulnerable_brief",
           "title": "Brief ขาด Booking Rules",
-          "problem": "The Vulnerable Developer Incident",
+          "problem": "เหตุการณ์นักพัฒนาที่เปราะบาง",
           "copy": "ลูกค้าบอกแค่ว่า 'อยากได้ระบบจองคิวเร็วๆ' แต่ทีมไม่รู้เลยว่าใครคือคนจอง, Slot เวลาซ้อนทับกันได้ไหม, ต้องคอนเฟิร์มแบบไหน, และอะไรคือ Non-goals ของ MVP นีั",
           "danger": "การข้าม Workflow จะทำให้ AI เดา Requirement เอาเองทั้งหมด",
           "progressPenalty": 25,
@@ -254,10 +254,10 @@ const stage01 = {
               },
               "resolveMsg": "AI เติมข้อมูลให้จน Brief ดูสมบูรณ์ แต่ทีมก็ยังอธิบายไม่ได้อยู่ดีว่ากฎการจองจริงๆ คืออะไร และยังมีคำถามอะไรที่ตกหล่น",
               "lesson": "AI จะเสนอ Booking Flow ได้ดีเมื่อได้รับเป้าหมายและ Context ที่ชัดเจน ไม่ใช่ตอนที่โดนบังคับให้เดาสิ่งที่ว่างเปล่า",
-              "problem": "The Vulnerable Developer Incident",
-              "purpose": "Let the AI interpret the short brief and guess the booking flow on its own.",
-              "solves": "Accelerate work but increase Risk",
-              "misses": "Leaves risk that needs another guardrail / Lowers delivery quality"
+              "problem": "เหตุการณ์นักพัฒนาที่เปราะบาง",
+              "purpose": "ปล่อยให้ AI ตีความบรีฟสั้นๆ และเดา Flow การจองเอาเอง",
+              "solves": "เร่งการทำงานแต่ความเสี่ยงเพิ่มขึ้น",
+              "misses": "ทิ้งความเสี่ยงที่ต้องหาทางป้องกันทีหลัง / คุณภาพงานลดลง"
             }
           ],
           "skillOptions": [
@@ -282,9 +282,9 @@ const stage01 = {
               "preventPenalty": true,
               "resolveMsg": "คุณได้เคลียร์คำถามสำคัญ ทำให้รู้ว่าเป้าหมายคือการจองที่สำเร็จพร้อมหลักฐานการคอนเฟิร์ม ไม่ใช่แค่หน้าตา UI เปล่าๆ",
               "lesson": "Grill with Docs ช่วยในขั้นตอนสุดท้ายของ Brainstorming: เคลียร์คำถามที่เหลือให้ชัดก่อนจะให้ AI เดา",
-              "purpose": "Use the docs/brief to formulate questions about target user, service type, slot rules, cancellation, and confirmation.",
-              "solves": "Resolve current Issue ยท Use skill to resolve specific issues ยท Reduce Risk",
-              "misses": "Takes time to ask, but the booking flow does not rely on guesses."
+              "purpose": "ใช้เอกสารอ้างอิงเพื่อตั้งคำถามเกี่ยวกับผู้ใช้, บริการ, กฎของ Slot, การยกเลิก, และการยืนยัน",
+              "solves": "Resolve current Issue ยท Use skill to resolve specific issues ยท ลดความเสี่ยง",
+              "misses": "ใช้เวลาตั้งคำถาม แต่ Flow จะไม่อิงจากการเดา"
             },
             {
               "skill": "context",
@@ -307,9 +307,9 @@ const stage01 = {
               "preventPenalty": true,
               "resolveMsg": "ทีมได้สร้าง Brief กลางที่ระบุเป้าหมายการจองและ Out-of-scope items ให้ AI ใช้อ้างอิง หลีกเลี่ยงการเดาไปคนละทิศคนละทาง",
               "lesson": "CONTEXT.md ช่วยให้เฟส Brainstorming สามารถสรุปเป้าหมายของ Booking MVP ไว้เป็น Shared Context ได้",
-              "purpose": "Create a shared brief summarizing the app goal, user, booking flow, scope, non-goals, and constraints.",
-              "solves": "Resolve current Issue ยท Use skill to resolve specific issues ยท Reduce Risk",
-              "misses": "Takes a bit of time, but aligns everyone on the same goal."
+              "purpose": "สร้างบรีฟสรุปเป้าหมาย, ผู้ใช้, Flow, ขอบเขต และข้อจำกัดที่แชร์กันในทีม",
+              "solves": "Resolve current Issue ยท Use skill to resolve specific issues ยท ลดความเสี่ยง",
+              "misses": "เสียเวลาเล็กน้อย แต่ทำให้ทุกคนเห็นเป้าหมายตรงกัน"
             },
             {
               "skill": "scaffolds",
@@ -332,9 +332,9 @@ const stage01 = {
               "preventPenalty": true,
               "resolveMsg": "Checklist บังคับให้ทีมต้องครอบคลุมเป้าหมายการจอง, Core Flows, Trade-offs, กฎของ Slot, การคอนเฟิร์ม และคำถามที่ค้างอยู่",
               "lesson": "Scaffolds ช่วยให้มือใหม่ทำตาม Workflow ของ Brainstorming ได้ครบถ้วนโดยไม่เผลอข้าม Step",
-              "purpose": "Use a checklist to cover docs, booking goal, core flow, trade-offs, and open questions.",
-              "solves": "Resolve current Issue ยท Use skill to resolve specific issues ยท Reduce Risk",
-              "misses": "Slower than guessing, but prevents skipping critical steps."
+              "purpose": "ใช้ Checklist เพื่อตรวจสอบเอกสาร, เป้าหมาย, Flow หลัก, ข้อแลกเปลี่ยน และคำถาม",
+              "solves": "Resolve current Issue ยท Use skill to resolve specific issues ยท ลดความเสี่ยง",
+              "misses": "ช้ากว่าการเดา แต่ป้องกันการข้ามขั้นตอนที่สำคัญ"
             }
           ]
         }
@@ -360,9 +360,9 @@ const stage01 = {
             "risk": 0,
             "quality": 2
           },
-          "purpose": "Read the brief and summarize the booking goal, target user, and success signal before proposing a flow.",
-          "solves": "Increase Quality & Evidence",
-          "misses": "Starts in the right direction, but does not close the remaining questions."
+          "purpose": "อ่านบรีฟและสรุปเป้าหมาย, ผู้ใช้หลัก, และตัวชี้วัดความสำเร็จก่อนเสนอ Flow",
+          "solves": "เพิ่มคุณภาพและหลักฐานอ้างอิง",
+          "misses": "เริ่มต้นมาถูกทาง แต่ยังไม่ได้เคลียร์คำถามที่เหลือ"
         },
         {
           "id": "ai_persona",
@@ -384,9 +384,9 @@ const stage01 = {
             "risk": 3,
             "quality": 1
           },
-          "purpose": "Have AI propose user personas, booking screens and approach before closing unknowns from the brief.",
-          "solves": "Increase Quality & Evidence ยท Advance Work",
-          "misses": "Leaves risk that needs another guardrail / Spends a lot of AI budget"
+          "purpose": "ให้ AI เสนอ Persona, หน้าจอ และแนวทางก่อนที่จะเคลียร์ข้อสงสัยในบรีฟ",
+          "solves": "เพิ่มคุณภาพและหลักฐานอ้างอิง ยท งานเดินหน้า",
+          "misses": "ทิ้งความเสี่ยงที่ต้องหาทางป้องกัน / ผลาญโควตา AI เยอะมาก"
         },
         {
           "id": "skip_discovery",
@@ -401,7 +401,7 @@ const stage01 = {
           "tradeoff": "สร้าง Prototype ได้เร็วมาก แต่ขาด Context อย่างรุนแรงและอาจจะต้องรื้อทำใหม่",
           "outcome": "คุณได้ UI สำเร็จรูปมาอย่างรวดเร็ว แต่ไม่มีการจัดการ State ที่ถูกต้อง และไม่ได้ตอบโจทย์เรื่องความขัดแย้งของ Slot เวลา",
           "lesson": "การข้าม Workflow ไป Execute เลยจะทำให้ได้โค้ดที่ดูดีแต่ไร้โครงสร้างที่รองรับ Use Case จริง",
-          "problem": "Misleading Confidence",
+          "problem": "ความมั่นใจที่ผิดพลาด",
           "progress": 40,
           "effects": {
             "time": 0,
@@ -409,9 +409,9 @@ const stage01 = {
             "risk": 4,
             "quality": -1
           },
-          "purpose": "The team uses patterns from similar past projects to draft the booking flow before closing all unknowns.",
-          "solves": "Advance Work",
-          "misses": "High risk can trigger a phase issue / Lowers delivery quality"
+          "purpose": "ทีมใช้แพตเทิร์นจากโปรเจกต์เก่าเพื่อร่าง Flow โดยที่ยังมีข้อสงสัย",
+          "solves": "งานเดินหน้า",
+          "misses": "ความเสี่ยงสูงอาจทำให้เกิดปัญหาในเฟสได้ / ลดคุณภาพงาน"
         }
       ],
       "skillOptions": [
@@ -425,10 +425,10 @@ const stage01 = {
             "+40%",
             "Ask remaining"
           ],
-          "helper": "Use the docs/brief to raise questions about service type, slot length, conflict rules, cancellation, and confirmation.",
-          "tradeoff": "Takes more time, but closes unknowns before letting the AI propose an approach.",
-          "outcome": "You obtain the missing answers from the brief to evaluate against the AI's approach.",
-          "lesson": "Grill with Docs helps the 'Ask remaining questions' step of Brainstorming.",
+          "helper": "ใช้เอกสารเพื่อตั้งคำถามเกี่ยวกับประเภทบริการ, ระยะเวลาของ Slot, กฎการชนกัน, การยกเลิก และการยืนยัน",
+          "tradeoff": "ใช้เวลามากขึ้น แต่ปิดข้อสงสัยได้หมดก่อนให้ AI เสนอแนวทาง",
+          "outcome": "คุณได้คำตอบที่ขาดหายไปเพื่อนำมาประเมินแนวทางของ AI",
+          "lesson": "ทักษะ Grill with Docs ช่วยในขั้นตอน 'ถามคำถามที่เหลือ' ของเฟส Brainstorming",
           "progress": 40,
           "effects": {
             "time": 2,
@@ -436,9 +436,9 @@ const stage01 = {
             "risk": -3,
             "quality": 3
           },
-          "purpose": "Use the docs/brief to raise questions about service type, slot length, conflict rules, cancellation, and confirmation.",
-          "solves": "Use skill to resolve specific issues ยท Reduce Risk ยท Increase Quality & Evidence",
-          "misses": "Takes more time, but closes unknowns before letting the AI propose an approach."
+          "purpose": "ใช้เอกสารเพื่อตั้งคำถามเกี่ยวกับประเภทบริการ, ระยะเวลาของ Slot, กฎการชนกัน, การยกเลิก และการยืนยัน",
+          "solves": "Use skill to resolve specific issues ยท ลดความเสี่ยง ยท เพิ่มคุณภาพและหลักฐานอ้างอิง",
+          "misses": "ใช้เวลามากขึ้น แต่ปิดข้อสงสัยได้หมดก่อนให้ AI เสนอแนวทาง"
         },
         {
           "skill": "context",
@@ -450,10 +450,10 @@ const stage01 = {
             "+40%",
             "Docs + Goal"
           ],
-          "helper": "Read the brief and create a context seed: app goal, target user, booking flow, scope, non-goals, and definition of done.",
-          "tradeoff": "Invests time so both the team and AI align on the same goal from the beginning.",
-          "outcome": "All subsequent prompts have goals, users, and non-goals to refer back to.",
-          "lesson": "CONTEXT.md helps the 'Read docs' and 'Summarize goal' steps of Brainstorming.",
+          "helper": "อ่านบรีฟและสร้าง Context Seed: เป้าหมาย, ผู้ใช้, Flow, ขอบเขต และสิ่งที่ถือว่าเสร็จ (DoD)",
+          "tradeoff": "ลงทุนเวลาเพื่อให้ทีมและ AI เข้าใจเป้าหมายตรงกันตั้งแต่ต้น",
+          "outcome": "Prompt ถัดๆ ไปจะมีเป้าหมายและข้อจำกัดให้อ้างอิงกลับมาได้เสมอ",
+          "lesson": "CONTEXT.md ช่วยในขั้นตอน 'อ่านเอกสาร' และ 'สรุปเป้าหมาย' ของเฟส Brainstorming",
           "progress": 40,
           "effects": {
             "time": 1,
@@ -461,9 +461,9 @@ const stage01 = {
             "risk": -2,
             "quality": 3
           },
-          "purpose": "Read the brief and create a context seed: app goal, target user, booking flow, scope, non-goals, and definition of done.",
-          "solves": "Use skill to resolve specific issues ยท Reduce Risk ยท Increase Quality & Evidence",
-          "misses": "Invests time so both the team and AI align on the same goal from the beginning."
+          "purpose": "อ่านบรีฟและสร้าง Context Seed: เป้าหมาย, ผู้ใช้, Flow, ขอบเขต และสิ่งที่ถือว่าเสร็จ (DoD)",
+          "solves": "Use skill to resolve specific issues ยท ลดความเสี่ยง ยท เพิ่มคุณภาพและหลักฐานอ้างอิง",
+          "misses": "ลงทุนเวลาเพื่อให้ทีมและ AI เข้าใจเป้าหมายตรงกันตั้งแต่ต้น"
         },
         {
           "skill": "scaffolds",
@@ -475,10 +475,10 @@ const stage01 = {
             "+35%",
             "Full 5 steps"
           ],
-          "helper": "Use a checklist to force completion of docs, booking goal, core flow, trade-offs, and open questions.",
-          "tradeoff": "Slower than guessing, but reduces the chance of skipping critical steps.",
-          "outcome": "The team doesn't miss core flows and clearly sees which questions must be closed before Planning.",
-          "lesson": "Scaffolds keep Brainstorming aligned with the workflow even for beginner teams.",
+          "helper": "ใช้ Checklist บังคับให้ดูเอกสาร, เป้าหมาย, Flow หลัก, ข้อแลกเปลี่ยน และคำถามให้ครบ",
+          "tradeoff": "ช้ากว่าการเดา แต่ลดโอกาสที่จะข้ามขั้นตอนสำคัญ",
+          "outcome": "ทีมไม่พลาด Flow หลัก และเห็นชัดว่าคำถามไหนต้องหาคำตอบก่อนเริ่มวางแผน",
+          "lesson": "Scaffolds ช่วยให้เฟส Brainstorming เป็นไปตามระบบแม้แต่กับทีมมือใหม่",
           "progress": 35,
           "effects": {
             "time": 1,
@@ -486,9 +486,9 @@ const stage01 = {
             "risk": -2,
             "quality": 2
           },
-          "purpose": "Use a checklist to force completion of docs, booking goal, core flow, trade-offs, and open questions.",
-          "solves": "Use skill to resolve specific issues ยท Reduce Risk ยท Increase Quality & Evidence",
-          "misses": "Slower than guessing, but reduces the chance of skipping critical steps."
+          "purpose": "ใช้ Checklist บังคับให้ดูเอกสาร, เป้าหมาย, Flow หลัก, ข้อแลกเปลี่ยน และคำถามให้ครบ",
+          "solves": "Use skill to resolve specific issues ยท ลดความเสี่ยง ยท เพิ่มคุณภาพและหลักฐานอ้างอิง",
+          "misses": "ช้ากว่าการเดา แต่ลดโอกาสที่จะข้ามขั้นตอนสำคัญ"
         }
       ],
       "synergyOptions": [
@@ -505,10 +505,10 @@ const stage01 = {
             "+90%",
             "Solid brief"
           ],
-          "helper": "Combine docs, booking goal summary, core flow, trade-offs, and open questions into a single brief.",
-          "tradeoff": "Spends a little time and tokens, but still requires scoping/testing choices in the Plan phase rather than instantly winning.",
-          "outcome": "The team obtains a brief clear enough to Plan: knowing the booking goal, core flow, trade-offs, and remaining questions.",
-          "lesson": "Brief Alignment Packet represents a complete Brainstorming workflow before letting the AI build.",
+          "helper": "รวมเอกสาร, เป้าหมาย, Flow หลัก, ข้อแลกเปลี่ยน และคำถามเข้าเป็นบรีฟเดียว",
+          "tradeoff": "ใช้เวลาและ Token เล็กน้อย แต่ยังต้องกำหนดขอบเขตและตรวจสอบในเฟส Plan ต่อไป",
+          "outcome": "ทีมได้บรีฟที่ชัดเจนพอจะใช้วางแผน: รู้เป้าหมาย, Flow หลัก, ข้อแลกเปลี่ยน และคำถามที่เหลือ",
+          "lesson": "Brief Alignment Packet ช่วยทำให้กระบวนการ Brainstorm สมบูรณ์ก่อนปล่อย AI สร้างงาน",
           "progress": 90,
           "effects": {
             "time": 2,
@@ -516,9 +516,9 @@ const stage01 = {
             "risk": -4,
             "quality": 5
           },
-          "purpose": "Combine docs, booking goal summary, core flow, trade-offs, and open questions into a single brief.",
-          "solves": "Use Combo to close multiple Gaps ยท Reduce Risk ยท Increase Quality & Evidence",
-          "misses": "Spends a little time and tokens, but still requires scoping/testing choices in the Plan phase rather than instantly winning."
+          "purpose": "รวมเอกสาร, เป้าหมาย, Flow หลัก, ข้อแลกเปลี่ยน และคำถามเข้าเป็นบรีฟเดียว",
+          "solves": "Use Combo to close multiple Gaps ยท ลดความเสี่ยง ยท เพิ่มคุณภาพและหลักฐานอ้างอิง",
+          "misses": "ใช้เวลาและ Token เล็กน้อย แต่ยังต้องกำหนดขอบเขตและตรวจสอบในเฟส Plan ต่อไป"
         }
       ]
     },
@@ -543,7 +543,7 @@ const stage01 = {
         {
           "id": "escape_complexity",
           "title": "Scope Creep",
-          "problem": "Escape Complexity Trap",
+          "problem": "หลีกหนีกับดักความซับซ้อน",
           "copy": "ระหว่างที่กำลังวางแผน AI แนะนำว่าเราควรเพิ่มระบบชำระเงิน, User Auth, และ Dashboard สำหรับ Admin เข้าไปใน MVP ด้วย",
           "danger": "ถ้าไม่ล็อก Scope ตอนนี้ คุณจะผลาญ Budget ไปกับการทำฟีเจอร์ที่ไม่จำเป็น",
           "progressPenalty": 30,
@@ -567,10 +567,10 @@ const stage01 = {
               },
               "resolveMsg": "แผนงานของคุณพองโตกลายเป็นโปรเจกต์สเกลใหญ่ ทำให้โฟกัสที่ระบบ Booking หลักหายไป",
               "lesson": "AI มักจะแนะนำให้ทำฟีเจอร์ที่เกินความจำเป็น หน้าที่ของคุณคือการคุมให้อยู่ใน Scope ของ MVP",
-              "problem": "Escape Complexity Trap",
-              "purpose": "Let the AI draft broadly first, even without clearly defined files, tests, order, and verification.",
-              "solves": "Create a tactical choice for this situation",
-              "misses": "Leaves risk that needs another guardrail / Lowers delivery quality / Consumes deadline room"
+              "problem": "หลีกหนีกับดักความซับซ้อน",
+              "purpose": "ปล่อย AI ร่างงานกว้างๆ ไปก่อน โดยที่ยังไม่กำหนดไฟล์, เทสต์, ลำดับ, และการตรวจสอบ",
+              "solves": "สร้างตัวเลือกตามสถานการณ์เฉพาะหน้า",
+              "misses": "ทิ้งความเสี่ยงที่ต้องหาทางป้องกันทีหลัง / คุณภาพงานลดลง / กินเวลาเดดไลน์ที่มี"
             }
           ],
           "skillOptions": [
@@ -595,9 +595,9 @@ const stage01 = {
               "preventPenalty": true,
               "resolveMsg": "คุณตีตกฟีเจอร์ที่ไม่จำเป็นทิ้ง และบังคับให้ AI โฟกัสเฉพาะ Core Booking Flow เท่านั้น",
               "lesson": "Spec Doc เป็นเครื่องมือที่ดีที่สุดในการป้องกัน Scope Creep จาก AI",
-              "purpose": "Use the spec to decide which files to modify, whether to create new files, and what is out-of-scope.",
-              "solves": "Resolve current Issue ยท Use skill to resolve specific issues ยท Reduce Risk",
-              "misses": "Uses the document to enforce scope rather than feelings or AI suggestions."
+              "purpose": "ใช้ Spec เพื่อตัดสินใจว่าจะแก้ไฟล์ไหน, สร้างไฟล์ใหม่ไหม, และอะไรที่อยู่นอกขอบเขต",
+              "solves": "Resolve current Issue ยท Use skill to resolve specific issues ยท ลดความเสี่ยง",
+              "misses": "ใช้เอกสารบังคับขอบเขต แทนที่จะอิงความรู้สึกหรือคำแนะนำของ AI"
             },
             {
               "skill": "plan_doc",
@@ -620,9 +620,9 @@ const stage01 = {
               "preventPenalty": true,
               "resolveMsg": "คุณจัดลำดับความสำคัญของแผนงานใหม่ ให้เห็นชัดว่าถ้าทำ Payment ตอนนี้ จะกระทบเวลาของฟีเจอร์หลัก",
               "lesson": "Implementation Plan ช่วยให้ทีมมีข้ออ้างในการปฏิเสธการเพิ่ม Scope โดยอิงตามลำดับงาน",
-              "purpose": "Order tasks sequentially with checkpoints on how to verify each task.",
-              "solves": "Resolve current Issue ยท Use skill to resolve specific issues ยท Reduce Risk",
-              "misses": "Slower than issuing all tasks at once, but controls dependencies and checkpoints."
+              "purpose": "จัดเรียงลำดับงานพร้อมจุดตรวจสอบสำหรับทุกๆ Task",
+              "solves": "Resolve current Issue ยท Use skill to resolve specific issues ยท ลดความเสี่ยง",
+              "misses": "ช้ากว่าการสั่งงานรวดเดียว แต่คุมลำดับและความเกี่ยวเนื่องกันได้"
             }
           ]
         }
@@ -648,9 +648,9 @@ const stage01 = {
             "risk": -1,
             "quality": 2
           },
-          "purpose": "Identify files to inspect and core tasks: service picker, slot picker, contact form, confirmation, and booking list.",
-          "solves": "Reduce Risk ยท Increase Quality & Evidence",
-          "misses": "Starts in line with actual files, but lacks tests, verification, risks, and scope guards."
+          "purpose": "ระบุไฟล์ที่จะดูและงานหลักๆ: หน้าเลือกบริการ, เวลา, ฟอร์ม, ยืนยัน, และรายการจอง",
+          "solves": "ลดความเสี่ยง ยท เพิ่มคุณภาพและหลักฐานอ้างอิง",
+          "misses": "เริ่มตรงกับไฟล์ที่มีอยู่จริง แต่ขาดเทสต์, การตรวจสอบ, ความเสี่ยง และการคุมขอบเขต"
         },
         {
           "id": "rush_execute",
@@ -665,7 +665,7 @@ const stage01 = {
           "tradeoff": "ใช้ Token และเวลาเยอะ แต่ลดโอกาสที่โค้ดจะพันกันในภายหลัง",
           "outcome": "คุณได้โครงสร้างโปรเจกต์ที่ชัดเจน มีการแยก Component และ Service ออกจากกัน",
           "lesson": "การวาง Architecture เป็นเรื่องสำคัญ โดยเฉพาะเมื่อใช้ AI สร้างโค้ดเยอะๆ",
-          "problem": "Sloppy Maintainability",
+          "problem": "การดูแลรักษาระบบที่สะเปะสะปะ",
           "progress": 55,
           "effects": {
             "time": -1,
@@ -673,9 +673,9 @@ const stage01 = {
             "risk": 4,
             "quality": 0
           },
-          "purpose": "Skip writing an explicit plan and just ask AI to build based on conversational memory.",
-          "solves": "Advance Work",
-          "misses": "High risk can trigger a phase issue"
+          "purpose": "ข้ามการวางแผนไปเลย และสั่งให้ AI สร้างจากบริบทเดิมที่คุยค้างไว้",
+          "solves": "งานเดินหน้า",
+          "misses": "ความเสี่ยงสูงอาจทำให้เกิดปัญหาในเฟส"
         },
         {
           "id": "prototype_ready_scope",
@@ -690,7 +690,7 @@ const stage01 = {
           "tradeoff": "รู้สึกเหมือนงานเดินเร็ว แต่เดี๋ยวก็ต้องกลับมารื้อโค้ดที่พัง",
           "outcome": "AI สร้าง Component ขึ้นมาสะเปะสะปะ ตัวแปร State ไม่ตรงกัน และต้องเริ่มแก้บั๊กกันตั้งแต่ตอนนี้",
           "lesson": "การไม่วางแผนคือการวางแผนที่จะล้มเหลว โดยเฉพาะกับ AI ที่พร้อมจะสร้างโค้ดขยะให้คุณทุกเมื่อ",
-          "problem": "Escape Complexity Trap",
+          "problem": "หลีกหนีกับดักความซับซ้อน",
           "progress": 45,
           "effects": {
             "time": 0,
@@ -698,9 +698,9 @@ const stage01 = {
             "risk": 3,
             "quality": -1
           },
-          "purpose": "Write a high-level plan giving AI total freedom. No files, tests, or verification steps locked in.",
-          "solves": "Advance Work",
-          "misses": "Leaves risk that needs another guardrail / Lowers delivery quality"
+          "purpose": "ร่างแผนระดับสูง ปล่อย AI อิสระ ไม่มีการระบุไฟล์ เทสต์ หรือการตรวจสอบอะไรเลย",
+          "solves": "งานเดินหน้า",
+          "misses": "ทิ้งความเสี่ยงที่ต้องหาทางป้องกันทีหลัง / คุณภาพงานลดลง"
         }
       ],
       "skillOptions": [
@@ -714,10 +714,10 @@ const stage01 = {
             "+50%",
             "files/scope"
           ],
-          "helper": "Clarify which files to edit, whether to create new files, and define must-haves versus out-of-scope items.",
-          "tradeoff": "Slower, but provides documented evidence to prevent scope creep.",
-          "outcome": "The team knows exactly which files the Booking MVP must touch, what to build, and what is out-of-scope.",
-          "lesson": "Spec Doc helps the Planning phase answer files, new files, scope, and scope guards.",
+          "helper": "กำหนดให้ชัดเจนว่าจะแก้ไฟล์ไหน สร้างใหม่ไหม และกำหนดว่าอะไรต้องมี / อยู่นอกขอบเขต",
+          "tradeoff": "ช้าลงหน่อย แต่ได้หลักฐานยืนยันชัดเจน ช่วยป้องกันการบานปลายของสโคปงาน",
+          "outcome": "ทีมรู้ชัดว่า MVP นี้ต้องยุ่งกับไฟล์ไหน สร้างอะไรบ้าง และอะไรที่ไม่ต้องทำ",
+          "lesson": "Spec Doc ช่วยตอบคำถามเรื่องไฟล์, ขอบเขต และการป้องกันสโคปในเฟส Plan",
           "progress": 50,
           "effects": {
             "time": 3,
@@ -725,9 +725,9 @@ const stage01 = {
             "risk": -4,
             "quality": 4
           },
-          "purpose": "Clarify which files to edit, whether to create new files, and define must-haves versus out-of-scope items.",
-          "solves": "Use skill to resolve specific issues ยท Reduce Risk ยท Increase Quality & Evidence",
-          "misses": "Consumes deadline room"
+          "purpose": "กำหนดให้ชัดเจนว่าจะแก้ไฟล์ไหน สร้างใหม่ไหม และกำหนดว่าอะไรต้องมี / อยู่นอกขอบเขต",
+          "solves": "Use skill to resolve specific issues ยท ลดความเสี่ยง ยท เพิ่มคุณภาพและหลักฐานอ้างอิง",
+          "misses": "กินเวลาเดดไลน์ที่มี"
         },
         {
           "skill": "plan_doc",
@@ -739,10 +739,10 @@ const stage01 = {
             "+50%",
             "order/verify"
           ],
-          "helper": "Establish task order, dependency order, and verification methods after each task.",
-          "tradeoff": "Takes more time, but reduces reprompt loops during Execution.",
-          "outcome": "The team visualizes the flow from files to tests to reviews, and knows what to verify after each task.",
-          "lesson": "Implementation Plan helps Planning define order and verification before letting the AI start.",
+          "helper": "จัดลำดับงาน, การพึ่งพา, และวิธีตรวจสอบหลังทำเสร็จแต่ละงาน",
+          "tradeoff": "ใช้เวลามากขึ้น แต่ช่วยลดการต้องแก้ Prompt ซ้ำๆ ในเฟส Execution",
+          "outcome": "ทีมเห็นภาพรวมจากไฟล์ ไปจนถึงรีวิว และรู้ชัดว่าต้องตรวจสอบอะไร",
+          "lesson": "Implementation Plan ช่วยระบุลำดับและการตรวจสอบก่อนจะให้ AI เริ่มลงมือ",
           "progress": 50,
           "effects": {
             "time": 2,
@@ -750,9 +750,9 @@ const stage01 = {
             "risk": -3,
             "quality": 4
           },
-          "purpose": "Establish task order, dependency order, and verification methods after each task.",
-          "solves": "Use skill to resolve specific issues ยท Reduce Risk ยท Increase Quality & Evidence",
-          "misses": "Takes more time, but reduces reprompt loops during Execution."
+          "purpose": "จัดลำดับงาน, การพึ่งพา, และวิธีตรวจสอบหลังทำเสร็จแต่ละงาน",
+          "solves": "Use skill to resolve specific issues ยท ลดความเสี่ยง ยท เพิ่มคุณภาพและหลักฐานอ้างอิง",
+          "misses": "ใช้เวลามากขึ้น แต่ช่วยลดการต้องแก้ Prompt ซ้ำๆ ในเฟส Execution"
         },
         {
           "skill": "terraform_skill",
@@ -764,10 +764,10 @@ const stage01 = {
             "+35%",
             "plan-only"
           ],
-          "helper": "Plan the Terraform module pattern, environment boundaries, tests, CI/CD gates, and production guardrails without running apply.",
-          "tradeoff": "Takes extra time, but reduces risk from infra scope and live resources.",
-          "outcome": "The team has an IaC plan specifying modules, state/backend, inputs, tests, and approvals before executing resource-changing commands.",
-          "lesson": "Terraform must start with planning and guardrails, not letting AI apply infra directly from prompts.",
+          "helper": "วางแผนเรื่อง Terraform Module, สภาพแวดล้อม, เทสต์, และการป้องกันโดยยังไม่รัน apply",
+          "tradeoff": "เสียเวลาเพิ่ม แต่ลดความเสี่ยงที่เกี่ยวกับโครงสร้างเซิร์ฟเวอร์",
+          "outcome": "ทีมมีแผน IaC ที่ระบุ Module, State, Tests และเงื่อนไขการอนุมัติล่วงหน้า",
+          "lesson": "Terraform ต้องเริ่มที่แผนและการป้องกัน ห้ามให้ AI รันคำสั่งโครงสร้างโดยตรง",
           "progress": 35,
           "effects": {
             "time": 2,
@@ -775,9 +775,9 @@ const stage01 = {
             "risk": -3,
             "quality": 3
           },
-          "purpose": "Plan the Terraform module pattern, environment boundaries, tests, CI/CD gates, and production guardrails without running apply.",
-          "solves": "Use skill to resolve specific issues ยท Reduce Risk ยท Increase Quality & Evidence",
-          "misses": "Takes extra time, but reduces risk from infra scope and live resources."
+          "purpose": "วางแผนเรื่อง Terraform Module, สภาพแวดล้อม, เทสต์, และการป้องกันโดยยังไม่รัน apply",
+          "solves": "Use skill to resolve specific issues ยท ลดความเสี่ยง ยท เพิ่มคุณภาพและหลักฐานอ้างอิง",
+          "misses": "เสียเวลาเพิ่ม แต่ลดความเสี่ยงที่เกี่ยวกับโครงสร้างเซิร์ฟเวอร์"
         },
         {
           "skill": "context",
@@ -789,10 +789,10 @@ const stage01 = {
             "+35%",
             "Actual status"
           ],
-          "helper": "Cross-check the plan with current context: goal, existing files, constraints, and definition of done.",
-          "tradeoff": "Not the fastest option, but prevents hallucinating repository states that do not exist.",
-          "outcome": "The plan remains anchored to the goal, users, existing files, and documented constraints, rather than becoming a wish list.",
-          "lesson": "CONTEXT.md helps align the Plan with the actual status of the project.",
+          "helper": "ตรวจสอบแผนไขว้กับ Context: เป้าหมาย, ไฟล์ที่มี, ข้อจำกัด และ DoD",
+          "tradeoff": "ไม่ใช่ทางเลือกที่เร็วที่สุด แต่ป้องกันการเพ้อฝันถึงไฟล์ที่ไม่มีอยู่จริง",
+          "outcome": "แผนจะอิงตามความเป็นจริง ไม่กลายเป็นแค่ความต้องการเลื่อนลอย",
+          "lesson": "CONTEXT.md ช่วยปรับแผนให้ตรงกับสถานะความเป็นจริงของโปรเจกต์",
           "progress": 35,
           "effects": {
             "time": 1,
@@ -800,9 +800,9 @@ const stage01 = {
             "risk": -2,
             "quality": 2
           },
-          "purpose": "Cross-check the plan with current context: goal, existing files, constraints, and definition of done.",
-          "solves": "Use skill to resolve specific issues ยท Reduce Risk ยท Increase Quality & Evidence",
-          "misses": "Not the fastest option, but prevents hallucinating repository states that do not exist."
+          "purpose": "ตรวจสอบแผนไขว้กับ Context: เป้าหมาย, ไฟล์ที่มี, ข้อจำกัด และ DoD",
+          "solves": "Use skill to resolve specific issues ยท ลดความเสี่ยง ยท เพิ่มคุณภาพและหลักฐานอ้างอิง",
+          "misses": "ไม่ใช่ทางเลือกที่เร็วที่สุด แต่ป้องกันการเพ้อฝันถึงไฟล์ที่ไม่มีอยู่จริง"
         },
         {
           "skill": "scaffolds",
@@ -814,10 +814,10 @@ const stage01 = {
             "+35%",
             "test/risk guard"
           ],
-          "helper": "Use a checklist to enforce tests, DoD, risks, verification, and scope guards before Execution.",
-          "tradeoff": "Adds some process, but reduces false confidence and forgotten tests.",
-          "outcome": "The team has a checklist of what to test first, what the risks are, how to verify, and what is out-of-bounds.",
-          "lesson": "Scaffolds help Planning remember tests, risks, and scope guards.",
+          "helper": "ใช้ Checklist บังคับเรื่องเทสต์, DoD, ความเสี่ยง และขอบเขตก่อนเข้า Execution",
+          "tradeoff": "เพิ่มขั้นตอนขึ้นบ้าง แต่ลดความมั่นใจผิดๆ และการลืมทำเทสต์",
+          "outcome": "ทีมมี Checklist ชัดเจนว่าต้องเทสต์อะไร มีความเสี่ยงไหน และอะไรที่ข้ามเส้น",
+          "lesson": "Scaffolds ช่วยให้ไม่ลืมเรื่องเทสต์ ความเสี่ยง และขอบเขต",
           "progress": 35,
           "effects": {
             "time": 1,
@@ -825,9 +825,9 @@ const stage01 = {
             "risk": -2,
             "quality": 2
           },
-          "purpose": "Use a checklist to enforce tests, DoD, risks, verification, and scope guards before Execution.",
-          "solves": "Use skill to resolve specific issues ยท Reduce Risk ยท Increase Quality & Evidence",
-          "misses": "Adds some process, but reduces false confidence and forgotten tests."
+          "purpose": "ใช้ Checklist บังคับเรื่องเทสต์, DoD, ความเสี่ยง และขอบเขตก่อนเข้า Execution",
+          "solves": "Use skill to resolve specific issues ยท ลดความเสี่ยง ยท เพิ่มคุณภาพและหลักฐานอ้างอิง",
+          "misses": "เพิ่มขั้นตอนขึ้นบ้าง แต่ลดความมั่นใจผิดๆ และการลืมทำเทสต์"
         }
       ],
       "synergyOptions": [
@@ -844,10 +844,10 @@ const stage01 = {
             "+90%",
             "ready to execute"
           ],
-          "helper": "Combine files, new files, tests, order, verification, risks, and scope guards into a single plan.",
-          "tradeoff": "Spends a little time and tokens; the plan is ready, but you still have to decide on the first task in Execution.",
-          "outcome": "AI obtains an actionable plan: knowing files to edit, files to protect, booking path tests, task order, verification, risks, and scope guards.",
-          "lesson": "Implementation Readiness Plan represents a Plan that fully answers what to do, where, in what order, how to verify, and what to protect.",
+          "helper": "รวมรายละเอียดไฟล์, การเทสต์, ลำดับ, และขอบเขตเข้าในแผนงานเดียว",
+          "tradeoff": "เสียเวลากับ Token ไปบ้าง ได้แผนออกมา แต่ก็ยังต้องมาตัดสินใจเลือกงานแรกอยู่ดี",
+          "outcome": "AI ได้รับแผนที่ทำได้จริง รู้ว่าต้องแก้ตรงไหน ระวังตรงไหน ตรวจสอบอย่างไร",
+          "lesson": "แผน Implementation Readiness ช่วยตอบโจทย์ได้ครบว่าต้องทำอะไร ที่ไหน อย่างไร",
           "progress": 90,
           "effects": {
             "time": 3,
@@ -855,9 +855,9 @@ const stage01 = {
             "risk": -5,
             "quality": 6
           },
-          "purpose": "Combine files, new files, tests, order, verification, risks, and scope guards into a single plan.",
-          "solves": "Use Combo to close multiple Gaps ยท Reduce Risk ยท Increase Quality & Evidence",
-          "misses": "Consumes deadline room"
+          "purpose": "รวมรายละเอียดไฟล์, การเทสต์, ลำดับ, และขอบเขตเข้าในแผนงานเดียว",
+          "solves": "Use Combo to close multiple Gaps ยท ลดความเสี่ยง ยท เพิ่มคุณภาพและหลักฐานอ้างอิง",
+          "misses": "กินเวลาเดดไลน์ที่มี"
         }
       ]
     },
@@ -882,7 +882,7 @@ const stage01 = {
         {
           "id": "hardcoded_secret",
           "title": "Hallucination Spike",
-          "problem": "Hardcoded Secrets Leak",
+          "problem": "โค้ดหลุดข้อมูล Secrets ความปลอดภัย",
           "copy": "จู่ๆ AI ก็เรียกใช้ Library ประหลาดๆ ที่ไม่มีอยู่จริง และใส่โค้ดที่ดูซับซ้อนเกินจำเป็นเข้ามาในการจอง",
           "danger": "ถ้าปล่อยผ่าน โค้ดนี้จะรันไม่ขึ้น และการหาจุดแก้จะยากมาก",
           "progressPenalty": 30,
@@ -906,10 +906,10 @@ const stage01 = {
               },
               "resolveMsg": "โค้ดพังยับเยิน Error กระจายเต็มหน้าจอ คุณต้องเสียเวลาไล่ลบโค้ดผีเหล่านั้นทิ้ง",
               "lesson": "อย่าปล่อยผ่าน Hallucination เด็ดขาด โค้ดที่อธิบายไม่ได้คือหนี้สินก้อนโต",
-              "problem": "Hardcoded Secrets Leak",
-              "purpose": "Make a mental note to remove the key later.",
-              "solves": "Accelerate work but increase Risk",
-              "misses": "High risk can trigger a phase issue / Lowers delivery quality"
+              "problem": "โค้ดหลุดข้อมูล Secrets ความปลอดภัย",
+              "purpose": "จำไว้ในใจว่าจะมาลบ Key ออกทีหลัง",
+              "solves": "เร่งการทำงานแต่ความเสี่ยงเพิ่มขึ้น",
+              "misses": "ความเสี่ยงสูงอาจทำให้เกิดปัญหาในเฟสได้ / ลดคุณภาพงาน"
             }
           ],
           "skillOptions": [
@@ -934,9 +934,9 @@ const stage01 = {
               "preventPenalty": true,
               "resolveMsg": "TDD บังคับให้ AI ต้องเขียนโค้ดที่ผ่าน Test เท่านั้น ทำให้บรรดา Library ผีๆ หายไปหมด",
               "lesson": "TDD Loop คือเครื่องมือที่ดีที่สุดในการป้องกัน Hallucination จาก AI",
-              "purpose": "The system warns that a token/secret pattern is found in the code.",
-              "solves": "Resolve current Issue ยท Use skill to resolve specific issues ยท Reduce Risk",
-              "misses": "Requires time to inspect, but reduces damage."
+              "purpose": "ระบบแจ้งเตือนว่าพบรูปแบบของ Token/Secret หลุดเข้ามาในโค้ด",
+              "solves": "Resolve current Issue ยท Use skill to resolve specific issues ยท ลดความเสี่ยง",
+              "misses": "ต้องใช้เวลาตรวจสอบ แต่ช่วยลดความเสียหาย"
             },
             {
               "skill": "scaffolds",
@@ -959,9 +959,9 @@ const stage01 = {
               "preventPenalty": true,
               "resolveMsg": "พอโดนจี้ให้อธิบาย AI ก็รู้ตัวว่ามั่วขึ้นมา จึงขอโทษและเสนอโค้ดใหม่ที่ถูกต้อง",
               "lesson": "การให้ AI อธิบายโค้ดตัวเอง (Rubber Ducking) มักจะช่วยแก้ Hallucination ได้",
-              "purpose": "Use a checklist forbidding hardcoded secrets and requiring environment variables.",
-              "solves": "Resolve current Issue ยท Use skill to resolve specific issues ยท Reduce Risk",
-              "misses": "Adds inspection steps, but keeps junior developers from making mistakes."
+              "purpose": "ใช้ Checklist ห้ามการ Hardcode Secrets และบังคับใช้ตัวแปร ENV",
+              "solves": "Resolve current Issue ยท Use skill to resolve specific issues ยท ลดความเสี่ยง",
+              "misses": "เพิ่มขั้นตอนตรวจสอบ แต่กันความผิดพลาดจากนักพัฒนาจูเนียร์"
             }
           ]
         }
@@ -987,9 +987,9 @@ const stage01 = {
             "risk": 4,
             "quality": 0
           },
-          "purpose": "Combine tasks that appear related to let AI execute them in a batch covering service, slot, form, and confirmation.",
-          "solves": "Advance Work",
-          "misses": "High risk can trigger a phase issue / Spends a lot of AI budget"
+          "purpose": "รวม Task ที่ดูเกี่ยวข้องกันให้ AI ทำรวดเดียวครอบคลุมทุกเรื่อง",
+          "solves": "งานเดินหน้า",
+          "misses": "ความเสี่ยงสูงอาจทำให้เกิดปัญหาในเฟส / ใช้ AI Budget เยอะมาก"
         },
         {
           "id": "reprompt_loop",
@@ -1004,7 +1004,7 @@ const stage01 = {
           "tradeoff": "อาจจะเสร็จเร็วมาก หรือพังยับเยินจนต้องแก้ใหม่หมด",
           "outcome": "AI พ่นโค้ดออกมาหลายร้อยบรรทัด บางส่วนทำงานได้ดี แต่บางส่วนก็พังลอจิกพัง แถม State มั่วซั่ว",
           "lesson": "Mega Prompt มักจะให้ผลลัพธ์ที่ขาดๆ เกินๆ และยากต่อการตรวจสอบ",
-          "problem": "Reprompting Loop Trap",
+          "problem": "ติดกับดัก Reprompt วนลูป",
           "progress": 35,
           "effects": {
             "time": 3,
@@ -1012,9 +1012,9 @@ const stage01 = {
             "risk": 4,
             "quality": -2
           },
-          "purpose": "Use the latest error as context to let AI patch the failure immediately.",
-          "solves": "Accelerate work but increase Risk",
-          "misses": "High risk can trigger a phase issue / Creates quality debt / Spends a lot of AI budget / Consumes deadline room"
+          "purpose": "ใช้ Error ล่าสุดเป็น Context ให้ AI แปะโค้ดแก้ทันที",
+          "solves": "เร่งการทำงานแต่ความเสี่ยงเพิ่มขึ้น",
+          "misses": "ความเสี่ยงสูงอาจทำให้เกิดปัญหาในเฟส / Creates quality debt / ใช้ AI Budget เยอะมาก / กินเวลาเดดไลน์ที่มี"
         },
         {
           "id": "manual_build",
@@ -1036,9 +1036,9 @@ const stage01 = {
             "risk": -1,
             "quality": 2
           },
-          "purpose": "Read the plan, select the next task, summarize what to do, and edit only the relevant files.",
-          "solves": "Reduce Risk ยท Increase Quality & Evidence ยท Advance Work",
-          "misses": "Consumes deadline room"
+          "purpose": "อ่านแผน เลือกงานถัดไป สรุปสิ่งที่จะทำ และแก้เฉพาะไฟล์ที่เกี่ยว",
+          "solves": "ลดความเสี่ยง ยท เพิ่มคุณภาพและหลักฐานอ้างอิง ยท งานเดินหน้า",
+          "misses": "กินเวลาเดดไลน์ที่มี"
         },
         {
           "id": "tool_rush_no_check",
@@ -1049,11 +1049,11 @@ const stage01 = {
             "+40%",
             "visual first"
           ],
-          "helper": "Use tools to generate the booking UI slice first, then check where validation/state needs to be added.",
-          "tradeoff": "Helps visualize the flow quickly, but validation, conflicts, and accessibility remain broken without focused tests.",
-          "outcome": "The app looks ready very fast, but evidence that the completed task actually passes is lacking.",
-          "lesson": "Visual slices help discuss requirements, but must be backed by focused tests and evidence.",
-          "problem": "Delegated QA to AI",
+          "helper": "ให้ AI สร้าง UI การจองคิวออกมาก่อน แล้วค่อยมาดูว่าต้องใส่ Validation ตรงไหน",
+          "tradeoff": "ทำให้เห็นภาพรวมได้เร็ว แต่ระบบการตรวจสอบ ข้อมูลซ้อนทับ ก็ยังคงพังอยู่",
+          "outcome": "แอปดูเหมือนจะเสร็จเร็วมาก แต่ไม่มีหลักฐานยืนยันว่าการทำงานนั้นถูกต้อง",
+          "lesson": "การทำ UI ล่วงหน้าช่วยในการคุย Requirement ได้ แต่สุดท้ายก็ต้องมีเทสต์อยู่ดี",
+          "problem": "โยนงานตรวจคุณภาพให้ AI แทน",
           "progress": 40,
           "effects": {
             "time": 0,
@@ -1061,9 +1061,9 @@ const stage01 = {
             "risk": 3,
             "quality": 1
           },
-          "purpose": "Use tools to generate the booking UI slice first, then check where validation/state needs to be added.",
-          "solves": "Increase Quality & Evidence ยท Advance Work",
-          "misses": "Leaves risk that needs another guardrail"
+          "purpose": "ให้ AI สร้าง UI การจองคิวออกมาก่อน แล้วค่อยมาดูว่าต้องใส่ Validation ตรงไหน",
+          "solves": "เพิ่มคุณภาพและหลักฐานอ้างอิง ยท งานเดินหน้า",
+          "misses": "ทิ้งความเสี่ยงที่ต้องการ Guardrail อย่างอื่นมาช่วย"
         }
       ],
       "skillOptions": [
@@ -1077,10 +1077,10 @@ const stage01 = {
             "+55%",
             "focused test"
           ],
-          "helper": "Write a failing test first, write minimal code to pass, refactor, rerun tests, and only then proceed to the next task.",
-          "tradeoff": "Takes more time, but catches bugs before crossing to the next task.",
-          "outcome": "The team observes the red -> green -> refactor -> rerun flow of this task before moving to the next part.",
-          "lesson": "TDD Loop forces the AI to work on one task at a time, providing proof that tests actually pass, not just that the UI looks nice.",
+          "helper": "เขียน Failing Test ก่อน เขียนโค้ดสั้นๆ ให้ผ่าน Refactor และทำซ้ำจนกว่าจะย้ายไปงานถัดไป",
+          "tradeoff": "ใช้เวลามากขึ้น แต่ดักจับบั๊กได้ก่อนจะข้ามไปทำงานอื่น",
+          "outcome": "ทีมได้เห็นวงจร Red -> Green -> Refactor ของการพัฒนาในทุกส่วน",
+          "lesson": "TDD Loop บังคับให้ AI ทำงานทีละอย่าง และมีข้อพิสูจน์ว่ามันผ่านจริงๆ ไม่ใช่แค่หน้าตาดี",
           "progress": 55,
           "effects": {
             "time": 2,
@@ -1088,9 +1088,9 @@ const stage01 = {
             "risk": -4,
             "quality": 4
           },
-          "purpose": "Write a failing test first, write minimal code to pass, refactor, rerun tests, and only then proceed to the next task.",
-          "solves": "Use skill to resolve specific issues ยท Reduce Risk ยท Increase Quality & Evidence",
-          "misses": "Takes more time, but catches bugs before crossing to the next task."
+          "purpose": "เขียน Failing Test ก่อน เขียนโค้ดสั้นๆ ให้ผ่าน Refactor และทำซ้ำจนกว่าจะย้ายไปงานถัดไป",
+          "solves": "Use skill to resolve specific issues ยท ลดความเสี่ยง ยท เพิ่มคุณภาพและหลักฐานอ้างอิง",
+          "misses": "ใช้เวลามากขึ้น แต่ดักจับบั๊กได้ก่อนจะข้ามไปทำงานอื่น"
         },
         {
           "skill": "risk_scanner",
@@ -1102,10 +1102,10 @@ const stage01 = {
             "+50%",
             "Risk alert"
           ],
-          "helper": "Alerts when editing files out of scope, missing tests, exposing secrets, or risking data integrity.",
-          "tradeoff": "Has overhead, but halts risks before they propagate to the next task.",
-          "outcome": "The team sees warnings as soon as the code becomes fragile, without waiting for the booking flow to crash.",
-          "lesson": "The speed of AI requires early warning systems for scope, security, and data integrity.",
+          "helper": "แจ้งเตือนเมื่อ AI แตะไฟล์นอกขอบเขต ขาดเทสต์ ทำ Secret หลุด หรือความเสี่ยงเรื่องข้อมูล",
+          "tradeoff": "มีโอเวอร์เฮด แต่มันหยุดความเสี่ยงได้ก่อนจะลามไปส่วนอื่น",
+          "outcome": "ทีมจะเห็นคำเตือนตั้งแต่ตอนที่โค้ดเริ่มเปราะบาง โดยไม่ต้องรอให้แอปพังจริงๆ",
+          "lesson": "ความเร็วของ AI ทำให้เราต้องการระบบเตือนภัยล่วงหน้าเรื่องขอบเขตและความปลอดภัย",
           "progress": 50,
           "effects": {
             "time": 1,
@@ -1113,9 +1113,9 @@ const stage01 = {
             "risk": -3,
             "quality": 3
           },
-          "purpose": "Alerts when editing files out of scope, missing tests, exposing secrets, or risking data integrity.",
-          "solves": "Use skill to resolve specific issues ยท Reduce Risk ยท Increase Quality & Evidence",
-          "misses": "Has overhead, but halts risks before they propagate to the next task."
+          "purpose": "แจ้งเตือนเมื่อ AI แตะไฟล์นอกขอบเขต ขาดเทสต์ ทำ Secret หลุด หรือความเสี่ยงเรื่องข้อมูล",
+          "solves": "Use skill to resolve specific issues ยท ลดความเสี่ยง ยท เพิ่มคุณภาพและหลักฐานอ้างอิง",
+          "misses": "มีโอเวอร์เฮด แต่มันหยุดความเสี่ยงได้ก่อนจะลามไปส่วนอื่น"
         },
         {
           "skill": "terraform_skill",
@@ -1127,10 +1127,10 @@ const stage01 = {
             "+50%",
             "no apply"
           ],
-          "helper": "Run Terraform plan-only: fmt, validate, test, and plan, stopping before apply or destroy.",
-          "tradeoff": "Slower than generating and deploying directly, but protects live resources from damage.",
-          "outcome": "The team obtains evidence from plan/test without creating or deleting live resources.",
-          "lesson": "Infra workflow must require human approval before executing apply or destroy commands.",
+          "helper": "รัน Terraform แค่ plan-only: fmt, validate, test, plan แล้วหยุดก่อนที่จะ apply",
+          "tradeoff": "ช้ากว่าแบบปั่นเสร็จแล้ว Deploy เลย แต่คุ้มครองทรัพยากรบนเซิร์ฟเวอร์ได้",
+          "outcome": "ทีมได้หลักฐานจาก plan/test โดยยังไม่มีการลบหรือสร้างของจริงๆ",
+          "lesson": "Workflow ของ Infra ต้องรอการอนุมัติจากคนก่อนจะรันคำสั่งแก้ไขโครงสร้าง",
           "progress": 50,
           "effects": {
             "time": 2,
@@ -1138,9 +1138,9 @@ const stage01 = {
             "risk": -4,
             "quality": 4
           },
-          "purpose": "Run Terraform plan-only: fmt, validate, test, and plan, stopping before apply or destroy.",
-          "solves": "Use skill to resolve specific issues ยท Reduce Risk ยท Increase Quality & Evidence",
-          "misses": "Slower than generating and deploying directly, but protects live resources from damage."
+          "purpose": "รัน Terraform แค่ plan-only: fmt, validate, test, plan แล้วหยุดก่อนที่จะ apply",
+          "solves": "Use skill to resolve specific issues ยท ลดความเสี่ยง ยท เพิ่มคุณภาพและหลักฐานอ้างอิง",
+          "misses": "ช้ากว่าแบบปั่นเสร็จแล้ว Deploy เลย แต่คุ้มครองทรัพยากรบนเซิร์ฟเวอร์ได้"
         },
         {
           "skill": "scaffolds",
@@ -1152,10 +1152,10 @@ const stage01 = {
             "+50%",
             "All 7 steps"
           ],
-          "helper": "Use a checklist: read plan, choose task, summarize, relevant files, focused test, summarize result, stop/ask.",
-          "tradeoff": "Slower than copying errors, but fixes the root cause and respects checkpoints.",
-          "outcome": "The team executes based on evidence rather than repeatedly feeding raw errors back to the AI.",
-          "lesson": "Scaffolds prevent Executing Plans from turning into a reprompt loop.",
+          "helper": "ใช้ Checklist: อ่านแผน เลือกงาน สรุป หาไฟล์ เขียนเทสต์ สรุปผล แล้วหยุดประเมิน",
+          "tradeoff": "ช้ากว่าการก็อป Error แปะๆ แต่ได้แก้ที่ต้นเหตุ",
+          "outcome": "ทีมตัดสินใจลงมือแก้ตามหลักฐาน ดีกว่าการยัด Error ดิบๆ ให้ AI เรื่อยๆ",
+          "lesson": "Scaffolds ช่วยป้องกันการ Execute แผนงานไม่ให้กลายเป็นการวนลูปแก้โค้ดไปเรื่อย",
           "progress": 50,
           "effects": {
             "time": 2,
@@ -1163,9 +1163,9 @@ const stage01 = {
             "risk": -3,
             "quality": 3
           },
-          "purpose": "Use a checklist: read plan, choose task, summarize, relevant files, focused test, summarize result, stop/ask.",
-          "solves": "Use skill to resolve specific issues ยท Reduce Risk ยท Increase Quality & Evidence",
-          "misses": "Slower than copying errors, but fixes the root cause and respects checkpoints."
+          "purpose": "ใช้ Checklist: อ่านแผน เลือกงาน สรุป หาไฟล์ เขียนเทสต์ สรุปผล แล้วหยุดประเมิน",
+          "solves": "Use skill to resolve specific issues ยท ลดความเสี่ยง ยท เพิ่มคุณภาพและหลักฐานอ้างอิง",
+          "misses": "ช้ากว่าการก็อป Error แปะๆ แต่ได้แก้ที่ต้นเหตุ"
         }
       ],
       "synergyOptions": [
@@ -1182,10 +1182,10 @@ const stage01 = {
             "+90%",
             "spec + test"
           ],
-          "helper": "Use Spec + TDD Loop to verify that the task matches the spec: write a failing test -> write minimal code to pass -> refactor -> rerun tests -> proceed to the next task before accepting code.",
-          "tradeoff": "Invests tokens and time to gather evidence, but you must still judge if the test scope is sufficient.",
-          "outcome": "Work progresses fast, yet Spec remains the target, and TDD Loop provides proof that the task actually passes.",
-          "lesson": "Spec defines what to build, while TDD Loop verifies that the task actually passes before proceeding.",
+          "helper": "ใช้ Spec + TDD Loop ตรวจสอบความถูกต้อง: เขียนเทสต์ที่พัง -> แก้ให้ผ่าน -> รีแฟกเตอร์ ก่อนจะรับงาน",
+          "tradeoff": "ใช้ Token กับเวลาเก็บหลักฐาน แต่ก็ยังคงต้องประเมินต่อว่าสโคปแค่นี้พอหรือไม่",
+          "outcome": "งานเดินเร็ว โดยมี Spec เป็นเป้า และ TDD Loop ช่วยการันตีว่ามันผ่าน",
+          "lesson": "Spec กำหนดว่าต้องสร้างอะไร ส่วน TDD Loop พิสูจน์ว่ามันรันผ่านจริงๆ",
           "progress": 90,
           "effects": {
             "time": 2,
@@ -1193,9 +1193,9 @@ const stage01 = {
             "risk": -4,
             "quality": 5
           },
-          "purpose": "Use Spec + TDD Loop to verify that the task matches the spec: write a failing test -> write minimal code to pass -> refactor -> rerun tests -> proceed to the next task before accepting code.",
-          "solves": "Use Combo to close multiple Gaps ยท Reduce Risk ยท Increase Quality & Evidence",
-          "misses": "Spends a lot of AI budget"
+          "purpose": "ใช้ Spec + TDD Loop ตรวจสอบความถูกต้อง: เขียนเทสต์ที่พัง -> แก้ให้ผ่าน -> รีแฟกเตอร์ ก่อนจะรับงาน",
+          "solves": "Use Combo to close multiple Gaps ยท ลดความเสี่ยง ยท เพิ่มคุณภาพและหลักฐานอ้างอิง",
+          "misses": "ใช้ AI Budget เยอะมาก"
         },
         {
           "requires": [
@@ -1210,10 +1210,10 @@ const stage01 = {
             "+90%",
             "plan + risk"
           ],
-          "helper": "Combine Terraform plan-only evidence with risk scanner to check drift, secrets/state, destructive changes, and approval before apply/destroy.",
-          "tradeoff": "Takes more time and tokens, but closes infra risks affecting live resources.",
-          "outcome": "The team inspects destructive changes, secret/state risks, and approval gates before touching live resources.",
-          "lesson": "Good Terraform workflows demand plan, risk scans, and explicit approval before any resource-changing command.",
+          "helper": "ใช้ข้อมูล Terraform plan + Risk Scanner ตรวจจับ Drift, Secrets, และความเสี่ยง ก่อนอนุมัติ Apply",
+          "tradeoff": "ใช้เวลาและ Token เพิ่ม แต่สามารถอุดช่องโหว่ความเสี่ยงทางโครงสร้างได้หมดจด",
+          "outcome": "ทีมตรวจสอบการเปลี่ยนแปลงรุนแรง ความเสี่ยงเรื่อง Secret ก่อนจะแตะระบบจริง",
+          "lesson": "Workflow ของ Terraform ที่ดีต้องมีการวางแผน, สแกนความเสี่ยง, และอนุมัติชัดเจนก่อนทำงานจริง",
           "progress": 90,
           "effects": {
             "time": 3,
@@ -1221,9 +1221,9 @@ const stage01 = {
             "risk": -5,
             "quality": 5
           },
-          "purpose": "Combine Terraform plan-only evidence with risk scanner to check drift, secrets/state, destructive changes, and approval before apply/destroy.",
-          "solves": "Use Combo to close multiple Gaps ยท Reduce Risk ยท Increase Quality & Evidence",
-          "misses": "Consumes deadline room"
+          "purpose": "ใช้ข้อมูล Terraform plan + Risk Scanner ตรวจจับ Drift, Secrets, และความเสี่ยง ก่อนอนุมัติ Apply",
+          "solves": "Use Combo to close multiple Gaps ยท ลดความเสี่ยง ยท เพิ่มคุณภาพและหลักฐานอ้างอิง",
+          "misses": "กินเวลาเดดไลน์ที่มี"
         }
       ]
     },
@@ -1248,7 +1248,7 @@ const stage01 = {
         {
           "id": "shadow_it",
           "title": "Secret Key หลุดในโค้ด",
-          "problem": "Shadow IT Discovery",
+          "problem": "ระบบถูกมองเป็น Shadow IT (แอประดับทดลองที่ไม่ผ่านมาตรฐาน)",
           "copy": "ระหว่างเตรียมส่งงาน คุณพบว่า AI แอบใส่ API Key ของจริง (หรือคล้ายของจริงมาก) ไว้แบบ Hard-code ในไฟล์ Frontend",
           "danger": "ถ้ากดส่งงานไปตอนนี้ ระบบจะมีความเสี่ยงขั้นวิกฤต",
           "progressPenalty": 30,
@@ -1272,10 +1272,10 @@ const stage01 = {
               },
               "resolveMsg": "คุณส่งงานผ่านไปได้ แต่ไม่กี่วันต่อมา API Key ก็ถูกดูดเงินไปหลายแสน",
               "lesson": "เรื่อง Security ไม่ใช่เรื่องล้อเล่น ถึงจะเป็น MVP ก็ห้ามปล่อย Hard-code Secrets เด็ดขาด",
-              "problem": "Shadow IT Discovery",
-              "purpose": "Explain that this is a quick demo and promise documentation later.",
-              "solves": "Accelerate work but increase Risk",
-              "misses": "High risk can trigger a phase issue / Lowers delivery quality"
+              "problem": "ระบบถูกมองเป็น Shadow IT (แอประดับทดลองที่ไม่ผ่านมาตรฐาน)",
+              "purpose": "อธิบายไปว่านี่คือเดโมแบบเร็วๆ แล้วรับปากว่าจะทำ Document ทีหลัง",
+              "solves": "เร่งการทำงานแต่ความเสี่ยงเพิ่มขึ้น",
+              "misses": "ความเสี่ยงสูงอาจทำให้เกิดปัญหาในเฟสได้ / ลดคุณภาพงาน"
             }
           ],
           "skillOptions": [
@@ -1300,9 +1300,9 @@ const stage01 = {
               "preventPenalty": true,
               "resolveMsg": "คุณย้าย API Key ไปไว้ใน .env อย่างปลอดภัย ปิดรอยรั่วสำคัญได้สำเร็จ",
               "lesson": "Code Review ช่วยดักจับปัญหาคอขาดบาดตายอย่าง Hard-code Secrets ได้ทันท่วงที",
-              "purpose": "Gather evidence: does it match spec? are AC met? are there out-of-scope files? test coverage? security risks? data integrity? docs updated? hallucinations or guesses? duplicate code? meaningful naming?",
-              "solves": "Resolve current Issue ยท Use skill to resolve specific issues ยท Reduce Risk",
-              "misses": "Takes time to review, but provides concrete evidence to discuss with ops/IT."
+              "purpose": "รวมรวบหลักฐาน: ตรง Spec ไหม? ผ่าน AC ไหม? ออกนอกขอบเขตไหม? ครอบคลุมการเทสต์ไหม? ความเสี่ยงปลอดภัย? ฯลฯ",
+              "solves": "Resolve current Issue ยท Use skill to resolve specific issues ยท ลดความเสี่ยง",
+              "misses": "ใช้เวลารีวิว แต่ให้ผลลัพธ์ที่ชัดเจนเอาไปคุยกับฝั่ง Ops/IT ได้"
             },
             {
               "skill": "context",
@@ -1325,9 +1325,9 @@ const stage01 = {
               "preventPenalty": true,
               "resolveMsg": "Scanner กวาดเจอ Key ที่ซ่อนอยู่ และ Token เก่าๆ คุณล้างบางมันออกจนหมดจด",
               "lesson": "เครื่องมือ Automated อย่าง Risk Scanner ช่วยลดความผิดพลาดของมนุษย์ในการตรวจหา Secrets ได้ดีเยี่ยม",
-              "purpose": "Open project context, booking scope, and definition of done for audit.",
-              "solves": "Resolve current Issue ยท Use skill to resolve specific issues ยท Reduce Risk",
-              "misses": "Documentation does not fix bugs, but prevents the project from appearing as shadow IT."
+              "purpose": "เปิด Context, ขอบเขต Booking, และ DoD มาออดิตกัน",
+              "solves": "Resolve current Issue ยท Use skill to resolve specific issues ยท ลดความเสี่ยง",
+              "misses": "Document ไม่ได้ช่วยแก้บั๊ก แต่มันกันไม่ให้คนมองโปรเจกต์คุณเป็นเหมือนเด็กเล่นขายของ"
             },
             {
               "skill": "scaffolds",
@@ -1339,8 +1339,8 @@ const stage01 = {
                 "Template",
                 "Full check"
               ],
-              "helper": "Use a template to audit: spec matching, AC completeness, out-of-scope files, test coverage, security risks, data integrity, docs, hallucinations, duplicate code, and naming.",
-              "tradeoff": "Requires going through checklist items, but prevents memory slips.",
+              "helper": "ใช้ Template ตรวจสอบ: Spec, AC, ไฟล์นอกกรอบ, Test, Security, ฯลฯ",
+              "tradeoff": "ต้องไล่ดูตาม Checklist แต่มันป้องกันไม่ให้หลงลืมประเด็นสำคัญ",
               "effects": {
                 "time": 2,
                 "token": 0,
@@ -1348,11 +1348,11 @@ const stage01 = {
                 "quality": 3
               },
               "preventPenalty": true,
-              "resolveMsg": "Review templates enable the team to answer ops/IT questions systematically.",
-              "lesson": "Scaffolds ensure standards do not depend solely on individual memory.",
-              "purpose": "Use a template to audit: spec matching, AC completeness, out-of-scope files, test coverage, security risks, data integrity, docs, hallucinations, duplicate code, and naming.",
-              "solves": "Resolve current Issue ยท Use skill to resolve specific issues ยท Reduce Risk",
-              "misses": "Requires going through checklist items, but prevents memory slips."
+              "resolveMsg": "Review Template ช่วยให้ทีมสามารถตอบคำถามฝั่ง Ops/IT ได้อย่างเป็นระบบ",
+              "lesson": "Scaffolds ทำให้มาตรฐานไม่ตกหล่นตามความทรงจำของใครบางคน",
+              "purpose": "ใช้ Template ตรวจสอบ: Spec, AC, ไฟล์นอกกรอบ, Test, Security, ฯลฯ",
+              "solves": "Resolve current Issue ยท Use skill to resolve specific issues ยท ลดความเสี่ยง",
+              "misses": "ต้องไล่ดูตาม Checklist แต่มันป้องกันไม่ให้หลงลืมประเด็นสำคัญ"
             }
           ]
         }
@@ -1378,9 +1378,9 @@ const stage01 = {
             "risk": -1,
             "quality": 1
           },
-          "purpose": "Launch the app, try selecting services, selecting slots, filling contact info, confirming, and inspecting the booking list on desktop/mobile.",
-          "solves": "Reduce Risk ยท Increase Quality & Evidence ยท Advance Work",
-          "misses": "Verifies the basic user flow, but does not cover specs, security, data integrity, docs, hallucinations, or code quality."
+          "purpose": "ลองรันแอป, ลองกดเลือกบริการ, เลือกเวลา, กรอกข้อมูล, คอนเฟิร์ม, แล้วเปิดดูรายการในระบบ",
+          "solves": "ลดความเสี่ยง ยท เพิ่มคุณภาพและหลักฐานอ้างอิง ยท งานเดินหน้า",
+          "misses": "ตรวจสอบ Flow เบื้องต้น แต่ไม่ได้คัฟเวอร์เรื่อง Spec, Security, หรือคุณภาพโค้ดเลย"
         },
         {
           "id": "ai_self_review",
@@ -1395,7 +1395,7 @@ const stage01 = {
           "tradeoff": "ใช้ Token และเวลาเยอะ แต่คุณภาพออกมาเนี๊ยบ",
           "outcome": "จับบักได้เพียบเรื่อง Timezone ซ้อนทับกัน และเรื่อง Form Validation ที่ยังหลวมอยู่",
           "lesson": "Review คือปราการด่านสุดท้ายก่อนหายนะ",
-          "problem": "Delegated QA to AI",
+          "problem": "โยนงานตรวจคุณภาพให้ AI แทน",
           "progress": 45,
           "effects": {
             "time": 1,
@@ -1403,9 +1403,9 @@ const stage01 = {
             "risk": 3,
             "quality": 0
           },
-          "purpose": "Have the same AI model review the code it just created, without cross-checking specs, tests, or file diffs.",
-          "solves": "Advance Work",
-          "misses": "Leaves risk that needs another guardrail"
+          "purpose": "ให้ AI โมเดลเดิม มารีวิวโค้ดที่มันเพิ่งเขียนเอง โดยไม่ต้องเอา Spec หรือ Test มาเช็คเทียบ",
+          "solves": "งานเดินหน้า",
+          "misses": "ทิ้งความเสี่ยงที่ต้องการ Guardrail อย่างอื่นมาช่วย"
         },
         {
           "id": "ship_now",
@@ -1420,7 +1420,7 @@ const stage01 = {
           "tradeoff": "ถึงเส้นชัยเร็วมาก แต่ไปวัดดวงกันหน้างานว่าจะมีระบบไหนพังบ้าง",
           "outcome": "คุณส่งมอบระบบได้ตรงเวลาเป๊ะ! แต่ลูกค้าบ่นว่าทำไมระบบจองเวลาชนกันได้ และอีเมลไม่ออก...",
           "lesson": "YOLO Ship It มักจบด้วยการแก้บั๊กกลางดึกเสมอ",
-          "problem": "Misleading Confidence",
+          "problem": "ความมั่นใจที่ผิดพลาด",
           "progress": 60,
           "effects": {
             "time": 0,
@@ -1428,9 +1428,9 @@ const stage01 = {
             "risk": 5,
             "quality": -3
           },
-          "purpose": "Ship immediately because AI reports no errors and the demo looks fine.",
-          "solves": "Accelerate Progress",
-          "misses": "High risk can trigger a phase issue / Creates quality debt"
+          "purpose": "ปล่อยงานทันที เพราะ AI แจ้งว่าไม่มี Error และหน้าตาเดโมก็ดูดี",
+          "solves": "เร่งความคืบหน้าแบบลัดขั้นตอน",
+          "misses": "ความเสี่ยงสูงอาจทำให้เกิดปัญหาในเฟส / Creates quality debt"
         }
       ],
       "skillOptions": [
@@ -1444,10 +1444,10 @@ const stage01 = {
             "+60%",
             "Rigorous review"
           ],
-          "helper": "Audit: spec matching, AC completeness, out-of-scope files, test coverage, security risks, data integrity, docs, hallucinations, duplicate code, and naming.",
-          "tradeoff": "Slower, but catches leaked bugs and detects over-edits.",
-          "outcome": "The team catches risks before shipping, fixing them based on evidence rather than pure confidence.",
-          "lesson": "Code Review is the final gate validating specs, acceptance, scope, tests, security, data, docs, hallucinations, and code quality.",
+          "helper": "ออดิต: Spec, AC, ไฟล์นอกกรอบ, Test, Security, Data, ฯลฯ",
+          "tradeoff": "ช้าลง แต่ช่วยจับบั๊กที่หลุดมา และป้องกันการแก้ไฟล์ที่ไม่จำเป็น",
+          "outcome": "ทีมดักความเสี่ยงก่อนปล่อยงาน แก้ไขมันด้วยหลักฐานไม่ใช่แค่ความมั่นใจ",
+          "lesson": "Code Review คือประตูด่านสุดท้ายในการเช็ค Spec, Tests, Scope, และโค้ด",
           "progress": 60,
           "effects": {
             "time": 3,
@@ -1455,9 +1455,9 @@ const stage01 = {
             "risk": -5,
             "quality": 5
           },
-          "purpose": "Audit: spec matching, AC completeness, out-of-scope files, test coverage, security risks, data integrity, docs, hallucinations, duplicate code, and naming.",
-          "solves": "Use skill to resolve specific issues ยท Reduce Risk ยท Increase Quality & Evidence",
-          "misses": "Consumes deadline room"
+          "purpose": "ออดิต: Spec, AC, ไฟล์นอกกรอบ, Test, Security, Data, ฯลฯ",
+          "solves": "Use skill to resolve specific issues ยท ลดความเสี่ยง ยท เพิ่มคุณภาพและหลักฐานอ้างอิง",
+          "misses": "กินเวลาเดดไลน์ที่มี"
         },
         {
           "skill": "walkthrough",
@@ -1469,10 +1469,10 @@ const stage01 = {
             "+50%",
             "Understand code"
           ],
-          "helper": "Force AI to explain the booking state, validation, data integrity, and potential assumptions, while the team questions it.",
-          "tradeoff": "Spends tokens, but prevents the team from shipping code they do not comprehend.",
-          "outcome": "The team uncovers places where the AI wrote overly complex code or invented unnecessary requirements, refactoring them to be simpler.",
-          "lesson": "Developers must understand the code and references used by AI, rather than believing it's done just because the AI claims so.",
+          "helper": "บังคับ AI อธิบายกลไก State, Validation, การคุม Data พร้อมให้ทีมช่วยกันซักไซ้",
+          "tradeoff": "เปลือง Token แต่กันไม่ให้ทีมปล่อยโค้ดที่พวกเขาก็ยังไม่เข้าใจมัน 100%",
+          "outcome": "ทีมจะค้นพบจุดที่ AI เขียนโค้ดซับซ้อนเกินจริง หรือมโน requirement เอง แล้วนำมา Refactor ให้เรียบง่าย",
+          "lesson": "นักพัฒนาต้องเข้าใจโค้ดของ AI ไม่ใช่แค่เชื่อว่าเสร็จเพราะ AI บอกว่าเสร็จแล้ว",
           "progress": 50,
           "effects": {
             "time": 2,
@@ -1480,9 +1480,9 @@ const stage01 = {
             "risk": -4,
             "quality": 4
           },
-          "purpose": "Force AI to explain the booking state, validation, data integrity, and potential assumptions, while the team questions it.",
-          "solves": "Use skill to resolve specific issues ยท Reduce Risk ยท Increase Quality & Evidence",
-          "misses": "Spends tokens, but prevents the team from shipping code they do not comprehend."
+          "purpose": "บังคับ AI อธิบายกลไก State, Validation, การคุม Data พร้อมให้ทีมช่วยกันซักไซ้",
+          "solves": "Use skill to resolve specific issues ยท ลดความเสี่ยง ยท เพิ่มคุณภาพและหลักฐานอ้างอิง",
+          "misses": "เปลือง Token แต่กันไม่ให้ทีมปล่อยโค้ดที่พวกเขาก็ยังไม่เข้าใจมัน 100%"
         },
         {
           "skill": "tdd",
@@ -1494,10 +1494,10 @@ const stage01 = {
             "+55%",
             "Matches spec"
           ],
-          "helper": "Rerun TDD Loop evidence: write a failing test, code minimal fix, refactor, rerun tests, and advance, covering critical booking paths.",
-          "tradeoff": "Straightforward, but requires investing time.",
-          "outcome": "The team clearly observes that the core task loops actually pass, identifying what still needs fixes before delivery.",
-          "lesson": "TDD Loop provides proof that the code functions as agreed upon after refactoring and rerunning.",
+          "helper": "ทำ TDD Loop ซ้ำ: เขียนเทสต์ให้พัง, แก้สั้นๆ, Refactor, รันซ้ำ ให้ครอบคลุมทุกจุดสำคัญ",
+          "tradeoff": "ตรงไปตรงมา แต่ต้องลงทุนเวลาสูง",
+          "outcome": "ทีมจะเห็นชัดๆ เลยว่าส่วนสำคัญๆ รันผ่านจริงๆ และหาจุดแก้ก่อนปล่อยงาน",
+          "lesson": "TDD Loop ให้หลักฐานชัดเจนว่าโค้ดนั้นทำงานได้ตามที่ตกลงกันไว้",
           "progress": 55,
           "effects": {
             "time": 1,
@@ -1505,9 +1505,9 @@ const stage01 = {
             "risk": -3,
             "quality": 3
           },
-          "purpose": "Rerun TDD Loop evidence: write a failing test, code minimal fix, refactor, rerun tests, and advance, covering critical booking paths.",
-          "solves": "Use skill to resolve specific issues ยท Reduce Risk ยท Increase Quality & Evidence",
-          "misses": "Straightforward, but requires investing time."
+          "purpose": "ทำ TDD Loop ซ้ำ: เขียนเทสต์ให้พัง, แก้สั้นๆ, Refactor, รันซ้ำ ให้ครอบคลุมทุกจุดสำคัญ",
+          "solves": "Use skill to resolve specific issues ยท ลดความเสี่ยง ยท เพิ่มคุณภาพและหลักฐานอ้างอิง",
+          "misses": "ตรงไปตรงมา แต่ต้องลงทุนเวลาสูง"
         },
         {
           "skill": "risk_scanner",
@@ -1519,10 +1519,10 @@ const stage01 = {
             "+55%",
             "risk pass"
           ],
-          "helper": "Check for no secrets, tests, fragile booking logic, missing validation, conflict handling, and data integrity.",
-          "tradeoff": "Has overhead, but minimizes late-game risk.",
-          "outcome": "Scanner points out warnings the team missed during visual smoke testing.",
-          "lesson": "Accumulated risk must be visible before delivery.",
+          "helper": "สแกนหาจุดที่อาจเป็น Secret หลุด, หา Logic ที่เปราะบาง, และการขัดแย้งต่างๆ",
+          "tradeoff": "มีขั้นตอนเสริม แต่ลดความเสี่ยงช่วงท้ายโปรเจกต์",
+          "outcome": "Scanner จะเตือนในจุดที่สายตามนุษย์อาจมองพลาดไปตอนทำ Smoke Testing",
+          "lesson": "ความเสี่ยงที่สะสมไว้ ต้องสามารถถูกมองเห็นได้ก่อนส่งมอบงาน",
           "progress": 55,
           "effects": {
             "time": 1,
@@ -1530,9 +1530,9 @@ const stage01 = {
             "risk": -4,
             "quality": 4
           },
-          "purpose": "Check for no secrets, tests, fragile booking logic, missing validation, conflict handling, and data integrity.",
-          "solves": "Use skill to resolve specific issues ยท Reduce Risk ยท Increase Quality & Evidence",
-          "misses": "Has overhead, but minimizes late-game risk."
+          "purpose": "สแกนหาจุดที่อาจเป็น Secret หลุด, หา Logic ที่เปราะบาง, และการขัดแย้งต่างๆ",
+          "solves": "Use skill to resolve specific issues ยท ลดความเสี่ยง ยท เพิ่มคุณภาพและหลักฐานอ้างอิง",
+          "misses": "มีขั้นตอนเสริม แต่ลดความเสี่ยงช่วงท้ายโปรเจกต์"
         },
         {
           "skill": "terraform_skill",
@@ -1544,10 +1544,10 @@ const stage01 = {
             "+50%",
             "infra review"
           ],
-          "helper": "Inspect Terraform testing, module patterns, backend/state, variables/secrets, CI/CD, and production safety before delivery.",
-          "tradeoff": "Requires extra review time, but reduces live infra risks that are hard to revert.",
-          "outcome": "The team uncovers risks in modules, state, and CI/CD, knowing which commands require approval before touching live resources.",
-          "lesson": "IaC reviews must audit both the code and resource impact, not just verifying that syntax passes.",
+          "helper": "ตรวจสอบ Terraform ทั้ง Test, Module, State, Secrets และความปลอดภัยบน Prod",
+          "tradeoff": "เสียเวลารีวิวเพิ่ม แต่ลดความเสี่ยงเวลาเกิดเหตุบนเซิร์ฟเวอร์จริงที่จะแก้กลับยาก",
+          "outcome": "ทีมเจอความเสี่ยงล่วงหน้า รู้ว่าคำสั่งไหนต้องคุมก่อนจะแตะเครื่องจริง",
+          "lesson": "IaC รีวิวต้องดูทั้งโค้ดและผลกระทบ ไม่ใช่แค่ดูว่า Syntax ผ่านไหม",
           "progress": 50,
           "effects": {
             "time": 2,
@@ -1555,9 +1555,9 @@ const stage01 = {
             "risk": -4,
             "quality": 4
           },
-          "purpose": "Inspect Terraform testing, module patterns, backend/state, variables/secrets, CI/CD, and production safety before delivery.",
-          "solves": "Use skill to resolve specific issues ยท Reduce Risk ยท Increase Quality & Evidence",
-          "misses": "Requires extra review time, but reduces live infra risks that are hard to revert."
+          "purpose": "ตรวจสอบ Terraform ทั้ง Test, Module, State, Secrets และความปลอดภัยบน Prod",
+          "solves": "Use skill to resolve specific issues ยท ลดความเสี่ยง ยท เพิ่มคุณภาพและหลักฐานอ้างอิง",
+          "misses": "เสียเวลารีวิวเพิ่ม แต่ลดความเสี่ยงเวลาเกิดเหตุบนเซิร์ฟเวอร์จริงที่จะแก้กลับยาก"
         }
       ],
       "synergyOptions": [
@@ -1574,10 +1574,10 @@ const stage01 = {
             "+90%",
             "Understand & Audit"
           ],
-          "helper": "Perform complete Code Review checklist alongside a walkthrough: spec matching, AC met, out-of-scope files, test coverage, security risks, data integrity, docs, hallucinations, duplicate code, and naming.",
-          "tradeoff": "Invests time and tokens, but still requires deciding how to resolve issues using tests, specs, or handoff evidence.",
-          "outcome": "The team catches bugs and comprehends why the fixes are necessary.",
-          "lesson": "Good reviews enable the team to deliver code based on comprehension, not just faith in AI.",
+          "helper": "ทำ Code Review สอดคล้องกับ Walkthrough: ตรวจเช็ค Spec, ความปลอดภัย, ฯลฯ ควบคู่กันไป",
+          "tradeoff": "ลงทุนเวลาและ Token แต่ยังต้องไปหาทางแก้ตาม Test หรือหลักฐานอยู่ดี",
+          "outcome": "ทีมจะจับบั๊กได้และเข้าใจว่าทำไมต้องแก้ด้วย",
+          "lesson": "การรีวิวที่ดีช่วยให้ทีมปล่อยโค้ดด้วยความเข้าใจ ไม่ใช่แค่ศรัทธาใน AI",
           "progress": 90,
           "effects": {
             "time": 3,
@@ -1585,9 +1585,9 @@ const stage01 = {
             "risk": -5,
             "quality": 6
           },
-          "purpose": "Perform complete Code Review checklist alongside a walkthrough: spec matching, AC met, out-of-scope files, test coverage, security risks, data integrity, docs, hallucinations, duplicate code, and naming.",
-          "solves": "Use Combo to close multiple Gaps ยท Reduce Risk ยท Increase Quality & Evidence",
-          "misses": "Spends a lot of AI budget / Consumes deadline room"
+          "purpose": "ทำ Code Review สอดคล้องกับ Walkthrough: ตรวจเช็ค Spec, ความปลอดภัย, ฯลฯ ควบคู่กันไป",
+          "solves": "Use Combo to close multiple Gaps ยท ลดความเสี่ยง ยท เพิ่มคุณภาพและหลักฐานอ้างอิง",
+          "misses": "ใช้ AI Budget เยอะมาก / กินเวลาเดดไลน์ที่มี"
         },
         {
           "requires": [
@@ -1602,10 +1602,10 @@ const stage01 = {
             "+85%",
             "Audit vs Spec"
           ],
-          "helper": "Use Spec + Code Review to check: spec matching, AC completeness, out-of-scope files, test coverage, security risks, data integrity, docs, hallucinations, duplicate code, and naming.",
-          "tradeoff": "Slower, but evaluates code based on real scope limits and concrete evidence.",
-          "outcome": "The team closes gaps between what was built and what was agreed upon, catching out-of-scope files before shipping.",
-          "lesson": "Spec prevents reviews from being subjective and helps catch feature creep added by AI.",
+          "helper": "ใช้ Spec ควบคู่ Code Review ตรวจสอบคุณภาพงานและความปลอดภัยให้ครบถ้วน",
+          "tradeoff": "ช้าลง แต่เป็นการประเมินคุณภาพงานตามกรอบขอบเขตและหลักฐานที่แท้จริง",
+          "outcome": "ทีมปิดช่องโหว่ระหว่างสิ่งที่ AI สร้างกับสิ่งที่คุยกันไว้ จับได้หมดว่าอันไหนเป็นของแถมที่ไม่จำเป็น",
+          "lesson": "Spec ป้องกันการใช้ความรู้สึกตอนรีวิว และดักจบการบานปลายที่ AI แอบยัดมา",
           "progress": 85,
           "effects": {
             "time": 3,
@@ -1613,9 +1613,9 @@ const stage01 = {
             "risk": -4,
             "quality": 5
           },
-          "purpose": "Use Spec + Code Review to check: spec matching, AC completeness, out-of-scope files, test coverage, security risks, data integrity, docs, hallucinations, duplicate code, and naming.",
-          "solves": "Use Combo to close multiple Gaps ยท Reduce Risk ยท Increase Quality & Evidence",
-          "misses": "Consumes deadline room"
+          "purpose": "ใช้ Spec ควบคู่ Code Review ตรวจสอบคุณภาพงานและความปลอดภัยให้ครบถ้วน",
+          "solves": "Use Combo to close multiple Gaps ยท ลดความเสี่ยง ยท เพิ่มคุณภาพและหลักฐานอ้างอิง",
+          "misses": "กินเวลาเดดไลน์ที่มี"
         }
       ]
     }
@@ -1630,8 +1630,8 @@ const stage01 = {
     "event": {
       "id": "emergency_crisis",
       "title": "Production Incident",
-      "problem": "The Vulnerable Developer Incident",
-      "copy": "The client asks what happened, but the team lacks the Spec, Tests, or Review notes necessary to isolate the cause.",
+      "problem": "เหตุการณ์นักพัฒนาที่เปราะบาง",
+      "copy": "ลูกค้าถามว่าเกิดอะไรขึ้น แต่ทีมไม่มี Spec ไม่มี Test เลยหาสาเหตุไม่ได้",
       "danger": "critical risk"
     },
     "baseOptions": [
@@ -1645,19 +1645,19 @@ const stage01 = {
           "Consumes time",
           "Resolves crisis"
         ],
-        "helper": "Reproduce, isolate, fix, and verify the issue on your own.",
-        "tradeoff": "Consumes significant time, but truly mitigates the risk.",
-        "outcome": "The team fixes the root cause in time, demonstrating to the client that you are in control.",
-        "lesson": "Sometimes there are no shortcuts; you must invest time to put out the fire.",
+        "helper": "รีโปรดิวซ์ แยกส่วน ซ่อมแซม และยืนยันความถูกต้องด้วยตัวคุณเอง",
+        "tradeoff": "ใช้เวลามาก แต่ก็ช่วยจัดการความเสี่ยงได้อย่างแท้จริง",
+        "outcome": "ทีมแก้ที่ต้นเหตุได้ทันเวลา โชว์ให้ลูกค้าเห็นว่าคุณควบคุมสถานการณ์ได้",
+        "lesson": "บางครั้งก็ไม่มีทางลัด; คุณต้องทุ่มเวลาเพื่อดับไฟให้ได้",
         "effects": {
           "time": 4,
           "token": 0,
           "risk": -4,
           "quality": 1
         },
-        "purpose": "Reproduce, isolate, fix, and verify the issue on your own.",
-        "solves": "Reduce Risk ยท Increase Quality & Evidence",
-        "misses": "Consumes deadline room"
+        "purpose": "รีโปรดิวซ์ แยกส่วน ซ่อมแซม และยืนยันความถูกต้องด้วยตัวคุณเอง",
+        "solves": "ลดความเสี่ยง ยท เพิ่มคุณภาพและหลักฐานอ้างอิง",
+        "misses": "กินเวลาเดดไลน์ที่มี"
       },
       {
         "id": "emergency_ai_patch",
@@ -1669,20 +1669,20 @@ const stage01 = {
           "Spends tokens",
           "Unsecured"
         ],
-        "helper": "Feed the raw error to AI immediately to get the demo running again.",
-        "tradeoff": "Saves time, but risks introducing new bugs.",
-        "outcome": "AI makes the primary bug disappear quickly, but the team doesn't know if other systems were broken in the process.",
-        "lesson": "Putting out fires with AI requires caution: watch out for spreading issues.",
-        "problem": "Reprompting Loop Trap",
+        "helper": "ยัด Error ให้ AI ทันที เพื่อให้เดโมกลับมาทำงานได้โดยไว",
+        "tradeoff": "ประหยัดเวลา แต่ก็เสี่ยงจะสร้างบั๊กตัวใหม่ขึ้นมา",
+        "outcome": "AI ทำให้บั๊กตัวนั้นหายไปอย่างไว แต่ทีมก็ไม่รู้เลยว่ามีระบบอื่นพังตามไปด้วยหรือเปล่า",
+        "lesson": "การดับไฟด้วย AI ต้องระวังให้ดี: ระวังว่าไฟจะลามไปที่อื่น",
+        "problem": "ติดกับดัก Reprompt วนลูป",
         "effects": {
           "time": 0,
           "token": 4,
           "risk": -1,
           "quality": -1
         },
-        "purpose": "Feed the raw error to AI immediately to get the demo running again.",
-        "solves": "Reduce Risk",
-        "misses": "Lowers delivery quality / Spends a lot of AI budget"
+        "purpose": "ยัด Error ให้ AI ทันที เพื่อให้เดโมกลับมาทำงานได้โดยไว",
+        "solves": "ลดความเสี่ยง",
+        "misses": "Lowers delivery quality / ใช้ AI Budget เยอะมาก"
       }
     ],
     "skillOptions": [
@@ -1696,19 +1696,19 @@ const stage01 = {
           "Recovery",
           "Process-driven"
         ],
-        "helper": "Use a runbook: reproduce, isolate, rollback, verify, explain.",
-        "tradeoff": "Takes time, but keeps the team calm and structured.",
-        "outcome": "The Runbook guides the team through resolving the incident step-by-step and communicating clearly with the client.",
-        "lesson": "Scaffolds give beginners a clear path to follow when systems crash.",
+        "helper": "ใช้ Runbook: สรุปปัญหา แยกส่วนหาตัวการ ย้อนกลับ ยืนยัน แล้วอธิบาย",
+        "tradeoff": "ใช้เวลาหน่อย แต่ช่วยให้ทีมใจเย็นและมีระบบระเบียบ",
+        "outcome": "Runbook จะไกด์ทีมให้ซ่อมแซมและพูดคุยกับลูกค้าอย่างเป็นสเต็ป",
+        "lesson": "Scaffolds ช่วยให้มือใหม่มีแนวทางที่ชัดเจนเวลาที่ระบบพัง",
         "effects": {
           "time": 3,
           "token": 1,
           "risk": -5,
           "quality": 2
         },
-        "purpose": "Use a runbook: reproduce, isolate, rollback, verify, explain.",
-        "solves": "Use skill to resolve specific issues ยท Reduce Risk ยท Increase Quality & Evidence",
-        "misses": "Consumes deadline room"
+        "purpose": "ใช้ Runbook: สรุปปัญหา แยกส่วนหาตัวการ ย้อนกลับ ยืนยัน แล้วอธิบาย",
+        "solves": "Use skill to resolve specific issues ยท ลดความเสี่ยง ยท เพิ่มคุณภาพและหลักฐานอ้างอิง",
+        "misses": "กินเวลาเดดไลน์ที่มี"
       },
       {
         "skill": "walkthrough",
@@ -1720,19 +1720,19 @@ const stage01 = {
           "Understand cause",
           "Reduce guesswork"
         ],
-        "helper": "Have AI explain the patch, then check it line-by-line before accepting.",
-        "tradeoff": "Spends tokens and time, but avoids blindly accepting code patches.",
-        "outcome": "The team isolates the cause and prevents AI from overwriting code that already functions.",
-        "lesson": "Do not trust a patch just because it runs; understand what it actually fixes.",
+        "helper": "ให้ AI อธิบายแพตช์นั้นก่อน แล้วเราไล่ดูทีละบรรทัดก่อนตกลงใจ",
+        "tradeoff": "เปลือง Token และเวลา แต่ป้องกันการหลับหูหลับตากดรับงาน",
+        "outcome": "ทีมแยกแยะสาเหตุและป้องกันไม่ให้ AI มาเขียนทับโค้ดที่มันทำงานได้ดีอยู่แล้ว",
+        "lesson": "อย่าเชื่อใจแพตช์เพียงเพราะมันรันผ่าน; ให้เข้าใจว่าจริงๆ มันแก้อะไร",
         "effects": {
           "time": 2,
           "token": 2,
           "risk": -4,
           "quality": 2
         },
-        "purpose": "Have AI explain the patch, then check it line-by-line before accepting.",
-        "solves": "Use skill to resolve specific issues ยท Reduce Risk ยท Increase Quality & Evidence",
-        "misses": "Spends tokens and time, but avoids blindly accepting code patches."
+        "purpose": "ให้ AI อธิบายแพตช์นั้นก่อน แล้วเราไล่ดูทีละบรรทัดก่อนตกลงใจ",
+        "solves": "Use skill to resolve specific issues ยท ลดความเสี่ยง ยท เพิ่มคุณภาพและหลักฐานอ้างอิง",
+        "misses": "เปลือง Token และเวลา แต่ป้องกันการหลับหูหลับตากดรับงาน"
       },
       {
         "skill": "tdd",
@@ -1744,19 +1744,19 @@ const stage01 = {
           "Verify",
           "Prevent regression"
         ],
-        "helper": "Write a short test check to verify the primary bug does not regress.",
-        "tradeoff": "Slower than raw patching, but provides proof that the fire is extinguished.",
-        "outcome": "The team fixes it and verifies with a check, rather than just believing it because the screen is back up.",
-        "lesson": "Tests turn disaster recovery into a verified process instead of guesswork.",
+        "helper": "เขียนเทสต์สั้นๆ เพื่อให้ชัวร์ว่าบั๊กหลักจะไม่กลับมาอีก",
+        "tradeoff": "ช้ากว่าการแปะแพตช์ดิบๆ แต่การันตีว่าไฟดับสนิทแล้ว",
+        "outcome": "ทีมแก้ไขแล้วทำการตรวจสอบยืนยัน ดีกว่าแค่เชื่อเพราะเห็นว่าจอไม่พังแล้ว",
+        "lesson": "เทสต์เปลี่ยนกระบวนการกู้คืนระบบให้เป็นการยืนยัน ไม่ใช่การเดาสุ่ม",
         "effects": {
           "time": 2,
           "token": 1,
           "risk": -4,
           "quality": 2
         },
-        "purpose": "Write a short test check to verify the primary bug does not regress.",
-        "solves": "Use skill to resolve specific issues ยท Reduce Risk ยท Increase Quality & Evidence",
-        "misses": "Slower than raw patching, but provides proof that the fire is extinguished."
+        "purpose": "เขียนเทสต์สั้นๆ เพื่อให้ชัวร์ว่าบั๊กหลักจะไม่กลับมาอีก",
+        "solves": "Use skill to resolve specific issues ยท ลดความเสี่ยง ยท เพิ่มคุณภาพและหลักฐานอ้างอิง",
+        "misses": "ช้ากว่าการแปะแพตช์ดิบๆ แต่การันตีว่าไฟดับสนิทแล้ว"
       },
       {
         "skill": "risk_scanner",
@@ -1768,19 +1768,19 @@ const stage01 = {
           "Scan",
           "Prevent regressions"
         ],
-        "helper": "Scan for regressions that the patch might have introduced elsewhere.",
-        "tradeoff": "Spends extra tokens, but minimizes hidden risk.",
-        "outcome": "The team uncovers side effects before they reach the client.",
-        "lesson": "Risk Scanner halts rushed patches from turning into a second production incident.",
+        "helper": "สแกนหาบั๊กข้างเคียงที่แพตช์ตัวนี้อาจสร้างผลกระทบต่อส่วนอื่นๆ",
+        "tradeoff": "เปลือง Token พิเศษ แต่ก็ลดความเสี่ยงที่มองไม่เห็นลงได้ต่ำสุด",
+        "outcome": "ทีมตรวจพบ Side Effect ก่อนที่ลูกค้าจะเห็นเข้า",
+        "lesson": "Risk Scanner หยุดยั้งไม่ให้แพตช์ลวกๆ กลายเป็นมหันตภัยบน Prod อีกครั้ง",
         "effects": {
           "time": 1,
           "token": 3,
           "risk": -4,
           "quality": 2
         },
-        "purpose": "Scan for regressions that the patch might have introduced elsewhere.",
-        "solves": "Use skill to resolve specific issues ยท Reduce Risk ยท Increase Quality & Evidence",
-        "misses": "Spends a lot of AI budget"
+        "purpose": "สแกนหาบั๊กข้างเคียงที่แพตช์ตัวนี้อาจสร้างผลกระทบต่อส่วนอื่นๆ",
+        "solves": "Use skill to resolve specific issues ยท ลดความเสี่ยง ยท เพิ่มคุณภาพและหลักฐานอ้างอิง",
+        "misses": "ใช้ AI Budget เยอะมาก"
       }
     ]
   }
@@ -1802,8 +1802,8 @@ function defaultChoiceMisses(option) {
   let misses = [];
   if (effects.risk > 0) misses.push("Adds hidden project risk");
   else if (effects.quality < 0) misses.push("Lowers delivery quality");
-  if (effects.token >= 3) misses.push("Spends a lot of AI budget");
-  if (effects.time >= 3) misses.push("Consumes deadline room");
+  if (effects.token >= 3) misses.push("ใช้ AI Budget เยอะมาก");
+  if (effects.time >= 3) misses.push("กินเวลาเดดไลน์ที่มี");
 
   return misses.join(" / ") || option.tradeoff || "Still needs verification in a later decision";
 }

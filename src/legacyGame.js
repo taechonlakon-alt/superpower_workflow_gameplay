@@ -182,81 +182,84 @@ function getChoiceReaction(option, countered) {
 }
 
 function inferChoiceSolves(option) {
+  const lang = i18n[currentLang];
   const effects = normalizeEffects(option.effects);
   const progress = Number.isFinite(option.progress) ? option.progress : 0;
   const solves = [];
 
   if (progress >= 100) {
-    solves.push("Closed phase in one move");
+    solves.push(lang.closedPhaseInOneMove);
   } else if (progress >= 60) {
-    solves.push("Accelerated phase progress clearly");
+    solves.push(lang.acceleratedPhaseProgress);
   } else if (progress >= 40) {
-    solves.push("Advanced work while leaving room for adjustments");
+    solves.push(lang.advancedWorkRoomForAdjustments);
   }
 
   if (effects.risk <= -5) {
-    solves.push("Heavily reduced risk, gaining confidence before handoff");
+    solves.push(lang.heavilyReducedRisk);
   } else if (effects.risk < 0) {
-    solves.push("Reduced accumulated risk in workflow");
+    solves.push(lang.reducedAccumulatedRisk);
   }
 
   if (effects.quality >= 5) {
-    solves.push("Increased evidence and work quality");
+    solves.push(lang.increasedEvidenceAndQuality);
   } else if (effects.quality > 0) {
-    solves.push("Made work more verifiable");
+    solves.push(lang.madeWorkMoreVerifiable);
   }
 
   if (option.preventPenalty) {
-    solves.push("Countered issue occurring in this phase");
+    solves.push(lang.counteredIssueInPhase);
   }
 
   if (option.requires?.length) {
-    solves.push("Combined superpowers to close multiple gaps simultaneously");
+    solves.push(lang.combinedSuperpowersToCloseGaps);
   } else if (option.skill) {
-    solves.push("Used specific superpower to resolve current pressure");
+    solves.push(lang.usedSpecificSuperpowerToResolvePressure);
   }
 
   if (!solves.length && effects.risk >= 3) {
-    solves.push("Bought speed or momentum, but accepted increased risk");
+    solves.push(lang.boughtSpeedAcceptedRisk);
   }
 
-  return solves.length ? solves.join(" / ") : "Provided tactical option for this situation";
+  return solves.length ? solves.join(" / ") : lang.providedTacticalOption;
 }
 
 function inferChoiceMisses(option) {
+  const lang = i18n[currentLang];
   const effects = normalizeEffects(option.effects);
   const misses = [];
 
   if (effects.risk >= 4) {
-    misses.push("Highly increased risk, might open phase issue immediately");
+    misses.push(lang.highlyIncreasedRisk);
   } else if (effects.risk >= 2) {
-    misses.push("Still has risk that needs guardrails later");
+    misses.push(lang.stillHasRiskNeedsGuardrails);
   }
 
   if (effects.quality <= -2) {
-    misses.push("High quality debt, might cause heavy reviews");
+    misses.push(lang.highQualityDebt);
   } else if (effects.quality < 0) {
-    misses.push("Work advanced but quality dropped");
+    misses.push(lang.workAdvancedQualityDropped);
   }
 
   if (effects.token >= 3) {
-    misses.push("Heavily consumed AI budget");
+    misses.push(lang.heavilyConsumedAIBudget);
   }
 
   if (effects.time >= 3) {
-    misses.push("Consumed a lot of time, might squeeze deadline");
+    misses.push(lang.consumedTimeSqueezeDeadline);
   }
 
   if (!misses.length && option.tradeoff) {
     misses.push(option.tradeoff);
   }
 
-  return misses.length ? misses.join(" / ") : "Still needs verification in next phase";
+  return misses.length ? misses.join(" / ") : lang.stillNeedsVerificationInNextPhase;
 }
 
 function getChoiceMeaning(option) {
+  const lang = i18n[currentLang];
   return {
-    purpose: option.purpose || option.helper || "Choose this approach to handle immediate phase pressure",
+    purpose: option.purpose || option.helper || lang.chooseThisApproachToHandleImmediatePhasePressure,
     solves: option.solves || inferChoiceSolves(option),
     misses: option.misses || inferChoiceMisses(option),
   };
@@ -1612,15 +1615,16 @@ function skillDetailPopupMarkup(skill, allowEdit = state.screen === "setup") {
 }
 
 function choiceCardMarkup(option, index) {
+  const lang = i18n[currentLang];
   const isSkill = Boolean(option.skill);
   const isSynergy = Boolean(option.requires);
   const meaning = getChoiceMeaning(option);
   const visibleTags = option.tags ? option.tags.slice(0, 2) : [];
   const hiddenTagCount = option.tags ? Math.max(0, option.tags.length - visibleTags.length) : 0;
   const unlock = isSkill
-    ? `Workflow Tool: ${getSkill(option.skill)?.name}`
+    ? `${lang.workflowTool} ${getSkill(option.skill)?.name}`
     : isSynergy
-      ? `Combo Tool: ${option.requires.map((req) => getSkill(req)?.name).join(" + ")}`
+      ? `${lang.comboTool} ${option.requires.map((req) => getSkill(req)?.name).join(" + ")}`
       : "";
   const visualTone = isSynergy ? "combo" : isSkill ? "skill" : "base";
 
@@ -1636,11 +1640,11 @@ function choiceCardMarkup(option, index) {
       </span>
       <span class="action-slot__footer">
         ${unlock ? `<span class="action-slot__unlock">${escapeHtml(unlock)}</span>` : ""}
-        <span class="action-slot__select">Select</span>
+        <span class="action-slot__select">${lang.select}</span>
       </span>
       <div class="action-slot__tooltip">
-        <p><strong>Solves:</strong> ${escapeHtml(meaning.solves)}</p>
-        <p><strong>Tradeoff:</strong> ${escapeHtml(option.tradeoff || meaning.misses)}</p>
+        <p><strong>${lang.solves}:</strong> ${escapeHtml(meaning.solves)}</p>
+        <p><strong>${lang.tradeoff}:</strong> ${escapeHtml(option.tradeoff || meaning.misses)}</p>
       </div>
     </button>
   `;
@@ -1875,14 +1879,15 @@ function renderStep(step, isEmergency = false) {
 
 function resolutionChoiceMeaningMarkup(result) {
   if (!result?.purpose && !result?.solves && !result?.misses) return "";
+  const lang = i18n[currentLang];
 
   return `
               <details class="resolution-card resolution-card--meaning">
-                <summary class="mini-label" style="cursor:pointer; display:list-item;">Choice Meaning</summary>
+                <summary class="mini-label" style="cursor:pointer; display:list-item;">${lang.choiceMeaning}</summary>
                 <div style="margin-top: 8px;">
-                  ${result.purpose ? `<p><strong>Important because:</strong> ${escapeHtml(result.purpose)}</p>` : ""}
-                  ${result.solves ? `<p><strong>Solves:</strong> ${escapeHtml(result.solves)}</p>` : ""}
-                  ${result.misses ? `<p><strong>Tradeoffs:</strong> ${escapeHtml(result.misses)}</p>` : ""}
+                  ${result.purpose ? `<p><strong>${lang.importantBecause}</strong> ${escapeHtml(result.purpose)}</p>` : ""}
+                  ${result.solves ? `<p><strong>${lang.solves}:</strong> ${escapeHtml(result.solves)}</p>` : ""}
+                  ${result.misses ? `<p><strong>${lang.tradeoff}:</strong> ${escapeHtml(result.misses)}</p>` : ""}
                 </div>
               </details>
   `;
@@ -1890,10 +1895,11 @@ function resolutionChoiceMeaningMarkup(result) {
 
 function resolutionHintMarkup(result) {
   if (!result?.hint) return "";
+  const lang = i18n[currentLang];
 
   return `
               <details class="resolution-card resolution-card--hint">
-                <summary class="mini-label" style="cursor:pointer; display:list-item;">In-Play Hint</summary>
+                <summary class="mini-label" style="cursor:pointer; display:list-item;">${lang.inPlayHint}</summary>
                 <p style="margin-top: 8px;">${escapeHtml(result.hint)}</p>
               </details>
   `;
@@ -1902,7 +1908,8 @@ function resolutionHintMarkup(result) {
 function renderResolution() {
   const result = state.resolution;
   if (!result) return;
-  const resolutionLabel = result.isRandomModifier ? "External Signal" : result.isMicroEvent ? "System Signal" : "Decision Result";
+  const lang = i18n[currentLang];
+  const resolutionLabel = result.isRandomModifier ? lang.externalSignal : result.isMicroEvent ? lang.systemSignal : lang.decisionResult;
   const resolutionToneClass = result.isRandomModifier
     ? `resolution-panel--random resolution-panel--${result.reaction?.tone || "warn"}`
     : result.countered ? "resolution-panel--safe" : "resolution-panel--warn";
@@ -1940,13 +1947,13 @@ function renderResolution() {
             ${selectedSkillHandMarkup()}
             <div class="resolution-layout">
               <div class="resolution-card reaction-card reaction-card--${result.reaction.tone} resolution-card--primary">
-                <p class="mini-label">Reaction</p>
+                <p class="mini-label">${lang.reaction}</p>
                 <h3>${result.reaction.title}</h3>
                 <p>${result.reaction.copy}</p>
               </div>
 
               <div class="resolution-card resolution-card--event">
-                <p class="mini-label">Event</p>
+                <p class="mini-label">${lang.event}</p>
                 <h3>${result.eventTitle}</h3>
                 <ul>
                   ${result.lines.map((line) => `<li>${line}</li>`).join("")}
@@ -1954,20 +1961,20 @@ function renderResolution() {
               </div>
 
               <div class="resolution-card">
-                <p class="mini-label">What happened</p>
+                <p class="mini-label">${lang.whatHappened}</p>
                 <p>${result.outcome}</p>
                 <div class="choice-tags resolution-tags">${tagMarkup(result.tags)}</div>
               </div>
 
               <div class="resolution-card resolution-card--lesson">
-                <p class="mini-label">Lesson</p>
+                <p class="mini-label">${lang.lesson}</p>
                 <p>${result.lesson}</p>
               </div>
               ${resolutionHintMarkup(result)}
               ${resolutionChoiceMeaningMarkup(result)}
             </div>
 
-            <button class="restart continue-button">Continue</button>
+            <button class="restart continue-button">${lang.continue}</button>
           </section>
         </section>
       </section>
