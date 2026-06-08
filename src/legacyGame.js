@@ -1520,7 +1520,7 @@ function heroMarkup() {
       </div>
       <div class="start-board">
         <div class="start-character" aria-hidden="true" style="${getCharacterInlineStyle()}">
-          <img src="/assets/character/lv1.gif" alt="Hero Lv1" class="hero-character-img" draggable="false" onerror="this.onerror=null; this.src='/assets/character/lv1.png';" />
+          <img src="/assets/cathappy/lv1.gif" alt="Hero Lv1" class="hero-character-img" draggable="false" onerror="this.onerror=null; this.src='/assets/cathappy/lv1.png';" />
           <div class="character-hitbox" style="${getCharacterHitboxStyle(1)}"></div>
         </div>
         <div class="start-emblem">${titleGlyphMarkup()}</div>
@@ -1692,7 +1692,7 @@ function renderStageSelect() {
   root.innerHTML = `
     <main class="app">
       <div class="phase-character" aria-hidden="true" style="${getCharacterInlineStyle()}">
-        <img src="/assets/character/lv1.gif" alt="Hero" class="phase-character-img" draggable="false" onerror="this.onerror=null; this.src='/assets/character/lv1.png';" />
+        <img src="/assets/cathappy/lv1.gif" alt="Hero" class="phase-character-img" draggable="false" onerror="this.onerror=null; this.src='/assets/cathappy/lv1.png';" />
         <div class="character-hitbox" style="${getCharacterHitboxStyle(1)}"></div>
       </div>
       <section class="${shellClass()}">
@@ -1728,7 +1728,7 @@ function renderSetup() {
   root.innerHTML = `
     <main class="app">
       <div class="phase-character" aria-hidden="true" style="${getCharacterInlineStyle()}">
-        <img src="/assets/character/lv${characterLevel}.gif" alt="Hero Lv${characterLevel}" class="phase-character-img" draggable="false" onerror="this.onerror=null; this.src='/assets/character/lv${characterLevel}.png';" />
+        <img src="/assets/cathappy/lv${characterLevel}.gif" alt="Hero Lv${characterLevel}" class="phase-character-img" draggable="false" onerror="this.onerror=null; this.src='/assets/cathappy/lv${characterLevel}.png';" />
         <div class="character-hitbox" style="${getCharacterHitboxStyle(characterLevel)}"></div>
       </div>
       <section class="${shellClass()}">
@@ -1779,11 +1779,11 @@ function renderStep(step, isEmergency = false) {
   const issueLabel = `${step.title} Issue`;
 
   const characterSrc = isEmergency && state.emergencyCharacterFailed
-    ? `/assets/character_fail/lv${characterLevel}fail.gif`
-    : `/assets/character/lv${characterLevel}.gif`;
+    ? `/assets/catfail/lv${characterLevel}fail.gif`
+    : `/assets/cathappy/lv${characterLevel}.gif`;
   const characterFallback = isEmergency && state.emergencyCharacterFailed
-    ? `/assets/character_fail/lv${characterLevel}fail.gif`
-    : `/assets/character/lv${characterLevel}.png`;
+    ? `/assets/catfail/lv${characterLevel}fail.gif`
+    : `/assets/cathappy/lv${characterLevel}.png`;
 
   const eventContent = isChaos ? `
     <section class="event event--active event--issue">
@@ -1866,8 +1866,8 @@ function renderStep(step, isEmergency = false) {
       const img = root.querySelector('.phase-character-img');
       if (img) {
         img.classList.add('character-glitch-active');
-        img.src = `/assets/character_fail/lv${characterLevel}fail.gif`;
-        img.onerror = () => { img.src = `/assets/character_fail/lv${characterLevel}fail.gif`; };
+        img.src = `/assets/catfail/lv${characterLevel}fail.gif`;
+        img.onerror = () => { img.src = `/assets/catfail/lv${characterLevel}fail.gif`; };
       }
     }, 1500);
   }
@@ -1913,11 +1913,11 @@ function renderResolution() {
   const characterLevel = Math.min(5, (state.index || 0) + 1);
   const isEmergency = state.screen === "emergency_resolution";
   const characterSrc = isEmergency
-    ? `/assets/character_fail/lv${characterLevel}fail.gif`
-    : `/assets/character/lv${characterLevel}.gif`;
+    ? `/assets/catfail/lv${characterLevel}fail.gif`
+    : `/assets/cathappy/lv${characterLevel}.gif`;
   const characterFallback = isEmergency
-    ? `/assets/character_fail/lv${characterLevel}fail.gif`
-    : `/assets/character/lv${characterLevel}.png`;
+    ? `/assets/catfail/lv${characterLevel}fail.gif`
+    : `/assets/cathappy/lv${characterLevel}.png`;
 
   root.innerHTML = `
     <main class="app">
@@ -1982,8 +1982,8 @@ function renderResolution() {
       const img = root.querySelector('.phase-character-img');
       if (img) {
         img.classList.add('character-glitch-active');
-        img.src = `/assets/character_fail/lv${characterLevel}fail.gif`;
-        img.onerror = () => { img.src = `/assets/character_fail/lv${characterLevel}fail.gif`; };
+        img.src = `/assets/catfail/lv${characterLevel}fail.gif`;
+        img.onerror = () => { img.src = `/assets/catfail/lv${characterLevel}fail.gif`; };
       }
     }, 600);
   }
@@ -2520,11 +2520,11 @@ function renderResult() {
 
   const characterLevel = Math.min(5, (state.index || 0) + 1);
   const characterSrc = result.failed
-    ? `/assets/character_fail/lv${characterLevel}fail.gif`
-    : `/assets/character/lv${characterLevel}.gif`;
+    ? `/assets/catfail/lv${characterLevel}fail.gif`
+    : `/assets/cathappy/lv${characterLevel}.gif`;
   const characterFallback = result.failed
-    ? `/assets/character_fail/lv${characterLevel}fail.gif`
-    : `/assets/character/lv${characterLevel}.png`;
+    ? `/assets/catfail/lv${characterLevel}fail.gif`
+    : `/assets/cathappy/lv${characterLevel}.png`;
 
   root.innerHTML = `
     <main class="app">
@@ -2735,10 +2735,10 @@ function renderEvolution() {
       <div class="evolution-container">
         <div class="evolution-flash" aria-hidden="true"></div>
         <div class="evolution-character old-character" aria-hidden="true" style="--evo-shift-x:${oldLayout.shiftX.toFixed(2)}px; --evo-shift-y:${oldLayout.shiftY.toFixed(2)}px; --evo-height:${oldLayout.height.toFixed(2)}px;">
-          <img src="/assets/character/lv${state.evolutionOldLevel}.gif" alt="Evolving..." onerror="this.onerror=null; this.src='/assets/character/lv${state.evolutionOldLevel}.png';" />
+          <img src="/assets/cathappy/lv${state.evolutionOldLevel}.gif" alt="Evolving..." onerror="this.onerror=null; this.src='/assets/cathappy/lv${state.evolutionOldLevel}.png';" />
         </div>
         <div class="evolution-character new-character" aria-hidden="true" style="--evo-shift-x:${newLayout.shiftX.toFixed(2)}px; --evo-shift-y:${newLayout.shiftY.toFixed(2)}px; --evo-height:${newLayout.height.toFixed(2)}px;">
-          <img src="/assets/character/lv${state.evolutionNewLevel}.gif" alt="Evolution Complete!" onerror="this.onerror=null; this.src='/assets/character/lv${state.evolutionNewLevel}.png';" />
+          <img src="/assets/cathappy/lv${state.evolutionNewLevel}.gif" alt="Evolution Complete!" onerror="this.onerror=null; this.src='/assets/cathappy/lv${state.evolutionNewLevel}.png';" />
         </div>
       </div>
       <div class="evolution-text" style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
