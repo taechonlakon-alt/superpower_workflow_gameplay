@@ -983,28 +983,71 @@ function continueAfterResolution() {
 function toggleSkill(skillId) {
   if (state.skills.includes(skillId)) {
     state.skills = state.skills.filter((id) => id !== skillId);
-    state.activeSkillDetail = null;
+  } else {
+    if (state.skills.length >= game.maxSkills) return;
+    state.skills = [...state.skills, skillId];
+  }
+  
+  closeSkillDetail();
+  
+  if (state.screen === "setup") {
+    updateSkillDraftUI();
+  } else {
     render();
-    return;
   }
+}
 
-  if (state.skills.length >= game.maxSkills) {
-    return;
+function updateSkillDraftUI() {
+  const cards = document.querySelectorAll('.skill-card');
+  cards.forEach(card => {
+    const id = card.dataset.skill;
+    const selected = state.skills.includes(id);
+    const locked = !selected && state.skills.length >= game.maxSkills;
+    
+    card.classList.toggle('is-selected', selected);
+    card.classList.toggle('is-locked', locked);
+    card.setAttribute('aria-pressed', selected ? "true" : "false");
+    
+    const check = card.querySelector('.inventory-slot__check');
+    if (check) check.innerHTML = selected ? "&#10003;" : "";
+  });
+  
+  const countEl = document.querySelector('.draft-count');
+  if (countEl) {
+    const lang = i18n[currentLang];
+    countEl.textContent = `${lang.selected} ${state.skills.length} / ${game.maxSkills}`;
   }
-  state.skills = [...state.skills, skillId];
-  state.activeSkillDetail = null;
-  render();
+  
+  const startBtn = document.querySelector('.start-mission');
+  if (startBtn) {
+    startBtn.disabled = state.skills.length !== game.maxSkills;
+  }
+  
+  const hotbarSection = document.querySelector('.superpower-hand.mmo-hotbar');
+  if (hotbarSection) {
+    hotbarSection.outerHTML = selectedSkillHandMarkup();
+  } else if (state.skills.length > 0) {
+    // If it wasn't there before, append it
+    const main = document.querySelector('main.app');
+    if (main) main.insertAdjacentHTML("beforeend", selectedSkillHandMarkup());
+  }
 }
 
 function openSkillDetail(skillId) {
-  if (!getSkill(skillId)) return;
+  const skill = getSkill(skillId);
+  if (!skill) return;
   state.activeSkillDetail = skillId;
-  render();
+  
+  const existing = document.querySelector('.skill-detail-overlay');
+  if (existing) existing.remove();
+  
+  root.insertAdjacentHTML("beforeend", skillDetailPopupMarkup(skill));
 }
 
 function closeSkillDetail() {
   state.activeSkillDetail = null;
-  render();
+  const overlay = document.querySelector('.skill-detail-overlay');
+  if (overlay) overlay.remove();
 }
 
 function confirmPhaseGoal() {
@@ -1486,24 +1529,29 @@ function selectedSkillHandMarkup() {
   if (!selectedSkills.length) return "";
   const runIdentity = getCurrentRunIdentity();
 
+  const slots = [];
+  for (let i = 0; i < game.maxSkills; i++) {
+    const skill = selectedSkills[i];
+    if (skill) {
+      slots.push(`
+        <button class="superpower-hand__card hotbar-slot" type="button" data-skill="${escapeHtml(skill.id)}" aria-label="View details ${escapeHtml(skill.name)}" title="${escapeHtml(skill.name)}">
+          <span class="hotbar-slot__icon">${escapeHtml(skill.icon)}</span>
+          <span class="hotbar-slot__number">${i + 1}</span>
+        </button>
+      `);
+    } else {
+      slots.push(`
+        <div class="hotbar-slot hotbar-slot--empty">
+          <span class="hotbar-slot__number">${i + 1}</span>
+        </div>
+      `);
+    }
+  }
+
   return `
-    <section class="superpower-hand" aria-label="Superpower Hand">
-      <div class="superpower-hand__label">
-        <span>Superpower Hand</span>
-        <strong>Holding ${selectedSkills.length}/${game.maxSkills}</strong>
-        <small class="superpower-hand__plan">${escapeHtml(runIdentity.label)} · ${escapeHtml(runIdentity.reward)}</small>
-      </div>
-      <div class="superpower-hand__cards">
-        ${selectedSkills.map((skill) => `
-          <button class="superpower-hand__card" type="button" data-skill="${escapeHtml(skill.id)}" aria-label="View details ${escapeHtml(skill.name)}">
-            <span class="superpower-hand__icon">${escapeHtml(skill.icon)}</span>
-            <span class="superpower-hand__meta">
-              <span>${escapeHtml(skill.type)}</span>
-              <strong>${escapeHtml(skill.name)}</strong>
-            </span>
-            <span class="superpower-hand__ready">Ready</span>
-          </button>
-        `).join("")}
+    <section class="superpower-hand mmo-hotbar" aria-label="Superpower Hand">
+      <div class="hotbar-slots">
+        ${slots.join("")}
       </div>
     </section>
   `;
@@ -1827,6 +1875,7 @@ function renderSetup() {
           </section>
         </section>
       </section>
+      ${selectedSkillHandMarkup()}
     </main>
   `;
 }
@@ -1915,7 +1964,6 @@ function renderStep(step, isEmergency = false) {
             </div>
 
             ${resourceBarMarkup()}
-            ${selectedSkillHandMarkup()}
             ${eventContent}
 
             <div class="choices choices--adaptive action-grid">
@@ -1926,6 +1974,7 @@ function renderStep(step, isEmergency = false) {
           </section>
         </section>
       </section>
+      ${selectedSkillHandMarkup()}
     </main>
   `;
 
@@ -2009,7 +2058,6 @@ function renderResolution() {
             </div>
 
             ${resourceBarMarkup()}
-            ${selectedSkillHandMarkup()}
             <div class="resolution-layout">
               <div class="resolution-card reaction-card reaction-card--${result.reaction.tone} resolution-card--primary">
                 <p class="mini-label">${lang.reaction}</p>
@@ -2043,6 +2091,7 @@ function renderResolution() {
           </section>
         </section>
       </section>
+      ${selectedSkillHandMarkup()}
     </main>
   `;
 
