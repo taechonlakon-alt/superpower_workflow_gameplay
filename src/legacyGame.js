@@ -12,8 +12,8 @@ let audioContext = null;
 let soundEnabled = true;
 let state = null;
 function getCharacterInlineStyle() {
-  if (!state || !state.characterPos) return "cursor: grab; touch-action: none; pointer-events: none;";
-  return `position: fixed; left: ${state.characterPos.x}px; top: ${state.characterPos.y}px; z-index: 9999; margin: 0; transform: none; transition: none; cursor: grab; touch-action: none; pointer-events: none;`;
+  if (!state || !state.characterPos) return `cursor: grab; touch-action: none; pointer-events: none; transform: none;`;
+  return `position: fixed; left: ${state.characterPos.x}px; top: ${state.characterPos.y}px; z-index: 9999; margin: 0; transition: none; cursor: var(--cursor-grab); touch-action: none; pointer-events: none; transform: none;`;
 }
 
 function getCharacterHitboxStyle(lv) {
@@ -522,6 +522,12 @@ function maybeTriggerMicroEvent() {
 
 function applyEffects(effects) {
   const safeEffects = normalizeEffects(effects);
+
+  state.resourceFlashes = {
+    time: safeEffects.time !== 0 ? (safeEffects.time < 0 ? 'green' : 'red') : null,
+    token: safeEffects.token !== 0 ? (safeEffects.token < 0 ? 'green' : 'red') : null,
+    risk: safeEffects.risk !== 0 ? (safeEffects.risk < 0 ? 'green' : 'red') : null,
+  };
 
   state.time = Math.max(0, state.time + safeEffects.time);
   state.token = Math.min(game.caps.token, state.token - safeEffects.token);
@@ -1404,6 +1410,7 @@ function getTokenResourceTone(value) {
 
 function getResourceBarState() {
   const lang = i18n[currentLang];
+  const flashes = state.resourceFlashes || {};
   const timeRemaining = Math.max(0, game.caps.time - state.time);
   const timeFill = game.caps.time > 0
     ? clamp(Math.round((timeRemaining / game.caps.time) * 100), 0, 100)
@@ -1426,6 +1433,7 @@ function getResourceBarState() {
       fill: timeFill,
       helper: lang.timeRemaining,
       tone: getTimeResourceTone(timeFill),
+      flash: flashes.time ? `meter-flash-${flashes.time}` : "",
     },
     {
       key: "token",
@@ -1434,6 +1442,7 @@ function getResourceBarState() {
       fill: tokenFill,
       helper: lang.aiBudgetRemaining,
       tone: getTokenResourceTone(tokenFill),
+      flash: flashes.token ? `meter-flash-${flashes.token}` : "",
     },
     {
       key: "risk",
@@ -1442,17 +1451,21 @@ function getResourceBarState() {
       fill: clamp(riskValue, 0, 100),
       helper: lang.fragility,
       tone: getPressureResourceTone(riskValue, 50, 80),
+      flash: flashes.risk ? `meter-flash-${flashes.risk}` : "",
     },
   ];
 }
 
 function resourceBarMarkup() {
   const resources = getResourceBarState();
+  if (state.resourceFlashes) {
+    state.resourceFlashes = null;
+  }
   return `
     <div class="resource-bar" aria-label="Resource Bar">
       ${resources
       .map((resource) => `
-            <div class="resource-meter resource-meter--${resource.key} resource-meter--${resource.tone}" aria-label="${resource.label}: ${resource.value}">
+            <div class="resource-meter resource-meter--${resource.key} resource-meter--${resource.tone} ${resource.flash || ''}" aria-label="${resource.label}: ${resource.value}">
               <span class="resource-meter__topline">
                 <span class="resource-meter__label">${resource.label}</span>
                 <strong class="resource-meter__value">${resource.value}</strong>
@@ -1735,7 +1748,7 @@ function stageCardMarkup(stage) {
 function renderStageSelect() {
   const lang = i18n[currentLang];
   root.innerHTML = `
-    <main class="app">
+    <main class="app phase-enter">
       <div class="phase-character" aria-hidden="true" style="${getCharacterInlineStyle()}">
         <img src="/assets/cathappy/lv1.gif" alt="Hero" class="phase-character-img" draggable="false" onerror="this.onerror=null; this.src='/assets/cathappy/lv1.png';" />
         <div class="character-hitbox" style="${getCharacterHitboxStyle(1)}"></div>
@@ -1772,7 +1785,7 @@ function renderSetup() {
   const characterLevel = Math.min(5, (state.index || 0) + 1);
   const runIdentity = state.skills.length === game.maxSkills ? getCurrentRunIdentity() : null;
   root.innerHTML = `
-    <main class="app">
+    <main class="app phase-enter">
       <div class="phase-character" aria-hidden="true" style="${getCharacterInlineStyle()}">
         <img src="/assets/cathappy/lv${characterLevel}.gif" alt="Hero Lv${characterLevel}" class="phase-character-img" draggable="false" onerror="this.onerror=null; this.src='/assets/cathappy/lv${characterLevel}.png';" />
         <div class="character-hitbox" style="${getCharacterHitboxStyle(characterLevel)}"></div>
@@ -1820,7 +1833,7 @@ function renderSetup() {
 
 function renderTitle() {
   root.innerHTML = `
-    <main class="app">
+    <main class="app phase-enter">
       ${heroMarkup()}
     </main>
   `;
@@ -1840,7 +1853,7 @@ function renderStep(step, isEmergency = false) {
     : `/assets/cathappy/lv${characterLevel}.png`;
 
   const eventContent = isChaos ? `
-    <section class="event event--active event--issue">
+    <section class="event event--active event--issue ${isChaos ? 'chaos-active' : ''}">
       <div class="event-label">${issueLabel}</div>
       <div class="event-icon">${eventIconMarkup()}</div>
       <div class="event-copyblock">
@@ -1853,7 +1866,7 @@ function renderStep(step, isEmergency = false) {
       </div>
     </section>
   ` : isEmergency && step.event ? `
-    <section class="event event--active event--chaos">
+    <section class="event event--active event--chaos ${isEmergency ? 'emergency-active' : ''}">
       <div class="event-label">EMERGENCY</div>
       <div class="event-icon">${eventIconMarkup()}</div>
       <div class="event-copyblock">
@@ -1878,7 +1891,9 @@ function renderStep(step, isEmergency = false) {
   `;
 
   root.innerHTML = `
-    <main class="app">
+    <div class="overlay-emergency ${isEmergency ? 'active' : ''}"></div>
+    <div class="overlay-chaos ${isChaos ? 'active' : ''}"></div>
+    <main class="app phase-enter">
       <div class="phase-character" aria-hidden="true" style="${getCharacterInlineStyle()}">
         <img src="${characterSrc}" alt="Hero Lv${characterLevel}" class="phase-character-img" draggable="false" onerror="this.onerror=null; this.src='${characterFallback}';" />
         <div class="character-hitbox" style="${getCharacterHitboxStyle(characterLevel)}"></div>
@@ -2582,10 +2597,13 @@ function renderResult() {
     ? `/assets/catfail/lv${characterLevel}fail.gif`
     : `/assets/cathappy/lv${characterLevel}.png`;
 
+  const bgClass = result.failed ? "result-lose-bg" : "result-win-bg";
+  const auraClass = result.failed ? "result-lose-aura" : "result-win-aura";
+
   root.innerHTML = `
-    <main class="app">
+    <main class="app phase-enter ${bgClass}">
       <div class="phase-character" aria-hidden="true" style="${getCharacterInlineStyle()}">
-        <img src="${characterSrc}" alt="Hero Lv${characterLevel}" class="phase-character-img" draggable="false" onerror="this.onerror=null; this.src='${characterFallback}';" />
+        <img src="${characterSrc}" alt="Hero Lv${characterLevel}" class="phase-character-img ${auraClass}" draggable="false" onerror="this.onerror=null; this.src='${characterFallback}';" />
         <div class="character-hitbox" style="${getCharacterHitboxStyle(characterLevel)}"></div>
       </div>
       <section class="${shellClass()}">
@@ -2932,16 +2950,102 @@ export function mountLegacyGame(container) {
   root = container;
   state = createInitialState();
 
+  // --- TOYS PHYSICS ENGINE ---
+  let toyLayer = document.getElementById("toy-layer");
+  if (!toyLayer) {
+    toyLayer = document.createElement("div");
+    toyLayer.id = "toy-layer";
+    document.body.appendChild(toyLayer);
+  } else {
+    toyLayer.innerHTML = "";
+  }
+
+  let toys = [];
+  let physicsRaf = null;
+  let draggedToy = null;
+  let lastMouse = { x: window.innerWidth/2, y: window.innerHeight/2, vx: 0, vy: 0 };
+
+  const spawnToy = (x, y, typeClass, innerText = "") => {
+    if (toys.length > 50) {
+      const oldToy = toys.shift();
+      if (oldToy.el && oldToy.el.parentNode) oldToy.el.parentNode.removeChild(oldToy.el);
+    }
+    const el = document.createElement("div");
+    el.className = `game-toy ${typeClass}`;
+    el.innerText = innerText;
+    toyLayer.appendChild(el);
+    const size = typeClass === "toy-yarn" ? 60 : 32;
+    toys.push({
+      el, x, y, size,
+      vx: (Math.random() - 0.5) * 10,
+      vy: (Math.random() - 0.5) * 10,
+      angle: 0,
+      va: (Math.random() - 0.5) * 20
+    });
+  };
+
+  spawnToy(window.innerWidth / 2, 50, "toy-yarn");
+
+  const physicsLoop = () => {
+    toys.forEach(toy => {
+      if (draggedToy === toy) return;
+      
+      toy.vy += 0.8; // Gravity
+      toy.x += toy.vx;
+      toy.y += toy.vy;
+      toy.angle += toy.va;
+      
+      // Friction
+      toy.vx *= 0.98;
+      toy.vy *= 0.98;
+      toy.va *= 0.98;
+
+      // Floor collision
+      if (toy.y + toy.size > window.innerHeight) {
+        toy.y = window.innerHeight - toy.size;
+        toy.vy *= -0.65; // Bounce
+        toy.vx *= 0.9; // Ground friction
+        toy.va *= 0.9;
+      }
+      
+      // Wall collision
+      if (toy.x < 0) {
+        toy.x = 0;
+        toy.vx *= -0.8;
+      } else if (toy.x + toy.size > window.innerWidth) {
+        toy.x = window.innerWidth - toy.size;
+        toy.vx *= -0.8;
+      }
+
+      toy.el.style.transform = `translate(${toy.x}px, ${toy.y}px) rotate(${toy.angle}deg)`;
+    });
+
+    physicsRaf = requestAnimationFrame(physicsLoop);
+  };
+  physicsRaf = requestAnimationFrame(physicsLoop);
+  // ---------------------------
+
   let isDraggingCat = false;
   let catDragOffsetX = 0;
   let catDragOffsetY = 0;
   let draggedElement = null;
 
   const onPointerDown = (e) => {
-    const hitboxTarget = e.target;
-    if (hitboxTarget.classList.contains("character-hitbox")) {
+    const target = e.target;
+    
+    // Check if dragging a toy
+    if (target.classList.contains("game-toy")) {
+      const toy = toys.find(t => t.el === target);
+      if (toy) {
+        draggedToy = toy;
+        target.setPointerCapture(e.pointerId);
+        return;
+      }
+    }
+
+    if (target.classList.contains("character-hitbox")) {
       isDraggingCat = true;
-      draggedElement = hitboxTarget.parentElement;
+      draggedElement = target.parentElement;
       const rect = draggedElement.getBoundingClientRect();
 
       if (!state.characterPos) {
@@ -2959,21 +3063,34 @@ export function mountLegacyGame(container) {
       draggedElement.style.margin = "0";
       draggedElement.style.transform = "none";
       draggedElement.style.transition = "none";
-      draggedElement.style.cursor = "grabbing";
-      document.body.style.cursor = "grabbing";
+      draggedElement.style.setProperty("cursor", "var(--cursor-grabbing)", "important");
+      document.body.style.setProperty("cursor", "var(--cursor-grabbing)", "important");
     }
   };
 
   const onPointerMove = (e) => {
+    lastMouse.vx = e.clientX - lastMouse.x;
+    lastMouse.vy = e.clientY - lastMouse.y;
+    lastMouse.x = e.clientX;
+    lastMouse.y = e.clientY;
+
+    if (draggedToy) {
+      draggedToy.x = e.clientX - draggedToy.size / 2;
+      draggedToy.y = e.clientY - draggedToy.size / 2;
+      draggedToy.el.style.transform = `translate(${draggedToy.x}px, ${draggedToy.y}px) rotate(${draggedToy.angle}deg)`;
+      return;
+    }
+
     if (isDraggingCat && draggedElement) {
       let newX = e.clientX - catDragOffsetX;
       let newY = e.clientY - catDragOffsetY;
 
       const hitbox = draggedElement.querySelector(".character-hitbox");
+      let W = 200, H = 200; // defaults
       if (hitbox) {
         const rect = draggedElement.getBoundingClientRect();
-        const W = rect.width;
-        const H = rect.height;
+        W = rect.width;
+        H = rect.height;
 
         const hitboxLeftPct = parseFloat(hitbox.style.left) || 0;
         const hitboxTopPct = parseFloat(hitbox.style.top) || 0;
@@ -2996,6 +3113,18 @@ export function mountLegacyGame(container) {
 
       state.characterPos = { x: newX, y: newY };
 
+      // Cat hits toys!
+      toys.forEach(toy => {
+        const dx = (toy.x + toy.size/2) - (newX + W/2);
+        const dy = (toy.y + toy.size/2) - (newY + H/2);
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < toy.size/2 + 100) {
+          toy.vx += dx * 0.05;
+          toy.vy += dy * 0.05;
+          toy.va += (Math.random() - 0.5) * 30;
+        }
+      });
+
       const catEls = document.querySelectorAll(".phase-character, .start-character");
       catEls.forEach(el => {
         el.style.position = "fixed";
@@ -3005,12 +3134,19 @@ export function mountLegacyGame(container) {
         el.style.margin = "0";
         el.style.transform = "none";
         el.style.transition = "none";
-        el.style.cursor = "grabbing";
+        el.style.setProperty("cursor", "var(--cursor-grabbing)", "important");
       });
     }
   };
 
   const onPointerUp = (e) => {
+    if (draggedToy) {
+      draggedToy.vx = clamp(lastMouse.vx * 0.8, -40, 40);
+      draggedToy.vy = clamp(lastMouse.vy * 0.8, -40, 40);
+      try { draggedToy.el.releasePointerCapture(e.pointerId); } catch(err){}
+      draggedToy = null;
+    }
+
     if (isDraggingCat) {
       isDraggingCat = false;
       document.body.style.cursor = "";
@@ -3024,7 +3160,7 @@ export function mountLegacyGame(container) {
       }
       const catEls = document.querySelectorAll(".phase-character, .start-character");
       catEls.forEach(el => {
-        el.style.cursor = "grab";
+        el.style.cursor = "var(--cursor-grab)";
       });
     }
   };
@@ -3033,7 +3169,17 @@ export function mountLegacyGame(container) {
   document.addEventListener("pointermove", onPointerMove);
   document.addEventListener("pointerup", onPointerUp);
 
-  root.addEventListener("click", handleRootClick);
+  const enhancedRootClick = (event) => {
+    const target = event.target;
+    const isInteractive = target.closest("button, .choice, .stage-card, .skill-card, .superpower-hand__card, .phase-goal-start, .lang-btn, .game-toy, .playfield");
+    if (!isInteractive && !(target instanceof HTMLImageElement)) {
+      const emojis = ["☕", "🐟", "🐛", "📄", "📎", "📦"];
+      spawnToy(event.clientX - 16, event.clientY - 16, "toy-emoji", emojis[Math.floor(Math.random() * emojis.length)]);
+    }
+    handleRootClick(event);
+  };
+
+  root.addEventListener("click", enhancedRootClick);
   render();
 
   return () => {
@@ -3041,8 +3187,11 @@ export function mountLegacyGame(container) {
     document.removeEventListener("pointermove", onPointerMove);
     document.removeEventListener("pointerup", onPointerUp);
 
+    if (physicsRaf) cancelAnimationFrame(physicsRaf);
+    if (toyLayer) toyLayer.innerHTML = "";
+
     if (root === container) {
-      root.removeEventListener("click", handleRootClick);
+      root.removeEventListener("click", enhancedRootClick);
       root.innerHTML = "";
       root = null;
     }
