@@ -2201,6 +2201,15 @@ button {
   line-height: 1;
 }
 
+.superpower-hand__plan {
+  color: #ffe9a9;
+  font-family: var(--font-pixel);
+  font-size: 0.5rem;
+  font-weight: 800;
+  line-height: 1.2;
+  text-transform: none;
+}
+
 .superpower-hand__cards {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2444,6 +2453,36 @@ button {
 .draft-count {
   margin: 0;
   color: #574d3f;
+}
+
+.draft-run-preview {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 3px solid #7c5b32;
+  background: linear-gradient(180deg, rgba(255, 248, 220, 0.95), rgba(245, 224, 168, 0.95));
+  color: #4a3314;
+  box-shadow: inset 0 0 0 2px rgba(255, 247, 214, 0.65);
+}
+
+.draft-run-preview h3,
+.phase-goal-popup__identity strong {
+  margin: 0;
+  color: #2467a6;
+  font-size: 1rem;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.draft-run-preview p,
+.draft-run-preview strong {
+  margin: 0;
+}
+
+.draft-run-preview strong {
+  color: #2d741e;
+  font-size: 0.88rem;
 }
 
 .start-mission:disabled {
@@ -7986,6 +8025,35 @@ canvas {
   font-size: 1rem;
   font-weight: 800;
   line-height: 1.24;
+}
+
+.phase-goal-popup__identity {
+  display: grid;
+  gap: 4px;
+  margin-top: 14px;
+  padding: 10px 12px;
+  border: 3px solid rgba(69, 101, 40, 0.4);
+  background: rgba(242, 255, 220, 0.72);
+}
+
+.phase-goal-popup__identity p {
+  margin: 0;
+  color: #4e452d;
+  font-size: 0.86rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.phase-moment-popup--safe h2 {
+  color: #26722a;
+}
+
+.phase-moment-popup--warn h2 {
+  color: #9b6306;
+}
+
+.phase-moment-popup--danger h2 {
+  color: #b44f47;
 }
 
 .phase-goal-popup__guidance {

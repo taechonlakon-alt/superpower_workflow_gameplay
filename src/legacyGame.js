@@ -1,5 +1,6 @@
 import { allStagesEN, allStagesTH } from "./data/gameData.js";
 import { i18n } from "./data/i18n.js";
+import { getPhaseMoment, getRunIdentity } from "./gameFeel.js";
 
 let root = null;
 let currentLang = localStorage.getItem("sp_workflow_lang") || "th";
@@ -45,6 +46,7 @@ function createInitialState() {
     activeChaos: null,
     triggeredChaosByPhase: {},
     phaseSummaries: [],
+    pendingPhaseMoment: null,
     seenPhaseGoals: [],
     activeSkillDetail: null,
     randomModifiersTriggered: [],
@@ -103,6 +105,10 @@ function getSkill(skillId) {
 
 function getCurrentStep() {
   return game.steps[state.index] ?? null;
+}
+
+function getCurrentRunIdentity() {
+  return getRunIdentity(state.skills, i18n[currentLang]);
 }
 
 function getAvailableOptions(step) {
@@ -616,27 +622,40 @@ function sumEffects(entries) {
 }
 
 function getPhaseFocus({ riskDelta, tokenDelta, timeDelta, qualityDelta, riskyChoices, counteredEvents, problems }) {
+  const lang = i18n[currentLang];
   if (riskDelta >= 4 || riskyChoices >= 2) {
-    return "Focus on Spec, guardrails, and Reviews faster before risk accumulates out of control.";
+    return currentLang === "th"
+      ? "โฟกัสที่ Spec, guardrails และการ review ให้ไวขึ้นก่อนที่ความเสี่ยงจะสะสมจนคุมไม่อยู่"
+      : "Focus on Spec, guardrails, and Reviews faster before risk accumulates out of control.";
   }
 
   if (qualityDelta < 0) {
-    return "Focus on acceptance criteria and tests/checklists so work doesn't look finished while quality drops.";
+    return currentLang === "th"
+      ? "โฟกัสที่ acceptance criteria และ test/checklist เพื่อไม่ให้งานดูเหมือนเสร็จทั้งที่คุณภาพกำลังตก"
+      : "Focus on acceptance criteria and tests/checklists so work doesn't look finished while quality drops.";
   }
 
   if (tokenDelta >= 6) {
-    return "Focus on bounded AI usage, reducing reprompt loops, and adding filtering tools.";
+    return currentLang === "th"
+      ? "โฟกัสที่การใช้ AI แบบมีขอบเขต ลดวง reprompt และเพิ่มตัวช่วยกรองคำตอบ"
+      : "Focus on bounded AI usage, reducing reprompt loops, and adding filtering tools.";
   }
 
   if (timeDelta >= 5) {
-    return "Focus on breaking down tasks and choosing workflows that buy back real confidence rather than adding arbitrary steps.";
+    return currentLang === "th"
+      ? "โฟกัสที่การแตก task และเลือก workflow ที่ซื้อความมั่นใจกลับมาได้จริง แทนการเพิ่มขั้นตอนลอย ๆ"
+      : "Focus on breaking down tasks and choosing workflows that buy back real confidence rather than adding arbitrary steps.";
   }
 
   if (problems.length && counteredEvents === 0) {
-    return "Focus on selecting the right Superpower to counter the edge cases of this phase at the right moment.";
+    return currentLang === "th"
+      ? "โฟกัสที่การเลือก Superpower ให้ตรงกับ edge case ของเฟสนี้ในจังหวะที่ใช่"
+      : "Focus on selecting the right Superpower to counter the edge cases of this phase at the right moment.";
   }
 
-  return "Maintain this pace and use Review/Scanner to verify evidence before handoff.";
+  return currentLang === "th"
+    ? "รักษาจังหวะนี้ไว้ และใช้ Review/Scanner ตรวจหลักฐานก่อน handoff"
+    : "Maintain this pace and use Review/Scanner to verify evidence before handoff.";
 }
 
 function getPhaseGrade(score) {
@@ -735,6 +754,18 @@ function buildPhaseSummary(step) {
   };
 }
 
+function buildPendingPhaseMoment(phaseSummary) {
+  const moment = getPhaseMoment(phaseSummary, i18n[currentLang]);
+  if (!moment) return null;
+
+  return {
+    ...moment,
+    phase: phaseSummary.phase,
+    grade: phaseSummary.grade,
+    focus: phaseSummary.focus,
+  };
+}
+
 function getNormalPhaseDecisionCount(step) {
   if (!step) return 0;
   return state.history.filter((item) =>
@@ -810,7 +841,9 @@ function advanceAfterNormalDecision({ allowRandomModifier = true, allowMicroEven
   }
 
   if (state.progress >= step.requiredProgress) {
-    state.phaseSummaries = [...state.phaseSummaries, buildPhaseSummary(step)];
+    const phaseSummary = buildPhaseSummary(step);
+    state.phaseSummaries = [...state.phaseSummaries, phaseSummary];
+    state.pendingPhaseMoment = buildPendingPhaseMoment(phaseSummary);
     const oldLevel = Math.min(5, state.index + 1);
     state.index += 1;
     const newLevel = Math.min(5, state.index + 1);
@@ -887,7 +920,9 @@ function continueAfterResolution() {
     state.resolution = null;
     const step = getCurrentStep();
     if (step) {
-      state.phaseSummaries = [...state.phaseSummaries, buildPhaseSummary(step)];
+      const phaseSummary = buildPhaseSummary(step);
+      state.phaseSummaries = [...state.phaseSummaries, phaseSummary];
+      state.pendingPhaseMoment = buildPendingPhaseMoment(phaseSummary);
     }
     const oldLevel = Math.min(5, state.index + 1);
     state.index += 1;
@@ -1317,6 +1352,13 @@ function handleRootClick(event) {
     return;
   }
 
+  const phaseMomentButton = target.closest(".phase-moment-start");
+  if (phaseMomentButton) {
+    state.pendingPhaseMoment = null;
+    render();
+    return;
+  }
+
   const choiceButton = target.closest(".choice");
   if (choiceButton) {
     chooseOption(choiceButton.dataset.option);
@@ -1361,6 +1403,7 @@ function getTokenResourceTone(value) {
 }
 
 function getResourceBarState() {
+  const lang = i18n[currentLang];
   const timeRemaining = Math.max(0, game.caps.time - state.time);
   const timeFill = game.caps.time > 0
     ? clamp(Math.round((timeRemaining / game.caps.time) * 100), 0, 100)
@@ -1378,10 +1421,10 @@ function getResourceBarState() {
   return [
     {
       key: "time",
-      label: "Time",
+      label: lang.time,
       value: timeRemaining,
       fill: timeFill,
-      helper: "Time remaining",
+      helper: lang.timeRemaining,
       tone: getTimeResourceTone(timeFill),
     },
     {
@@ -1389,15 +1432,15 @@ function getResourceBarState() {
       label: "Token",
       value: tokenRemaining,
       fill: tokenFill,
-      helper: "AI budget remaining",
+      helper: lang.aiBudgetRemaining,
       tone: getTokenResourceTone(tokenFill),
     },
     {
       key: "risk",
-      label: "Risk",
+      label: lang.risk,
       value: riskValue,
       fill: clamp(riskValue, 0, 100),
-      helper: "Fragility",
+      helper: lang.fragility,
       tone: getPressureResourceTone(riskValue, 50, 80),
     },
   ];
@@ -1428,12 +1471,14 @@ function resourceBarMarkup() {
 function selectedSkillHandMarkup() {
   const selectedSkills = state.skills.map((skillId) => getSkill(skillId)).filter(Boolean);
   if (!selectedSkills.length) return "";
+  const runIdentity = getCurrentRunIdentity();
 
   return `
     <section class="superpower-hand" aria-label="Superpower Hand">
       <div class="superpower-hand__label">
         <span>Superpower Hand</span>
         <strong>Holding ${selectedSkills.length}/${game.maxSkills}</strong>
+        <small class="superpower-hand__plan">${escapeHtml(runIdentity.label)} · ${escapeHtml(runIdentity.reward)}</small>
       </div>
       <div class="superpower-hand__cards">
         ${selectedSkills.map((skill) => `
@@ -1725,6 +1770,7 @@ function renderStageSelect() {
 function renderSetup() {
   const lang = i18n[currentLang];
   const characterLevel = Math.min(5, (state.index || 0) + 1);
+  const runIdentity = state.skills.length === game.maxSkills ? getCurrentRunIdentity() : null;
   root.innerHTML = `
     <main class="app">
       <div class="phase-character" aria-hidden="true" style="${getCharacterInlineStyle()}">
@@ -1757,6 +1803,14 @@ function renderSetup() {
               <p class="draft-count">${lang.selected} ${state.skills.length} / ${game.maxSkills}</p>
               <button class="restart start-mission" ${state.skills.length === game.maxSkills ? "" : "disabled"}>${lang.startMission}</button>
             </div>
+            ${runIdentity ? `
+              <section class="draft-run-preview draft-run-preview--${escapeHtml(runIdentity.key)}" aria-label="Run Identity Preview">
+                <p class="mini-label">${lang.runIdentity}</p>
+                <h3>${escapeHtml(runIdentity.label)}</h3>
+                <p>${escapeHtml(runIdentity.helper)}</p>
+                <strong>${escapeHtml(runIdentity.reward)}</strong>
+              </section>
+            ` : ""}
           </section>
         </section>
       </section>
@@ -2416,13 +2470,14 @@ function reportListMarkup(label, items, emptyText) {
 }
 
 function phaseLearningsMarkup(summaries) {
+  const lang = i18n[currentLang];
   const items = summaries.map((summary) => `${summary.phase}: ${summary.grade.label} - ${summary.focus}`);
-  return reportListMarkup("Phase Learnings", items, "No phase learnings recorded.");
+  return reportListMarkup(lang.phaseLearnings, items, lang.noPhaseLearnings);
 }
 
-function randomModifiersMarkup(modifiers) {
+function randomModifiersMarkup(modifiers, lang = i18n[currentLang]) {
   const items = modifiers.map((modifier) => `${modifier.phase}: ${modifier.title} (${formatRandomEffectDelta(modifier.effects)})`);
-  return reportListMarkup("Random Modifiers", items, "No external signals encountered this run.");
+  return reportListMarkup(lang.randomModifiers, items, lang.noRandomModifiers);
 }
 
 function decisionHistoryMarkup(history) {
@@ -2507,6 +2562,7 @@ function animateScoreSlot() {
 }
 
 function renderResult() {
+  const lang = i18n[currentLang];
   const result = getFinalResult();
   const timeTone = getUsageTone(state.time, game.caps.time);
   const tokenFill = game.caps.token > 0
@@ -2515,8 +2571,8 @@ function renderResult() {
   const tokenTone = result.overBudget ? "danger" : getTokenResourceTone(tokenFill);
   const riskTone = getRiskTone(state.risk);
   const tokenHelper = result.overBudget
-    ? `AI budget exceeded by ${result.tokenDebt}`
-    : "AI budget remained within limits.";
+    ? lang.aiBudgetExceededBy.replace("{amount}", result.tokenDebt)
+    : lang.aiBudgetWithinLimits;
 
   const characterLevel = Math.min(5, (state.index || 0) + 1);
   const characterSrc = result.failed
@@ -2540,7 +2596,7 @@ function renderResult() {
         <section class="playfield">
           <section class="result mission-report ${result.failed ? "fail" : ""}">
             <div class="mission-report__header">
-              <p class="phase-tag">Workflow Report</p>
+              <p class="phase-tag">${lang.workflowReport}</p>
               <span class="title-badge">${result.titleBadge.label}</span>
               ${result.randomModifierBadge ? `<span class="title-badge title-badge--chaos">${result.randomModifierBadge.label}</span>` : ""}
               <h2 class="result-title">${result.title}</h2>
@@ -2552,7 +2608,7 @@ function renderResult() {
             <div class="mission-report__body">
               <aside class="mission-report__summary">
                 <article class="run-pattern run-pattern--${result.failed ? "danger" : "safe"}">
-                  <span class="mini-label">Run Style</span>
+                  <span class="mini-label">${lang.runStyle}</span>
                   <strong>${result.workflowPattern.label}</strong>
                   <p>${result.workflowPattern.helper}</p>
                 </article>
@@ -2563,45 +2619,45 @@ function renderResult() {
                 <div class="report-signals mission-report__meters">
                   ${reportSignalMarkup({
     icon: "CLK",
-    label: "Time",
+    label: lang.time,
     value: `${state.time} / ${game.caps.time}`,
-    helper: result.overtime ? "Deadline exceeded plan" : "Time kept under control",
+    helper: result.overtime ? lang.deadlineExceededPlan : lang.timeKeptUnderControl,
     tone: timeTone,
   })}
                   ${reportSignalMarkup({
     icon: "AI",
-    label: "Token Left",
+    label: lang.tokenLeft,
     value: `${result.tokenRemaining} / ${game.caps.token}`,
     helper: tokenHelper,
     tone: tokenTone,
   })}
                   ${reportSignalMarkup({
     icon: "RISK",
-    label: "Risk",
+    label: lang.risk,
     value: `${state.risk} / ${game.caps.risk}`,
-    helper: state.risk >= 8 ? "Project is fragile" : "Risks kept under control",
+    helper: state.risk >= 8 ? lang.projectIsFragile : lang.risksKeptUnderControl,
     tone: riskTone,
   })}
                 </div>
 
                 <div class="report-evidence-row mission-report__evidence">
-                  ${reportEvidenceMarkup("Guardrails", result.protectedEvents, "Number of events prevented by workflow", result.protectedEvents > 0 ? "safe" : "neutral")}
-                  ${reportEvidenceMarkup("Risky Calls", result.riskyChoices, "Number of shortcuts that increased risk", result.riskyChoices >= 2 ? "danger" : "neutral")}
-                  ${reportEvidenceMarkup("Tool Uses", result.skillUses, "Number of times a superpower was used to make decisions", result.skillUses >= 2 ? "safe" : "neutral")}
+                  ${reportEvidenceMarkup(lang.guardrails, result.protectedEvents, "Number of events prevented by workflow", result.protectedEvents > 0 ? "safe" : "neutral")}
+                  ${reportEvidenceMarkup(lang.riskyCalls, result.riskyChoices, "Number of shortcuts that increased risk", result.riskyChoices >= 2 ? "danger" : "neutral")}
+                  ${reportEvidenceMarkup(lang.toolUses, result.skillUses, "Number of times a superpower was used to make decisions", result.skillUses >= 2 ? "safe" : "neutral")}
                 </div>
 
                 <div class="report-lists">
-                  ${reportListMarkup("Drafted Superpowers", result.draftedSuperpowers, "No superpowers drafted")}
-                  ${reportListMarkup("Superpowers Used", result.superpowersUsed, "Superpowers selected but not used")}
-                  ${reportListMarkup("Problems Triggered", result.problemsTriggered, "No major problems triggered")}
-                  ${reportListMarkup("Score Limits", result.scoreCeilingReasons, "No additional score ceiling reasons")}
-                  ${randomModifiersMarkup(result.randomModifiers)}
+                  ${reportListMarkup(lang.draftedSuperpowers, result.draftedSuperpowers, lang.noDraftedSuperpowers)}
+                  ${reportListMarkup(lang.superpowersUsed, result.superpowersUsed, lang.noSuperpowersUsed)}
+                  ${reportListMarkup(lang.problemsTriggered, result.problemsTriggered, lang.noProblemsTriggered)}
+                  ${reportListMarkup(lang.scoreLimits, result.scoreCeilingReasons, lang.noScoreLimits)}
+                  ${randomModifiersMarkup(result.randomModifiers, lang)}
                   ${phaseLearningsMarkup(result.phaseSummaries)}
                 </div>
               </aside>
 
               <div class="timeline-report mission-report__timeline">
-                <h3>Decision Timeline</h3>
+                <h3>${lang.decisionTimeline}</h3>
                 ${state.history
       .map(
         (item, index) => `
@@ -2609,7 +2665,7 @@ function renderResult() {
                       <span>${index + 1}</span>
                       <div>
                         <h4>${item.phase}: ${item.optionLabel}</h4>
-                        <p>${item.isRandomModifier ? "Random modifier" : item.isMicroEvent ? "Project Signal" : item.countered ? "Event Controlled" : "Moved forward but with hidden risk"} — ${item.lesson}</p>
+                        <p>${item.isRandomModifier ? lang.randomModifierShort : item.isMicroEvent ? lang.projectSignalShort : item.countered ? lang.eventControlledShort : lang.movedWithHiddenRiskShort} — ${item.lesson}</p>
                       </div>
                     </article>
                   `,
@@ -2620,7 +2676,7 @@ function renderResult() {
 
             <div class="mission-report__footer">
               <p class="result-lesson">${result.lesson}</p>
-              <button class="restart">Play again</button>
+              <button class="restart">${lang.playAgain}</button>
             </div>
           </section>
         </section>
@@ -2632,32 +2688,65 @@ function renderResult() {
 }
 
 function phaseGoalPopupMarkup() {
-  if (state.screen !== "step" || state.activeChaos) return "";
+  if (state.screen !== "step" || state.activeChaos || state.pendingPhaseMoment) return "";
 
+  const lang = i18n[currentLang];
   const step = getCurrentStep();
   if (!step?.goal || state.seenPhaseGoals.includes(step.id)) return "";
+  const runIdentity = getCurrentRunIdentity();
 
   const guidance = Array.isArray(step.goal.guidance) ? step.goal.guidance.slice(0, 5) : [];
   return `
     <div class="hero-popup-overlay phase-goal-overlay">
       <section class="phase-goal-popup" role="dialog" aria-modal="true" aria-labelledby="phase-goal-title">
         <div class="phase-goal-popup__head">
-          <p class="phase-tag">Phase Goal</p>
-          <span>Phase ${state.index + 1} of ${getTotalPhaseCount()} · ${escapeHtml(step.title)}</span>
+          <p class="phase-tag">${lang.phaseGoal}</p>
+          <span>${lang.phase} ${state.index + 1} ${lang.of} ${getTotalPhaseCount()} · ${escapeHtml(step.title)}</span>
         </div>
         <h2 id="phase-goal-title">${escapeHtml(step.goal.title)}</h2>
         <p class="phase-goal-popup__copy">${escapeHtml(step.goal.copy)}</p>
+        ${state.skills.length ? `
+          <div class="phase-goal-popup__identity">
+            <p class="mini-label">${lang.runIdentity}</p>
+            <strong>${escapeHtml(runIdentity.label)}</strong>
+            <p>${escapeHtml(runIdentity.reward)}</p>
+          </div>
+        ` : ""}
         ${guidance.length
       ? `
             <div class="phase-goal-popup__guidance">
-              <p class="mini-label">Guidance</p>
+              <p class="mini-label">${lang.guidance}</p>
               <ol>
                 ${guidance.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
               </ol>
             </div>
           `
       : ""}
-        <button class="restart phase-goal-start" type="button">Continue</button>
+        <button class="restart phase-goal-start" type="button">${lang.continue}</button>
+      </section>
+    </div>
+  `;
+}
+
+function phaseMomentPopupMarkup() {
+  if (state.screen !== "step" || !state.pendingPhaseMoment) return "";
+
+  const lang = i18n[currentLang];
+  const moment = state.pendingPhaseMoment;
+  return `
+    <div class="hero-popup-overlay phase-goal-overlay phase-moment-overlay">
+      <section class="phase-goal-popup phase-moment-popup phase-moment-popup--${escapeHtml(moment.tone || "safe")}" role="dialog" aria-modal="true" aria-labelledby="phase-moment-title">
+        <div class="phase-goal-popup__head">
+          <p class="phase-tag">${lang.phaseClear}</p>
+          <span>${escapeHtml(moment.phase)} · ${lang.grade} ${escapeHtml(moment.grade?.label || "-")}</span>
+        </div>
+        <h2 id="phase-moment-title">${escapeHtml(moment.badge || lang.phaseClear)}</h2>
+        <p class="phase-goal-popup__copy">${escapeHtml(moment.copy || "")}</p>
+        <div class="phase-goal-popup__identity">
+          <p class="mini-label">${escapeHtml(moment.title || lang.continue)}</p>
+          <p>${escapeHtml(moment.focus || "Carry this rhythm into the next phase.")}</p>
+        </div>
+        <button class="restart phase-moment-start" type="button">${lang.continue}</button>
       </section>
     </div>
   `;
@@ -2696,6 +2785,7 @@ function tutorialMarkup() {
   `;
 }
 function renderEvolution() {
+  const lang = i18n[currentLang];
   const getEvolutionSpriteLayout = (lv) => {
     const spriteMetrics = {
       1: { width: 1774, height: 887, bbox: [350, 300, 689, 681] },
@@ -2742,8 +2832,8 @@ function renderEvolution() {
         </div>
       </div>
       <div class="evolution-text" style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
-        <h2>Cat is evolving...</h2>
-        <button class="evolution-next-btn btn primary-btn" style="display:none; z-index: 100;">Continue to Next Workflow</button>
+        <h2>${lang.evolving}</h2>
+        <button class="evolution-next-btn btn primary-btn" style="display:none; z-index: 100;">${lang.continueNextWorkflow}</button>
       </div>
     </main>
   `;
@@ -2765,7 +2855,7 @@ function renderEvolution() {
 
       const title = root.querySelector('.evolution-text h2');
       if (title) {
-        title.innerText = `Level ${state.evolutionNewLevel} Reached!`;
+        title.innerText = lang.levelReached.replace("{level}", state.evolutionNewLevel);
         title.classList.add('glow-text');
       }
 
@@ -2828,6 +2918,11 @@ function render() {
   const phaseGoalPopup = phaseGoalPopupMarkup();
   if (phaseGoalPopup) {
     root.insertAdjacentHTML("beforeend", phaseGoalPopup);
+  }
+
+  const phaseMomentPopup = phaseMomentPopupMarkup();
+  if (phaseMomentPopup) {
+    root.insertAdjacentHTML("beforeend", phaseMomentPopup);
   }
 
   renderSkillDetailPopup();
