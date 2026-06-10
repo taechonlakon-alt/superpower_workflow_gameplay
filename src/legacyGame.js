@@ -16,15 +16,25 @@ function getCharacterInlineStyle() {
   return `position: fixed; left: ${state.characterPos.x}px; top: ${state.characterPos.y}px; z-index: 9999; margin: 0; transition: none; cursor: var(--cursor-grab); touch-action: none; pointer-events: none; transform: none;`;
 }
 
-function getCharacterHitboxStyle(lv) {
+function getCharacterHitboxStyle(lv, isFail = false) {
   const spriteMetrics = {
-    1: { width: 1774, height: 887, bbox: [350, 300, 689, 681] },
-    2: { width: 1774, height: 887, bbox: [587, 289, 1038, 694] },
-    3: { width: 1774, height: 887, bbox: [757, 210, 1062, 719] },
-    4: { width: 1774, height: 887, bbox: [410, 135, 1009, 819] },
-    5: { width: 1419, height: 709, bbox: [512, 148, 906, 615] },
+    1: { width: 1774, height: 887, bbox: [326, 196, 1104, 693] },
+    2: { width: 1774, height: 887, bbox: [415, 182, 1148, 752] },
+    3: { width: 1774, height: 887, bbox: [681, 79, 1112, 755] },
+    4: { width: 1774, height: 887, bbox: [298, 40, 1448, 821] },
+    5: { width: 1419, height: 709, bbox: [206, 71, 1214, 637] },
   };
-  const metrics = spriteMetrics[lv] || spriteMetrics[1];
+
+  const failMetrics = {
+    1: { width: 1064, height: 532, bbox: [343, 74, 751, 435] },
+    2: { width: 1064, height: 532, bbox: [266, 72, 786, 491] },
+    3: { width: 1064, height: 532, bbox: [360, 65, 726, 464] },
+    4: { width: 1419, height: 709, bbox: [544, 115, 959, 640] },
+    5: { width: 1419, height: 709, bbox: [444, 88, 963, 660] },
+  };
+
+  const metricsSet = isFail ? failMetrics : spriteMetrics;
+  const metrics = metricsSet[lv] || metricsSet[1];
   const [left, top, right, bottom] = metrics.bbox;
   const leftPct = (left / metrics.width) * 100;
   const topPct = (top / metrics.height) * 100;
@@ -1042,10 +1052,7 @@ function openSkillDetail(skillId) {
   if (!skill) return;
   state.activeSkillDetail = skillId;
   
-  const existing = document.querySelector('.skill-detail-overlay');
-  if (existing) existing.remove();
-  
-  root.insertAdjacentHTML("beforeend", skillDetailPopupMarkup(skill));
+  renderSkillDetailPopup();
 }
 
 function closeSkillDetail() {
@@ -1779,7 +1786,15 @@ function renderSkillDetailPopup() {
     return;
   }
 
-  root.insertAdjacentHTML("beforeend", skillDetailPopupMarkup(skill));
+  const existing = document.querySelector('.skill-detail-overlay');
+  if (existing) existing.remove();
+
+  const panel = document.querySelector('.panel');
+  if (panel && (state.screen === "step" || state.screen === "emergency_step")) {
+    panel.insertAdjacentHTML("beforeend", skillDetailPopupMarkup(skill));
+  } else {
+    root.insertAdjacentHTML("beforeend", skillDetailPopupMarkup(skill));
+  }
 }
 
 function stageCardMarkup(stage) {
@@ -1839,7 +1854,7 @@ function renderSetup() {
   const runIdentity = state.skills.length === game.maxSkills ? getCurrentRunIdentity() : null;
   root.innerHTML = `
     <main class="app phase-enter">
-      <div class="phase-character" aria-hidden="true" style="${getCharacterInlineStyle()}">
+      <div class="phase-character ${characterLevel === 4 ? 'phase-character--lv4' : ''}" aria-hidden="true" style="${getCharacterInlineStyle()}">
         <img src="/assets/cathappy/lv${characterLevel}.gif" alt="Hero Lv${characterLevel}" class="phase-character-img" draggable="false" onerror="this.onerror=null; this.src='/assets/cathappy/lv${characterLevel}.png';" />
         <div class="character-hitbox" style="${getCharacterHitboxStyle(characterLevel)}"></div>
       </div>
@@ -1948,9 +1963,9 @@ function renderStep(step, isEmergency = false) {
     <div class="overlay-emergency ${isEmergency ? 'active' : ''}"></div>
     <div class="overlay-chaos ${isChaos ? 'active' : ''}"></div>
     <main class="app phase-enter">
-      <div class="phase-character" aria-hidden="true" style="${getCharacterInlineStyle()}">
+      <div class="phase-character ${characterLevel === 4 ? 'phase-character--lv4' : ''}" aria-hidden="true" style="${getCharacterInlineStyle()}">
         <img src="${characterSrc}" alt="Hero Lv${characterLevel}" class="phase-character-img" draggable="false" onerror="this.onerror=null; this.src='${characterFallback}';" />
-        <div class="character-hitbox" style="${getCharacterHitboxStyle(characterLevel)}"></div>
+        <div class="character-hitbox" style="${getCharacterHitboxStyle(characterLevel, isEmergency && state.emergencyCharacterFailed)}"></div>
       </div>
       <section class="${shellClass()}">
         <section class="phasebar" style="display: flex; align-items: center; justify-content: space-between;">
@@ -2044,9 +2059,9 @@ function renderResolution() {
 
   root.innerHTML = `
     <main class="app">
-      <div class="phase-character" aria-hidden="true" style="${getCharacterInlineStyle()}">
+      <div class="phase-character ${characterLevel === 4 ? 'phase-character--lv4' : ''}" aria-hidden="true" style="${getCharacterInlineStyle()}">
         <img src="${characterSrc}" alt="Hero Lv${characterLevel}" class="phase-character-img" draggable="false" onerror="this.onerror=null; this.src='${characterFallback}';" />
-        <div class="character-hitbox" style="${getCharacterHitboxStyle(characterLevel)}"></div>
+        <div class="character-hitbox" style="${getCharacterHitboxStyle(characterLevel, isEmergency)}"></div>
       </div>
       <section class="${shellClass()}">
         <section class="phasebar" style="display: flex; align-items: center; justify-content: space-between;">
@@ -2598,6 +2613,27 @@ function scoreTierMarkup(tier) {
   `;
 }
 
+function scoreAndGradeMarkup(score, verdict, tier) {
+  const digits = String(score).padStart(3, "0").split("");
+  return `
+    <article class="score-slot score-slot--combined score-slot--${tier.tone}" data-score="${score}">
+      <div class="score-slot__left">
+        <span class="score-slot__label">Workflow Score</span>
+        <div class="score-slot__reels" aria-label="Workflow Score ${score} out of 100">
+          ${digits.map((digit) => `<span class="score-slot__digit" data-final="${digit}">0</span>`).join("")}
+          <span class="score-slot__max">/100</span>
+        </div>
+      </div>
+      <div class="score-slot__right">
+        <span class="score-tier__range">${tier.range}</span>
+        <strong>${tier.label}</strong>
+        <p>${verdict}</p>
+        ${tier.focus ? `<em>${tier.focus}</em>` : ""}
+      </div>
+    </article>
+  `;
+}
+
 function animateScoreSlot() {
   const scoreSlot = root.querySelector(".score-slot");
   if (!scoreSlot) return;
@@ -2663,9 +2699,9 @@ function renderResult() {
 
   root.innerHTML = `
     <main class="app phase-enter ${bgClass}">
-      <div class="phase-character" aria-hidden="true" style="${getCharacterInlineStyle()}">
+      <div class="phase-character ${characterLevel === 4 ? 'phase-character--lv4' : ''}" aria-hidden="true" style="${getCharacterInlineStyle()}">
         <img src="${characterSrc}" alt="Hero Lv${characterLevel}" class="phase-character-img ${auraClass}" draggable="false" onerror="this.onerror=null; this.src='${characterFallback}';" />
-        <div class="character-hitbox" style="${getCharacterHitboxStyle(characterLevel)}"></div>
+        <div class="character-hitbox" style="${getCharacterHitboxStyle(characterLevel, result.failed)}"></div>
       </div>
       <section class="${shellClass()}">
         <section class="phasebar" style="display: flex; align-items: center; justify-content: space-between;">
@@ -2676,53 +2712,53 @@ function renderResult() {
           <section class="result mission-report ${result.failed ? "fail" : ""}">
             <div class="mission-report__header">
               <p class="phase-tag">${lang.workflowReport}</p>
-              <span class="title-badge">${result.titleBadge.label}</span>
-              ${result.randomModifierBadge ? `<span class="title-badge title-badge--chaos">${result.randomModifierBadge.label}</span>` : ""}
+              <div class="header-title-row" style="display: flex; gap: 8px; justify-content: center; align-items: center; margin-top: 4px;">
+                <span class="title-badge">${result.titleBadge.label}</span>
+                ${result.randomModifierBadge ? `<span class="title-badge title-badge--chaos">${result.randomModifierBadge.label}</span>` : ""}
+              </div>
               <h2 class="result-title">${result.title}</h2>
               <p>${result.summary}</p>
-              <p class="title-badge-helper">${result.titleBadge.helper}</p>
-              ${result.randomModifierBadge ? `<p class="title-badge-helper title-badge-helper--chaos">${result.randomModifierBadge.helper}</p>` : ""}
+              ${scoreAndGradeMarkup(result.workflowScore, result.scoreVerdict, result.scoreTier)}
             </div>
 
             <div class="mission-report__body">
               <aside class="mission-report__summary">
-                <article class="run-pattern run-pattern--${result.failed ? "danger" : "safe"}">
-                  <span class="mini-label">${lang.runStyle}</span>
-                  <strong>${result.workflowPattern.label}</strong>
-                  <p>${result.workflowPattern.helper}</p>
-                </article>
+                <div class="summary-left" style="display: flex; flex-direction: column; gap: 10px; min-width: 0;">
+                  <article class="run-pattern run-pattern--${result.failed ? "danger" : "safe"}">
+                    <span class="mini-label">${lang.runStyle}</span>
+                    <strong>${result.workflowPattern.label}</strong>
+                    <p>${result.workflowPattern.helper}</p>
+                  </article>
 
-                ${scoreSlotMarkup(result.workflowScore, result.scoreVerdict)}
-                ${scoreTierMarkup(result.scoreTier)}
-
-                <div class="report-signals mission-report__meters">
-                  ${reportSignalMarkup({
+                  <div class="report-signals mission-report__meters">
+                    ${reportSignalMarkup({
     icon: "CLK",
     label: lang.time,
     value: `${state.time} / ${game.caps.time}`,
     helper: result.overtime ? lang.deadlineExceededPlan : lang.timeKeptUnderControl,
     tone: timeTone,
   })}
-                  ${reportSignalMarkup({
+                    ${reportSignalMarkup({
     icon: "AI",
     label: lang.tokenLeft,
     value: `${result.tokenRemaining} / ${game.caps.token}`,
     helper: tokenHelper,
     tone: tokenTone,
   })}
-                  ${reportSignalMarkup({
+                    ${reportSignalMarkup({
     icon: "RISK",
     label: lang.risk,
     value: `${state.risk} / ${game.caps.risk}`,
     helper: state.risk >= 8 ? lang.projectIsFragile : lang.risksKeptUnderControl,
     tone: riskTone,
   })}
-                </div>
+                  </div>
 
-                <div class="report-evidence-row mission-report__evidence">
-                  ${reportEvidenceMarkup(lang.guardrails, result.protectedEvents, lang.evidenceGuardrailsHelper, result.protectedEvents > 0 ? "safe" : "neutral")}
-                  ${reportEvidenceMarkup(lang.riskyCalls, result.riskyChoices, lang.evidenceRiskyCallsHelper, result.riskyChoices >= 2 ? "danger" : "neutral")}
-                  ${reportEvidenceMarkup(lang.toolUses, result.skillUses, lang.evidenceToolUsesHelper, result.skillUses >= 2 ? "safe" : "neutral")}
+                  <div class="report-evidence-row mission-report__evidence">
+                    ${reportEvidenceMarkup(lang.guardrails, result.protectedEvents, lang.evidenceGuardrailsHelper, result.protectedEvents > 0 ? "safe" : "neutral")}
+                    ${reportEvidenceMarkup(lang.riskyCalls, result.riskyChoices, lang.evidenceRiskyCallsHelper, result.riskyChoices >= 2 ? "danger" : "neutral")}
+                    ${reportEvidenceMarkup(lang.toolUses, result.skillUses, lang.evidenceToolUsesHelper, result.skillUses >= 2 ? "safe" : "neutral")}
+                  </div>
                 </div>
 
                 <div class="report-lists">
@@ -2734,23 +2770,6 @@ function renderResult() {
                   ${phaseLearningsMarkup(result.phaseSummaries)}
                 </div>
               </aside>
-
-              <div class="timeline-report mission-report__timeline">
-                <h3>${lang.decisionTimeline}</h3>
-                ${state.history
-      .map(
-        (item, index) => `
-                    <article class="timeline-item ${item.isRandomModifier ? "is-random" : item.isMicroEvent ? "is-signal" : item.countered ? "is-safe" : "is-risky"}">
-                      <span>${index + 1}</span>
-                      <div>
-                        <h4>${item.phase}: ${item.optionLabel}</h4>
-                        <p>${item.isRandomModifier ? lang.randomModifierShort : item.isMicroEvent ? lang.projectSignalShort : item.countered ? lang.eventControlledShort : lang.movedWithHiddenRiskShort} — ${item.lesson}</p>
-                      </div>
-                    </article>
-                  `,
-      )
-      .join("")}
-              </div>
             </div>
 
             <div class="mission-report__footer">
@@ -3010,6 +3029,11 @@ function render() {
 export function mountLegacyGame(container) {
   root = container;
   state = createInitialState();
+  window.__game = {
+    state,
+    render,
+    renderResult
+  };
 
   // --- TOYS PHYSICS ENGINE ---
   let toyLayer = document.getElementById("toy-layer");
