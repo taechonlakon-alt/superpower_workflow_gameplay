@@ -286,29 +286,30 @@ function getChoiceMeaning(option) {
 function getInPlayHint(step, option, countered) {
   if (option.hint) return option.hint;
 
+  const lang = i18n[currentLang];
   const effects = normalizeEffects(option.effects);
 
   if (countered) {
-    return "Hint: Used the right tool for the edge case. Next, check if time/token cost is worth the risk reduction.";
+    return lang.hintCountered;
   }
 
   if (option.requires?.length) {
-    return "Hint: Combos close gaps quickly, but check if the phase really needed the entire combo.";
+    return lang.hintCombo;
   }
 
   if (effects.risk >= 4 || effects.quality <= -2) {
-    return "Hint: This shortcut provides speed but creates risk/quality debt to pay during Review.";
+    return lang.hintShortcut;
   }
 
   if (effects.token >= 3 || effects.time >= 3) {
-    return "Hint: This choice bought confidence with budget/time. Reusing it needs evidence of return.";
+    return lang.hintExpensive;
   }
 
   if (effects.risk < 0 || effects.quality >= 3) {
-    return "Hint: Good guardrails reduce phase uncertainty, not just add ritualistic steps.";
+    return lang.hintGuardrails;
   }
 
-  return step?.goal?.copy || option.lesson || "Hint: Look at resource outcomes to decide whether to push or add guardrails.";
+  return step?.goal?.copy || option.lesson || lang.hintDefault;
 }
 
 function buildMicroEvent({ id, title, icon, tags, tradeoff, outcome, lesson, effects, reaction }) {
@@ -2711,12 +2712,12 @@ function renderResult() {
         <section class="playfield">
           <section class="result mission-report ${result.failed ? "fail" : ""}">
             <div class="mission-report__header">
-              <p class="phase-tag">${lang.workflowReport}</p>
-              <div class="header-title-row" style="display: flex; gap: 8px; justify-content: center; align-items: center; margin-top: 4px;">
+              <div class="header-title-row" style="display: flex; gap: 8px; justify-content: center; align-items: center; margin-top: 4px; flex-wrap: wrap;">
                 <span class="title-badge">${result.titleBadge.label}</span>
+                <span class="phase-tag" style="margin: 0;">${lang.workflowReport}</span>
                 ${result.randomModifierBadge ? `<span class="title-badge title-badge--chaos">${result.randomModifierBadge.label}</span>` : ""}
               </div>
-              <h2 class="result-title">${result.title}</h2>
+              <h2 class="result-title" style="margin-top: 4px;">${result.title}</h2>
               <p>${result.summary}</p>
               ${scoreAndGradeMarkup(result.workflowScore, result.scoreVerdict, result.scoreTier)}
             </div>
@@ -2765,8 +2766,6 @@ function renderResult() {
                   ${reportListMarkup(lang.draftedSuperpowers, result.draftedSuperpowers, lang.noDraftedSuperpowers)}
                   ${reportListMarkup(lang.superpowersUsed, result.superpowersUsed, lang.noSuperpowersUsed)}
                   ${reportListMarkup(lang.problemsTriggered, result.problemsTriggered, lang.noProblemsTriggered)}
-                  ${reportListMarkup(lang.scoreLimits, result.scoreCeilingReasons, lang.noScoreLimits)}
-                  ${randomModifiersMarkup(result.randomModifiers, lang)}
                   ${phaseLearningsMarkup(result.phaseSummaries)}
                 </div>
               </aside>
