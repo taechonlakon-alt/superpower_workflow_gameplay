@@ -1506,6 +1506,17 @@ button {
   padding: 20px;
 }
 
+.hero-popup-overlay.from-hotbar {
+  background: rgba(0, 0, 0, 0.1) !important;
+  backdrop-filter: none !important;
+  align-items: flex-end !important;
+  padding-bottom: 90px !important;
+}
+
+.hero-popup-overlay.from-hotbar .hero-popup-content {
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
 .hero-popup-content {
   max-width: min(840px, calc(100vw - 48px));
   width: 100%;
@@ -2190,18 +2201,17 @@ button {
   z-index: 50 !important;
   display: flex !important;
   margin: 0 !important;
-  padding: 4px 6px !important;
-  border-top: 2px solid #5a4b3d !important;
-  border-left: 2px solid #5a4b3d !important;
-  border-right: 2px solid #5a4b3d !important;
+  padding: 6px 10px !important;
+  border: 2px solid #5a4b3d !important;
   border-bottom: none !important;
+  border-radius: 8px 8px 0 0 !important;
   background: rgba(30, 24, 20, 0.9) !important;
   box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.6) !important;
 }
 
 .hotbar-slots {
   display: flex;
-  gap: 4px;
+  gap: 6px;
 }
 
 .hotbar-slot {
@@ -2209,8 +2219,8 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 56px;
+  height: 56px;
   background: rgba(0, 0, 0, 0.6);
   border: 1px solid #4a3b2c;
   color: #fff;
@@ -2227,8 +2237,8 @@ button {
 }
 
 .hotbar-slot__icon {
-  font-size: 13px;
-  line-height: 1.1;
+  font-size: 16px;
+  line-height: 1.15;
   font-weight: 900;
   text-align: center;
   word-break: break-all;
@@ -2237,9 +2247,9 @@ button {
 
 .hotbar-slot__number {
   position: absolute;
-  top: 2px;
-  left: 4px;
-  font-size: 10px;
+  top: 3px;
+  left: 5px;
+  font-size: 12px;
   color: #a99d8d;
   font-weight: bold;
 }

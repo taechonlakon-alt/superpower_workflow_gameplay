@@ -1033,7 +1033,7 @@ function updateSkillDraftUI() {
   }
 }
 
-function openSkillDetail(skillId) {
+function openSkillDetail(skillId, fromHotbar = false) {
   const skill = getSkill(skillId);
   if (!skill) return;
   state.activeSkillDetail = skillId;
@@ -1041,7 +1041,7 @@ function openSkillDetail(skillId) {
   const existing = document.querySelector('.skill-detail-overlay');
   if (existing) existing.remove();
   
-  root.insertAdjacentHTML("beforeend", skillDetailPopupMarkup(skill));
+  root.insertAdjacentHTML("beforeend", skillDetailPopupMarkup(skill, state.screen === "setup", fromHotbar));
 }
 
 function closeSkillDetail() {
@@ -1305,6 +1305,14 @@ function handleRootClick(event) {
     return;
   }
 
+  const evolutionNextBtn = target.closest(".evolution-next-btn");
+  if (evolutionNextBtn) {
+    state.characterPos = null;
+    state.screen = state.index >= game.steps.length ? "result" : "step";
+    render();
+    return;
+  }
+
   if (target.classList.contains("skill-detail-overlay")) {
     closeSkillDetail();
     return;
@@ -1379,13 +1387,13 @@ function handleRootClick(event) {
 
   const skillCard = target.closest(".skill-card");
   if (skillCard) {
-    openSkillDetail(skillCard.dataset.skill);
+    openSkillDetail(skillCard.dataset.skill, false);
     return;
   }
 
   const handCard = target.closest(".superpower-hand__card");
   if (handCard) {
-    openSkillDetail(handCard.dataset.skill);
+    openSkillDetail(handCard.dataset.skill, true);
     return;
   }
 
@@ -1668,7 +1676,7 @@ function skillCardMarkup(skill) {
   `;
 }
 
-function skillDetailPopupMarkup(skill, allowEdit = state.screen === "setup") {
+function skillDetailPopupMarkup(skill, allowEdit = state.screen === "setup", fromHotbar = false) {
   const lang = i18n[currentLang];
   const selected = state.skills.includes(skill.id);
   const locked = !selected && state.skills.length >= game.maxSkills;
@@ -1692,7 +1700,7 @@ function skillDetailPopupMarkup(skill, allowEdit = state.screen === "setup") {
     : "";
 
   return `
-    <div class="hero-popup-overlay skill-detail-overlay">
+    <div class="hero-popup-overlay skill-detail-overlay ${fromHotbar ? 'from-hotbar' : ''}">
       <div class="hero-popup-content skill-detail-popup">
         <section class="brief-card skill-detail-card">
           <p class="brief-label">${lang.details}</p>
@@ -2930,12 +2938,6 @@ function renderEvolution() {
       if (btn) btn.style.display = 'block';
     }, 1000); // 1s into the flash
   }, 2000); // 2s of shaking before flash
-
-  root.querySelector('.evolution-next-btn')?.addEventListener('click', () => {
-    state.characterPos = null;
-    state.screen = state.index >= game.steps.length ? "result" : "step";
-    render();
-  });
 }
 
 function render() {
