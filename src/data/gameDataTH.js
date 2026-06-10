@@ -58,15 +58,15 @@ const stage01 = {
     },
     {
       "id": "risk_spike",
-      "title": "Hidden Edge",
+      "title": "ปัญหาที่ซ่อนอยู่",
       "icon": "RISK",
       "tone": "danger",
       "weight": 1,
       "copy": "Edge Case ที่ซ่อนอยู่โผล่ขึ้นมาตอนที่ Workflow กำลังเจอความกดดัน ต้องรีบหาวิธีรับมือด่วน",
       "hint": "เลือกใช้ Guardrails ที่จัดการกับ Edge Case นั้นโดยตรง แทนที่จะแค่ดันงานให้คืบหน้าไปก่อน",
       "tags": [
-        "external",
-        "risk +1"
+        "ภายนอก",
+        "ความเสี่ยง +1"
       ],
       "effects": {
         "time": 0,
@@ -77,15 +77,15 @@ const stage01 = {
     },
     {
       "id": "lucky_guardrail",
-      "title": "Lucky Guardrail",
+      "title": "Guardrail ช่วยชีวิต",
       "icon": "SHD",
       "tone": "safe",
       "weight": 3,
       "copy": "Workflow Guardrails ที่คุณวางไว้ก่อนหน้านี้ ช่วยดักจับข้อผิดพลาดที่ไม่ตั้งใจเอาไว้ได้",
       "hint": "นี่คือรางวัลของการวาง Guardrails ตั้งแต่เนิ่นๆ: มันไม่ได้แจกแต้มฟรี แต่ช่วยปกป้องคุณจากความโชคร้าย",
       "tags": [
-        "external",
-        "shield"
+        "ภายนอก",
+        "ป้องกัน"
       ],
       "effects": {
         "time": 0,
@@ -96,15 +96,15 @@ const stage01 = {
     },
     {
       "id": "context_static",
-      "title": "Context Static",
+      "title": "Context สับสน",
       "icon": "CTX",
       "tone": "warn",
       "weight": 1,
       "copy": "Context Noise จากการตัดสินใจก่อนหน้า บังคับให้ทีมต้องทำ Code Review อย่างละเอียดขึ้นก่อนจะไปต่อ",
       "hint": "เมื่อ Context เริ่มมั่ว ให้กลับไปดู Spec เพื่อเป็นหลักยึด ก่อนที่จะปล่อยให้ AI Generate โค้ดเพิ่ม",
       "tags": [
-        "external",
-        "review tax"
+        "ภายนอก",
+        "เสียเวลารีวิว"
       ],
       "effects": {
         "time": 1,
@@ -394,7 +394,7 @@ const stage01 = {
           "icon": "RUN",
           "tone": "gray",
           "tags": [
-            "+40%",
+            "+80%",
             "Fast experience"
           ],
           "helper": "ข้ามเฟส Brainstorm และ Plan ไปเริ่มทำ Prototype จาก Brief สั้นๆ เลย",
@@ -402,7 +402,7 @@ const stage01 = {
           "outcome": "คุณได้ UI สำเร็จรูปมาอย่างรวดเร็ว แต่ไม่มีการจัดการ State ที่ถูกต้อง และไม่ได้ตอบโจทย์เรื่องความขัดแย้งของ Slot เวลา",
           "lesson": "การข้าม Workflow ไป Execute เลยจะทำให้ได้โค้ดที่ดูดีแต่ไร้โครงสร้างที่รองรับ Use Case จริง",
           "problem": "ความมั่นใจที่ผิดพลาด",
-          "progress": 40,
+          "progress": 80,
           "effects": {
             "time": 0,
             "token": 0,
@@ -502,14 +502,14 @@ const stage01 = {
           "icon": "DOC",
           "tone": "blue",
           "tags": [
-            "+90%",
+            "+70%",
             "Solid brief"
           ],
           "helper": "รวมเอกสาร, เป้าหมาย, Flow หลัก, ข้อแลกเปลี่ยน และคำถามเข้าเป็นบรีฟเดียว",
           "tradeoff": "ใช้เวลาและ Token เล็กน้อย แต่ยังต้องกำหนดขอบเขตและตรวจสอบในเฟส Plan ต่อไป",
           "outcome": "ทีมได้บรีฟที่ชัดเจนพอจะใช้วางแผน: รู้เป้าหมาย, Flow หลัก, ข้อแลกเปลี่ยน และคำถามที่เหลือ",
           "lesson": "Brief Alignment Packet ช่วยทำให้กระบวนการ Brainstorm สมบูรณ์ก่อนปล่อย AI สร้างงาน",
-          "progress": 90,
+          "progress": 70,
           "effects": {
             "time": 2,
             "token": 1,
@@ -658,7 +658,7 @@ const stage01 = {
           "icon": "GO",
           "tone": "gray",
           "tags": [
-            "+55%",
+            "+80%",
             "Skip Plan"
           ],
           "helper": "ให้ AI ช่วยออกแบบ Architecture และ State Management ก่อนเริ่มงาน",
@@ -666,7 +666,7 @@ const stage01 = {
           "outcome": "คุณได้โครงสร้างโปรเจกต์ที่ชัดเจน มีการแยก Component และ Service ออกจากกัน",
           "lesson": "การวาง Architecture เป็นเรื่องสำคัญ โดยเฉพาะเมื่อใช้ AI สร้างโค้ดเยอะๆ",
           "problem": "การดูแลรักษาระบบที่สะเปะสะปะ",
-          "progress": 55,
+          "progress": 80,
           "effects": {
             "time": -1,
             "token": 2,
@@ -683,7 +683,7 @@ const stage01 = {
           "icon": "MVP",
           "tone": "gray",
           "tags": [
-            "+45%",
+            "+80%",
             "Loose Scope"
           ],
           "helper": "คิดว่าเข้าใจ Brief แล้ว เลยกระโดดไป Execute ทันทีโดยไม่วางแผน",
@@ -691,7 +691,7 @@ const stage01 = {
           "outcome": "AI สร้าง Component ขึ้นมาสะเปะสะปะ ตัวแปร State ไม่ตรงกัน และต้องเริ่มแก้บั๊กกันตั้งแต่ตอนนี้",
           "lesson": "การไม่วางแผนคือการวางแผนที่จะล้มเหลว โดยเฉพาะกับ AI ที่พร้อมจะสร้างโค้ดขยะให้คุณทุกเมื่อ",
           "problem": "หลีกหนีกับดักความซับซ้อน",
-          "progress": 45,
+          "progress": 80,
           "effects": {
             "time": 0,
             "token": 2,
@@ -841,14 +841,14 @@ const stage01 = {
           "icon": "FLOW",
           "tone": "blue",
           "tags": [
-            "+90%",
+            "+70%",
             "ready to execute"
           ],
           "helper": "รวมรายละเอียดไฟล์, การเทสต์, ลำดับ, และขอบเขตเข้าในแผนงานเดียว",
           "tradeoff": "เสียเวลากับ Token ไปบ้าง ได้แผนออกมา แต่ก็ยังต้องมาตัดสินใจเลือกงานแรกอยู่ดี",
           "outcome": "AI ได้รับแผนที่ทำได้จริง รู้ว่าต้องแก้ตรงไหน ระวังตรงไหน ตรวจสอบอย่างไร",
           "lesson": "แผน Implementation Readiness ช่วยตอบโจทย์ได้ครบว่าต้องทำอะไร ที่ไหน อย่างไร",
-          "progress": 90,
+          "progress": 70,
           "effects": {
             "time": 3,
             "token": 1,
@@ -973,14 +973,14 @@ const stage01 = {
           "icon": "ONE",
           "tone": "gray",
           "tags": [
-            "+50%",
+            "+80%",
             "batch work"
           ],
           "helper": "สั่ง AI ให้ทำทีละ Component เช่น 'ทำ UI เลือกบริการก่อน' แล้วค่อยไปต่อ",
           "tradeoff": "ช้าแต่มั่นคง ลดความผิดพลาดได้เยอะ",
           "outcome": "คุณได้ UI เลือกบริการที่ทำงานได้จริง จากนั้นจึงเริ่มทำระบบเลือก Slot เวลาต่อ",
           "lesson": "การย่อย Prompt คือกุญแจสำคัญในการคุม AI",
-          "progress": 50,
+          "progress": 80,
           "effects": {
             "time": 0,
             "token": 3,
@@ -997,7 +997,7 @@ const stage01 = {
           "icon": "LOOP",
           "tone": "gray",
           "tags": [
-            "+35%",
+            "+80%",
             "Fast debug"
           ],
           "helper": "ใส่รายละเอียดทั้งหมดลงใน Prompt เดียว แล้วภาวนาให้ AI เขียน Booking MVP ออกมาสมบูรณ์",
@@ -1005,7 +1005,7 @@ const stage01 = {
           "outcome": "AI พ่นโค้ดออกมาหลายร้อยบรรทัด บางส่วนทำงานได้ดี แต่บางส่วนก็พังลอจิกพัง แถม State มั่วซั่ว",
           "lesson": "Mega Prompt มักจะให้ผลลัพธ์ที่ขาดๆ เกินๆ และยากต่อการตรวจสอบ",
           "problem": "ติดกับดัก Reprompt วนลูป",
-          "progress": 35,
+          "progress": 80,
           "effects": {
             "time": 3,
             "token": 4,
@@ -1046,7 +1046,7 @@ const stage01 = {
           "icon": "GEN",
           "tone": "gray",
           "tags": [
-            "+40%",
+            "+80%",
             "visual first"
           ],
           "helper": "ให้ AI สร้าง UI การจองคิวออกมาก่อน แล้วค่อยมาดูว่าต้องใส่ Validation ตรงไหน",
@@ -1054,7 +1054,7 @@ const stage01 = {
           "outcome": "แอปดูเหมือนจะเสร็จเร็วมาก แต่ไม่มีหลักฐานยืนยันว่าการทำงานนั้นถูกต้อง",
           "lesson": "การทำ UI ล่วงหน้าช่วยในการคุย Requirement ได้ แต่สุดท้ายก็ต้องมีเทสต์อยู่ดี",
           "problem": "โยนงานตรวจคุณภาพให้ AI แทน",
-          "progress": 40,
+          "progress": 80,
           "effects": {
             "time": 0,
             "token": 2,
@@ -1179,14 +1179,14 @@ const stage01 = {
           "icon": "SHD",
           "tone": "blue",
           "tags": [
-            "+90%",
+            "+70%",
             "spec + test"
           ],
           "helper": "ใช้ Spec + TDD Loop ตรวจสอบความถูกต้อง: เขียนเทสต์ที่พัง -> แก้ให้ผ่าน -> รีแฟกเตอร์ ก่อนจะรับงาน",
           "tradeoff": "ใช้ Token กับเวลาเก็บหลักฐาน แต่ก็ยังคงต้องประเมินต่อว่าสโคปแค่นี้พอหรือไม่",
           "outcome": "งานเดินเร็ว โดยมี Spec เป็นเป้า และ TDD Loop ช่วยการันตีว่ามันผ่าน",
           "lesson": "Spec กำหนดว่าต้องสร้างอะไร ส่วน TDD Loop พิสูจน์ว่ามันรันผ่านจริงๆ",
-          "progress": 90,
+          "progress": 70,
           "effects": {
             "time": 2,
             "token": 3,
@@ -1207,14 +1207,14 @@ const stage01 = {
           "icon": "IAC",
           "tone": "blue",
           "tags": [
-            "+90%",
+            "+70%",
             "plan + risk"
           ],
           "helper": "ใช้ข้อมูล Terraform plan + Risk Scanner ตรวจจับ Drift, Secrets, และความเสี่ยง ก่อนอนุมัติ Apply",
           "tradeoff": "ใช้เวลาและ Token เพิ่ม แต่สามารถอุดช่องโหว่ความเสี่ยงทางโครงสร้างได้หมดจด",
           "outcome": "ทีมตรวจสอบการเปลี่ยนแปลงรุนแรง ความเสี่ยงเรื่อง Secret ก่อนจะแตะระบบจริง",
           "lesson": "Workflow ของ Terraform ที่ดีต้องมีการวางแผน, สแกนความเสี่ยง, และอนุมัติชัดเจนก่อนทำงานจริง",
-          "progress": 90,
+          "progress": 70,
           "effects": {
             "time": 3,
             "token": 2,
@@ -1388,7 +1388,7 @@ const stage01 = {
           "icon": "AI",
           "tone": "gray",
           "tags": [
-            "+45%",
+            "+80%",
             "AI review"
           ],
           "helper": "ให้ AI หรือเพื่อนในทีมช่วย Review โค้ดเทียบกับ Spec ทั้งหมด",
@@ -1396,7 +1396,7 @@ const stage01 = {
           "outcome": "จับบักได้เพียบเรื่อง Timezone ซ้อนทับกัน และเรื่อง Form Validation ที่ยังหลวมอยู่",
           "lesson": "Review คือปราการด่านสุดท้ายก่อนหายนะ",
           "problem": "โยนงานตรวจคุณภาพให้ AI แทน",
-          "progress": 45,
+          "progress": 80,
           "effects": {
             "time": 1,
             "token": 2,
@@ -1413,7 +1413,7 @@ const stage01 = {
           "icon": "NOW",
           "tone": "gray",
           "tags": [
-            "+60%",
+            "+80%",
             "Looks done"
           ],
           "helper": "เวลาน้อย ขี้เกียจตรวจแล้ว มั่นใจว่า AI เก่ง รันผ่านคือจบ กดส่งงานเลย!",
@@ -1421,7 +1421,7 @@ const stage01 = {
           "outcome": "คุณส่งมอบระบบได้ตรงเวลาเป๊ะ! แต่ลูกค้าบ่นว่าทำไมระบบจองเวลาชนกันได้ และอีเมลไม่ออก...",
           "lesson": "YOLO Ship It มักจบด้วยการแก้บั๊กกลางดึกเสมอ",
           "problem": "ความมั่นใจที่ผิดพลาด",
-          "progress": 60,
+          "progress": 80,
           "effects": {
             "time": 0,
             "token": 0,
@@ -1571,14 +1571,14 @@ const stage01 = {
           "icon": "CHK",
           "tone": "blue",
           "tags": [
-            "+90%",
+            "+70%",
             "Understand & Audit"
           ],
           "helper": "ทำ Code Review สอดคล้องกับ Walkthrough: ตรวจเช็ค Spec, ความปลอดภัย, ฯลฯ ควบคู่กันไป",
           "tradeoff": "ลงทุนเวลาและ Token แต่ยังต้องไปหาทางแก้ตาม Test หรือหลักฐานอยู่ดี",
           "outcome": "ทีมจะจับบั๊กได้และเข้าใจว่าทำไมต้องแก้ด้วย",
           "lesson": "การรีวิวที่ดีช่วยให้ทีมปล่อยโค้ดด้วยความเข้าใจ ไม่ใช่แค่ศรัทธาใน AI",
-          "progress": 90,
+          "progress": 70,
           "effects": {
             "time": 3,
             "token": 3,
@@ -1599,14 +1599,14 @@ const stage01 = {
           "icon": "GATE",
           "tone": "blue",
           "tags": [
-            "+85%",
+            "+70%",
             "Audit vs Spec"
           ],
           "helper": "ใช้ Spec ควบคู่ Code Review ตรวจสอบคุณภาพงานและความปลอดภัยให้ครบถ้วน",
           "tradeoff": "ช้าลง แต่เป็นการประเมินคุณภาพงานตามกรอบขอบเขตและหลักฐานที่แท้จริง",
           "outcome": "ทีมปิดช่องโหว่ระหว่างสิ่งที่ AI สร้างกับสิ่งที่คุยกันไว้ จับได้หมดว่าอันไหนเป็นของแถมที่ไม่จำเป็น",
           "lesson": "Spec ป้องกันการใช้ความรู้สึกตอนรีวิว และดักจบการบานปลายที่ AI แอบยัดมา",
-          "progress": 85,
+          "progress": 70,
           "effects": {
             "time": 3,
             "token": 2,
@@ -1622,17 +1622,17 @@ const stage01 = {
   ],
   "emergencyStep": {
     "id": "emergency",
-    "title": "EMERGENCY: Vulnerable Developer Incident",
+    "title": "สถานการณ์ฉุกเฉิน: เหตุการณ์นักพัฒนาที่เปราะบาง",
     "briefing": [
-      "The system starts breaking during the demo, but the team relied solely on AI and can barely debug it on their own.",
-      "Without pre-established workflow discipline, this incident could immediately ruin client trust."
+      "ระบบเริ่มพังระหว่างการนำเสนอเดโม แต่ทีมพึ่งพา AI เพียงอย่างเดียวจนแทบจะไม่สามารถแก้โค้ดเองได้เลย",
+      "หากไม่มีวินัยใน Workflow ที่วางไว้แต่แรก เหตุการณ์นี้อาจทำลายความเชื่อใจของลูกค้าได้ทันที"
     ],
     "event": {
       "id": "emergency_crisis",
-      "title": "Production Incident",
+      "title": "เหตุการณ์ฉุกเฉินบนระบบจริง",
       "problem": "เหตุการณ์นักพัฒนาที่เปราะบาง",
       "copy": "ลูกค้าถามว่าเกิดอะไรขึ้น แต่ทีมไม่มี Spec ไม่มี Test เลยหาสาเหตุไม่ได้",
-      "danger": "critical risk"
+      "danger": "ความเสี่ยงระดับวิกฤต"
     },
     "baseOptions": [
       {
@@ -1641,9 +1641,9 @@ const stage01 = {
         "icon": "FIX",
         "tone": "mint",
         "tags": [
-          "Reliable",
-          "Consumes time",
-          "Resolves crisis"
+          "มั่นใจได้ชัวร์",
+          "ใช้เวลาเยอะ",
+          "แก้ปัญหาสำเร็จ"
         ],
         "helper": "รีโปรดิวซ์ แยกส่วน ซ่อมแซม และยืนยันความถูกต้องด้วยตัวคุณเอง",
         "tradeoff": "ใช้เวลามาก แต่ก็ช่วยจัดการความเสี่ยงได้อย่างแท้จริง",
@@ -1665,9 +1665,9 @@ const stage01 = {
         "icon": "AI",
         "tone": "gray",
         "tags": [
-          "Fast",
-          "Spends tokens",
-          "Unsecured"
+          "รวดเร็ว",
+          "เปลือง Token",
+          "ไม่ปลอดภัย"
         ],
         "helper": "ยัด Error ให้ AI ทันที เพื่อให้เดโมกลับมาทำงานได้โดยไว",
         "tradeoff": "ประหยัดเวลา แต่ก็เสี่ยงจะสร้างบั๊กตัวใหม่ขึ้นมา",
@@ -1693,8 +1693,8 @@ const stage01 = {
         "icon": "KIT",
         "tone": "blue",
         "tags": [
-          "Recovery",
-          "Process-driven"
+          "กู้คืนระบบ",
+          "ทำตามขั้นตอน"
         ],
         "helper": "ใช้ Runbook: สรุปปัญหา แยกส่วนหาตัวการ ย้อนกลับ ยืนยัน แล้วอธิบาย",
         "tradeoff": "ใช้เวลาหน่อย แต่ช่วยให้ทีมใจเย็นและมีระบบระเบียบ",
@@ -1717,8 +1717,8 @@ const stage01 = {
         "icon": "WALK",
         "tone": "mint",
         "tags": [
-          "Understand cause",
-          "Reduce guesswork"
+          "เข้าใจสาเหตุ",
+          "ลดการเดาสุ่ม"
         ],
         "helper": "ให้ AI อธิบายแพตช์นั้นก่อน แล้วเราไล่ดูทีละบรรทัดก่อนตกลงใจ",
         "tradeoff": "เปลือง Token และเวลา แต่ป้องกันการหลับหูหลับตากดรับงาน",

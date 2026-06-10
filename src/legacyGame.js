@@ -119,7 +119,9 @@ function getAvailableOptions(step) {
     ];
   }
 
-  const synergies = step.synergyOptions
+  const usedSynergy = state.history.some(item => item.phase === step.title && item.isSynergy);
+
+  const synergies = (!usedSynergy && step.synergyOptions)
     ? step.synergyOptions.filter((option) => option.requires.every((req) => state.skills.includes(req)))
     : [];
   return [
@@ -345,6 +347,7 @@ function formatRandomEffectDelta(effects) {
 }
 
 function buildRandomModifierEvent(modifier, step) {
+  const lang = i18n[currentLang];
   const effects = normalizeEffects(modifier.effects);
   const tone = modifier.tone || (effects.risk > 0 || effects.token > 0 || effects.time > 0 ? "warn" : "safe");
 
@@ -358,22 +361,22 @@ function buildRandomModifierEvent(modifier, step) {
     optionTone: tone === "danger" ? "gray" : "mint",
     skillName: null,
     tags: modifier.tags || ["external"],
-    tradeoff: "External pressure inserted after a decision to test workflow resilience.",
+    tradeoff: lang.modifierTradeoff,
     outcome: modifier.copy,
-    lesson: "This is an external signal, not a Problems Triggered by your choice directly, but the resource delta reflects the pressure of this run.",
-    hint: modifier.hint || "Hint: If this signal drains resources, use the next choice to mitigate pressure with evidence, rather than rushing.",
+    lesson: lang.modifierLesson,
+    hint: modifier.hint || lang.modifierHint,
     countered: false,
     effects,
     progress: 0,
     lines: [
-      `External signal after decision in phase ${step?.title || "current"}`,
+      `${lang.modifierExternalSignal} ${step?.title || "current"}`,
       modifier.copy,
       formatRandomEffectDelta(effects),
     ],
     reaction: {
       tone,
-      title: tone === "safe" ? "Workflow Resilient" : "External Pressure Building",
-      copy: "The game throws an external signal to test your adaptability without changing the phase goal.",
+      title: tone === "safe" ? lang.modifierWorkflowResilient : lang.modifierExternalPressure,
+      copy: lang.modifierReactionCopy,
     },
     isRandomModifier: true,
   };
@@ -610,6 +613,7 @@ function buildResolution(step, option) {
     progress: state.activeChaos ? (option.preventPenalty ? 0 : -(state.activeChaos.progressPenalty)) : (option.progress || 0),
     lines: [eventLine, projectMood, ...hiddenPenalty],
     problem: option.problem || state.activeChaos?.problem || step.event?.problem || null,
+    isSynergy: !!option.requires,
   };
 }
 
@@ -1761,7 +1765,8 @@ function choiceCardMarkup(option, index) {
 }
 
 function briefMarkup(step, isEmergency = false, isChaos = false) {
-  const label = isEmergency ? "Emergency Brief" : isChaos ? "Issue Brief" : "Brief";
+  const lang = i18n[currentLang];
+  const label = isEmergency ? lang.emergencyBrief : isChaos ? lang.issueBrief : lang.briefLabel;
 
   return `
     <div class="brief-card">
@@ -2116,6 +2121,7 @@ function renderResolution() {
 }
 
 function getTitleBadge({ failed, protectedEvents, riskyChoices, skillUses, problemsTriggered, overBudget, overtime, workflowScore }) {
+  const lang = i18n[currentLang];
   const tokenSpent = getTokenSpent();
   const masterReady =
     workflowScore >= 86
@@ -2129,186 +2135,190 @@ function getTitleBadge({ failed, protectedEvents, riskyChoices, skillUses, probl
 
   if (masterReady) {
     return {
-      label: "Workflow Master",
-      helper: "Applied multiple guardrails effectively; AI acted as a force multiplier, not a liability.",
+      label: lang.titleBadgeWorkflowMaster,
+      helper: lang.titleBadgeWorkflowMasterHelper,
     };
   }
 
   if (problemsTriggered.includes("Hardcoded Secrets Leak") && state.risk >= 6) {
     return {
-      label: "Security Oops",
-      helper: "Secret or security risk slipped through the workflow cracks.",
+      label: lang.titleBadgeSecurityOops,
+      helper: lang.titleBadgeSecurityOopsHelper,
     };
   }
 
   if (problemsTriggered.includes("Shadow IT Discovery") && (failed || state.risk >= 6)) {
     return {
-      label: "Shadow IT Casualty",
-      helper: "Built fast, but lacked evidence and standards to pass organizational review.",
+      label: lang.titleBadgeShadowIT,
+      helper: lang.titleBadgeShadowITHelper,
     };
   }
 
   if (problemsTriggered.includes("Reprompting Loop Trap") && state.time >= 12) {
     return {
-      label: "Debugging Victim",
-      helper: "Wasted resources on endless reprompting until debugging turned into rework.",
+      label: lang.titleBadgeDebuggingVictim,
+      helper: lang.titleBadgeDebuggingVictimHelper,
     };
   }
 
   if (!failed && !overBudget && !overtime && skillUses >= 3 && tokenSpent >= 7 && state.risk <= 5) {
     return {
-      label: "AI Conductor",
-      helper: "Managed multiple tools rapidly while maintaining direction and integration.",
+      label: lang.titleBadgeAIConductor,
+      helper: lang.titleBadgeAIConductorHelper,
     };
   }
 
   if (state.time <= 8 && riskyChoices >= 2) {
     return {
-      label: "Sloppy Speedster",
-      helper: "Saved time upfront, but paid for it with risk and late-game rework.",
+      label: lang.titleBadgeSloppySpeedster,
+      helper: lang.titleBadgeSloppySpeedsterHelper,
     };
   }
 
   if (state.time <= 10 && state.risk >= 6) {
     return {
-      label: "Fast but Fragile",
-      helper: "Reached the finish line quickly, but the project is filled with cracks.",
+      label: lang.titleBadgeFastButFragile,
+      helper: lang.titleBadgeFastButFragileHelper,
     };
   }
 
   if (tokenSpent >= 12) {
     return {
-      label: "AI Dependent",
-      helper: "Relied so heavily on AI that every answer required intensive human filtering.",
+      label: lang.titleBadgeAIDependent,
+      helper: lang.titleBadgeAIDependentHelper,
     };
   }
 
   if (failed) {
     return {
-      label: "Victim of Chaos",
-      helper: "Speed defeated workflow temporarily, but the damage caught up at delivery.",
+      label: lang.titleBadgeVictimOfChaos,
+      helper: lang.titleBadgeVictimOfChaosHelper,
     };
   }
 
   if (state.emergencyTriggered) {
     return {
-      label: "Project Survivor",
-      helper: "Project almost derailed, but you managed to put out the fires and recover.",
+      label: lang.titleBadgeProjectSurvivorEmergency,
+      helper: lang.titleBadgeProjectSurvivorEmergencyHelper,
     };
   }
 
   return {
-    label: "Project Survivor",
-    helper: "Delivered the project successfully, but there's room to sharpen the workflow next time.",
+    label: lang.titleBadgeProjectSurvivor,
+      helper: lang.titleBadgeProjectSurvivorHelper,
   };
 }
 
 function getWorkflowPattern({ failed, protectedEvents, riskyChoices, skillUses }) {
+  const lang = i18n[currentLang];
   const tokenSpent = getTokenSpent();
 
   if (failed && riskyChoices >= 2) {
     return {
-      label: "Risk-heavy Run",
-      helper: "Took too many shortcuts; accumulated risk overwhelmed the workflow.",
+      label: lang.patternRiskHeavy,
+      helper: lang.patternRiskHeavyHelper,
     };
   }
 
   if (protectedEvents >= 2 && riskyChoices <= 1 && getTokenDebt() === 0) {
     return {
-      label: "Guarded Run",
-      helper: "Used guardrails effectively to mitigate risky events without going over budget.",
+      label: lang.patternGuarded,
+      helper: lang.patternGuardedHelper,
     };
   }
 
   if (skillUses >= 3 && tokenSpent >= 9) {
     return {
-      label: "Tool-heavy Run",
-      helper: "Relied heavily on AI tools. Fast progress, but AI budget was strained.",
+      label: lang.patternToolHeavy,
+      helper: lang.patternToolHeavyHelper,
     };
   }
 
   if (state.time <= 8 && riskyChoices >= 2) {
     return {
-      label: "Fast but Fragile",
-      helper: "Fast completion, but left behind dangerous technical debt.",
+      label: lang.titleBadgeFastButFragile,
+      helper: lang.patternFastButFragileHelper,
     };
   }
 
   return {
-    label: "Balanced Run",
-    helper: "Managed time, AI tools, and risks in a relatively balanced manner.",
+    label: lang.patternBalanced,
+      helper: lang.patternBalancedHelper,
   };
 }
 
 function getScoreVerdict(score, failed, pressure = {}) {
+  const lang = i18n[currentLang];
   const tier = getScoreTier(score);
   if (pressure.overBudget && pressure.overtime) {
-    return "Workflow kept the project afloat, but spent both time and AI budget over plan. Try reducing reprompts and selecting more cost-effective guardrails.";
+    return lang.verdictOverBudgetAndTime;
   }
   if (pressure.overBudget) {
-    return "Mitigated some risk, but used AI too heavily. Bound your prompts and apply tools only where necessary.";
+    return lang.verdictOverBudget;
   }
   if (pressure.overtime) {
-    return "Work quality improved, but deadline was exceeded. Try cutting scope and performing reviews faster.";
+    return lang.verdictOverTime;
   }
   if (state.risk >= game.caps.risk * 0.8) {
-    return "Risk remains too high. Go back to reinforce Specs, guardrails, and Reviews before shipping.";
+    return lang.verdictHighRisk;
   }
   if (failed && score <= 50) return tier.helper;
   return tier.helper;
 }
 
 function getScoreTier(score) {
+  const lang = i18n[currentLang];
   if (score <= 30) {
     return {
-      label: "Workflow Breakdown",
+      label: lang.tierWorkflowBreakdown,
       range: "0-30",
       tone: "danger",
-      helper: "Poor control; risk or quality failures overwhelmed the workflow.",
-      focus: "Should focus on Spec + Review before using AI to accelerate further.",
+      helper: lang.tierWorkflowBreakdownHelper,
+      focus: lang.tierWorkflowBreakdownFocus,
     };
   }
 
   if (score <= 50) {
     return {
-      label: "Barely Survived",
+      label: lang.tierBarelySurvived,
       range: "31-50",
       tone: "danger",
-      helper: "Survived with scars; shortcuts won over workflow in several places.",
-      focus: "Should reduce shortcuts, add guardrails, and crosscheck requirements faster.",
+      helper: lang.tierBarelySurvivedHelper,
+      focus: lang.tierBarelySurvivedFocus,
     };
   }
 
   if (score <= 70) {
     return {
-      label: "Working but Fragile",
+      label: lang.tierWorkingButFragile,
       range: "51-70",
       tone: "warn",
-      helper: "Starting to gain control, but time, tokens, or risk are still unbalanced.",
-      focus: "Should use bounded AI prompts and choose the right tools/checks for the problem.",
+      helper: lang.tierWorkingButFragileHelper,
+      focus: lang.tierWorkingButFragileFocus,
     };
   }
 
   if (score <= 85) {
     return {
-      label: "Solid Workflow",
+      label: lang.tierSolidWorkflow,
       range: "71-85",
       tone: "safe",
-      helper: "Well played; used workflow at the right moments, keeping the project under control.",
-      focus: "Should refine tool usage and gather stronger review evidence.",
+      helper: lang.tierSolidWorkflowHelper,
+      focus: lang.tierSolidWorkflowFocus,
     };
   }
 
   return {
-    label: "Workflow Master",
+    label: lang.titleBadgeWorkflowMaster,
     range: "86-100",
     tone: "safe",
-    helper: "Excellent; fully controlled AI, risk, review, and delivery.",
-    focus: "Maintain this workflow and use it as a baseline for harder stages.",
+    helper: lang.tierWorkflowMasterHelper,
+    focus: lang.tierWorkflowMasterFocus,
   };
 }
 
 function getScoreCeilingDetails({ failed, overBudget, overtime, riskyChoices, skillUses }) {
+  const lang = i18n[currentLang];
   const tokenDebt = getTokenDebt();
   const timeOverflow = Math.max(0, state.time - game.caps.time);
   let ceiling = failed ? 50 : 100;
@@ -2322,49 +2332,49 @@ function getScoreCeilingDetails({ failed, overBudget, overtime, riskyChoices, sk
   };
 
   if (failed) {
-    reasons.push("Failed/shipped damaged route caps score at 50");
+    reasons.push(lang.ceilingFailed);
   }
 
   if (state.risk >= 8) {
-    capScore(70, "Risk >= 8 caps score at 70");
+    capScore(70, lang.ceilingRisk8);
   } else if (state.risk >= 6) {
-    capScore(82, "Risk >= 6 caps score at 82");
+    capScore(82, lang.ceilingRisk6);
   }
 
   if (state.risk >= game.caps.risk) {
-    capScore(45, "Risk reached the project failure cap");
+    capScore(45, lang.ceilingRiskCap);
   } else if (state.risk >= game.caps.risk * 0.8) {
-    capScore(68, "Risk reached critical project pressure");
+    capScore(68, lang.ceilingRiskCritical);
   }
 
   if (overBudget && overtime) {
-    capScore(76, "AI budget and deadline both exceeded");
+    capScore(76, lang.ceilingBudgetAndTime);
   } else if (overBudget || overtime) {
-    capScore(84, overBudget ? "Token debt caps score at 84" : "Overtime caps score at 84");
+    capScore(84, overBudget ? lang.ceilingBudget : lang.ceilingTime);
   }
 
   if (tokenDebt >= 10) {
-    capScore(68, "Token debt 10+ caps score at 68");
+    capScore(68, lang.ceilingToken10);
   } else if (tokenDebt >= 5) {
-    capScore(76, "Token debt 5-9 caps score at 76");
+    capScore(76, lang.ceilingToken5);
   } else if (tokenDebt >= 1) {
-    capScore(84, "Token debt 1-4 caps score at 84");
+    capScore(84, lang.ceilingToken1);
   }
 
   if (timeOverflow >= Math.ceil(game.caps.time * 0.6)) {
-    capScore(68, "Heavy overtime caps score at 68");
+    capScore(68, lang.ceilingTimeHeavy);
   } else if (timeOverflow >= Math.ceil(game.caps.time * 0.25)) {
-    capScore(76, "Moderate overtime caps score at 76");
+    capScore(76, lang.ceilingTimeModerate);
   } else if (timeOverflow >= 3) {
-    capScore(84, "Light overtime caps score at 84");
+    capScore(84, lang.ceilingTimeLight);
   }
 
   if (state.quality < 6) {
-    capScore(80, "Quality < 6 caps score at 80");
+    capScore(80, lang.ceilingQuality);
   }
 
   if (riskyChoices >= 3) {
-    capScore(75, "3+ risky choices caps score at 75");
+    capScore(75, lang.ceilingRiskyChoices);
   }
 
   const masterReady =
@@ -2378,7 +2388,7 @@ function getScoreCeilingDetails({ failed, overBudget, overtime, riskyChoices, sk
     && skillUses >= 3;
 
   if (!masterReady) {
-    capScore(85, "Workflow Master requires risk <= 3, quality >= 12, no token debt, <= 1 risky choice, and 3+ skill uses");
+    capScore(85, lang.ceilingMasterReady);
   }
 
   return {
@@ -2419,6 +2429,7 @@ function calculateWorkflowScore({ failed, protectedEvents, riskyChoices, skillUs
 }
 
 function getFinalResult() {
+  const lang = i18n[currentLang];
   const protectedEvents = state.history.filter((item) => item.countered).length;
   const riskyChoices = state.history.filter((item) => item.effects.risk >= 3).length;
   const skillUses = state.history.filter((item) => item.skillName).length;
@@ -2436,18 +2447,18 @@ function getFinalResult() {
   const crashed = state.risk >= game.caps.risk && state.index < game.steps.length;
   const failed = crashed || state.risk >= game.caps.risk || state.quality < 1 || shippedRiskyShortcut;
 
-  const title = crashed ? "Project Crashed" : failed ? "Project Shipped With Damage" : "Project Survived";
+  const title = crashed ? lang.resultTitleCrashed : failed ? lang.resultTitleDamaged : lang.resultTitleSurvived;
   const summary = crashed
-    ? "The project collapsed mid-way because the accumulated risk overwhelmed the workflow. Guardrails were needed sooner."
+    ? lang.resultSummaryCrashed
     : failed
-      ? "The project looks done, but inadequate guardrails allowed bugs and rework to reach the delivery phase."
-      : "The team used workflow effectively to control AI risk. The project was delivered without late-stage meltdowns.";
+      ? lang.resultSummaryDamaged
+      : lang.resultSummarySurvived;
 
   const lesson = crashed
-    ? "Key Lesson: Ignoring warning signals and pushing for speed without checks will ultimately derail the project."
+    ? lang.resultLessonCrashed
     : failed
-      ? "Key Lesson: AI provides speed, but without Specs, Checks, and Reviews, that speed turns into rework."
-      : "Key Lesson: Good workflow doesn't slow you down; it buys confidence and minimizes late-stage damage.";
+      ? lang.resultLessonDamaged
+      : lang.resultLessonSurvived;
 
   const workflowScore = calculateWorkflowScore({ failed, protectedEvents, riskyChoices, skillUses, overBudget, overtime });
   const scoreTier = getScoreTier(workflowScore);
@@ -2478,8 +2489,8 @@ function getFinalResult() {
     randomModifiers,
     randomModifierBadge: randomModifiers.length
       ? {
-        label: "Signal Run",
-        helper: `External signals triggered ${randomModifiers.length} time${randomModifiers.length > 1 ? "s" : ""}`,
+        label: lang.randomModifierBadgeLabel,
+        helper: lang.randomModifierBadgeHelper.replace("{count}", randomModifiers.length),
       }
       : null,
     phaseSummaries,
@@ -2553,6 +2564,7 @@ function randomModifiersMarkup(modifiers, lang = i18n[currentLang]) {
 }
 
 function decisionHistoryMarkup(history) {
+  const lang = i18n[currentLang];
   if (!history || history.length === 0) return "";
   const items = history.map((item, i) => {
     const label = item.optionLabel || item.title || "Unknown Decision";
@@ -2561,7 +2573,7 @@ function decisionHistoryMarkup(history) {
   });
   return `
     <article class="report-list-card decision-history-card">
-      <span class="mini-label">Play Log / Decision History</span>
+      <span class="mini-label">${lang.playLogTitle}</span>
       <ul style="max-height: 200px; overflow-y: auto;">
         ${items.join("")}
       </ul>
@@ -2716,9 +2728,9 @@ function renderResult() {
                 </div>
 
                 <div class="report-evidence-row mission-report__evidence">
-                  ${reportEvidenceMarkup(lang.guardrails, result.protectedEvents, "Number of events prevented by workflow", result.protectedEvents > 0 ? "safe" : "neutral")}
-                  ${reportEvidenceMarkup(lang.riskyCalls, result.riskyChoices, "Number of shortcuts that increased risk", result.riskyChoices >= 2 ? "danger" : "neutral")}
-                  ${reportEvidenceMarkup(lang.toolUses, result.skillUses, "Number of times a superpower was used to make decisions", result.skillUses >= 2 ? "safe" : "neutral")}
+                  ${reportEvidenceMarkup(lang.guardrails, result.protectedEvents, lang.evidenceGuardrailsHelper, result.protectedEvents > 0 ? "safe" : "neutral")}
+                  ${reportEvidenceMarkup(lang.riskyCalls, result.riskyChoices, lang.evidenceRiskyCallsHelper, result.riskyChoices >= 2 ? "danger" : "neutral")}
+                  ${reportEvidenceMarkup(lang.toolUses, result.skillUses, lang.evidenceToolUsesHelper, result.skillUses >= 2 ? "safe" : "neutral")}
                 </div>
 
                 <div class="report-lists">
@@ -2819,7 +2831,7 @@ function phaseMomentPopupMarkup() {
         <p class="phase-goal-popup__copy">${escapeHtml(moment.copy || "")}</p>
         <div class="phase-goal-popup__identity">
           <p class="mini-label">${escapeHtml(moment.title || lang.continue)}</p>
-          <p>${escapeHtml(moment.focus || "Carry this rhythm into the next phase.")}</p>
+          <p>${escapeHtml(moment.focus || lang.carryRhythm)}</p>
         </div>
         <button class="restart phase-moment-start" type="button">${lang.continue}</button>
       </section>
