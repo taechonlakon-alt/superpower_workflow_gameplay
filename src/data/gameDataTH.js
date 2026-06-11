@@ -119,7 +119,7 @@ const stage01 = {
       "id": "grill",
       "name": "Grill with Docs",
       "type": "Clarify",
-      "icon": "?",
+      "icon": "GWD",
       "summary": "เคลียร์ Business Rules ให้ชัดก่อนปล่อย AI เดา",
       "description": "ถามหา Rule การจองที่ชัดเจน เช่น ประเภทบริการ, Time Slot, นโยบายยกเลิก, และการคอนเฟิร์ม",
       "teaches": "ก่อนจะปล่อย AI เขียนโค้ด Booking Rules ต้องชัดเจน เพื่อป้องกันไม่ให้ AI มโน Flow ขึ้นมาเอง"
@@ -265,7 +265,7 @@ const stage01 = {
               "skill": "grill",
               "id": "chaos_grill_docs",
               "label": "Grill with Docs",
-              "icon": "?",
+              "icon": "GWD",
               "tone": "blue",
               "tags": [
                 "Ask remaining questions",
@@ -419,7 +419,7 @@ const stage01 = {
           "skill": "grill",
           "id": "grill_client",
           "label": "Grill with Docs",
-          "icon": "?",
+          "icon": "GWD",
           "tone": "blue",
           "tags": [
             "+40%",
