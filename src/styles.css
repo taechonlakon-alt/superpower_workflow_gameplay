@@ -142,7 +142,7 @@ button {
   height: min(920px, calc(100dvh - 32px));
   min-height: min(720px, calc(100dvh - 32px));
   overflow: hidden;
-  padding: 10px 10px 24px;
+  padding: 28px 10px 24px;
   border: 6px solid #3d342a;
   background:
     linear-gradient(180deg, rgba(26, 21, 16, 0.26), rgba(26, 21, 16, 0.58)),
@@ -1550,7 +1550,7 @@ button {
 @media (max-width: 1440px) {
   .shell {
     width: min(1120px, calc(100vw - 32px));
-    padding: 8px 8px 18px;
+    padding: 24px 8px 18px;
   }
 
   .shell::after {
@@ -1704,7 +1704,7 @@ button {
   .shell {
     height: calc(100vh - 20px);
     min-height: 600px;
-    padding: 6px 6px 14px;
+    padding: 22px 6px 14px;
   }
 
   .shell::after {
@@ -1941,7 +1941,7 @@ button {
 
 @media (max-width: 1080px) {
   .shell {
-    padding: 8px 8px 40px;
+    padding: 30px 8px 40px;
   }
 
   .shell::after {
@@ -2000,7 +2000,7 @@ button {
   }
 
   .shell {
-    padding: 6px 6px 36px;
+    padding: 26px 6px 36px;
   }
 
   .shell::after {
@@ -5954,7 +5954,7 @@ body::before {
     height: min(800px, calc(100vh - 64px));
     min-height: 0;
     margin: 0 auto;
-    padding: 6px 7px 10px;
+    padding: 26px 7px 10px;
     overflow: hidden;
   }
 
@@ -6639,11 +6639,10 @@ body::before {
   }
 
   .mission-report__header>p:not(.phase-tag) {
-    max-width: 90ch;
-    overflow: hidden;
+    max-width: none;
+    overflow: visible;
     font-size: 0.64rem;
     line-height: 1.05;
-    text-overflow: ellipsis;
     white-space: nowrap;
   }
 
@@ -6828,12 +6827,12 @@ body::before {
   }
 
   .mission-report__footer .result-lesson {
-    display: -webkit-box;
-    overflow: hidden;
+    display: block;
+    max-width: none;
+    white-space: nowrap;
+    overflow: visible;
     font-size: 0.62rem;
     line-height: 1.05;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
   }
 
   .mission-report__footer .restart {
@@ -7181,7 +7180,7 @@ canvas {
 @media (min-width: 900px) and (max-width: 1199px) {
   .shell {
     width: 100vw;
-    padding: 5px 6px 8px;
+    padding: 25px 6px 8px;
   }
 
   .phasebar,
@@ -7332,7 +7331,7 @@ canvas {
     width: 100%;
     min-height: calc(100vh - 16px);
     margin: 0;
-    padding: 7px;
+    padding: 27px 7px 7px;
     overflow: visible;
   }
 
@@ -7533,7 +7532,7 @@ canvas {
     width: 100%;
     min-height: calc(100vh - 8px);
     margin: 0;
-    padding: 5px;
+    padding: 13px 5px 5px;
     border-width: 4px;
     overflow: visible;
   }
@@ -7942,7 +7941,7 @@ canvas {
   }
 
   .shell {
-    padding: 3px;
+    padding: 13px 3px 3px;
     border-width: 3px;
   }
 
