@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useRef } from "react";
 import { mountLegacyGame } from "../legacyGame.js";
 

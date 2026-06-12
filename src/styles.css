@@ -1,6 +1,6 @@
 @font-face {
   font-family: "9 Pradit";
-  src: url("../assets/fonts/9Pradit-Regular.otf") format("opentype");
+  src: url("/assets/fonts/9Pradit-Regular.otf") format("opentype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -41,10 +41,10 @@ html:has(.mission-report) {
   --font-display: var(--font-thai), Impact, Haettenschweiler, "Arial Black", sans-serif;
   --font-pixel: var(--font-thai), "Courier New", Monaco, monospace;
 
-  --cursor-default: url("../assets/cursor-default.svg") 0 0, default;
-  --cursor-pointer: url("../assets/cursor-pointer.svg") 10 0, pointer;
-  --cursor-grab: url("../assets/cursor-grab.svg") 16 16, grab;
-  --cursor-grabbing: url("../assets/cursor-grab.svg") 16 16, grabbing;
+  --cursor-default: url("/assets/cursor-default.svg") 0 0, default;
+  --cursor-pointer: url("/assets/cursor-pointer.svg") 10 0, pointer;
+  --cursor-grab: url("/assets/cursor-grab.svg") 16 16, grab;
+  --cursor-grabbing: url("/assets/cursor-grab.svg") 16 16, grabbing;
 }
 
 * {
@@ -89,7 +89,7 @@ body::before {
   pointer-events: none;
   background:
     linear-gradient(180deg, rgba(15, 34, 58, 0.1), rgba(15, 34, 58, 0.02)),
-    url("../assets/backgrounds/background-scenic.png");
+    url("/assets/backgrounds/background-scenic.png");
   background-repeat: no-repeat, no-repeat;
   background-position: 0 0, center center;
   background-size: auto, cover;
@@ -3245,7 +3245,7 @@ body::before {
     radial-gradient(ellipse at 72% 13%, rgba(255, 255, 255, 0.86) 0 26px, transparent 27px),
     radial-gradient(ellipse at 78% 15%, rgba(255, 255, 255, 0.86) 0 42px, transparent 43px),
     linear-gradient(180deg, rgba(255, 255, 255, 0.26), transparent 42%),
-    url("../assets/backgrounds/background-scenic.png");
+    url("/assets/backgrounds/background-scenic.png");
   background-repeat: repeat-x, repeat-x, repeat-x, repeat-x, no-repeat, no-repeat;
   background-size: 360px 120px, 360px 120px, 460px 120px, 460px 120px, auto, cover;
   background-position: 28px 28px, 74px 22px, 20px 64px, 78px 58px, 0 0, center center;
