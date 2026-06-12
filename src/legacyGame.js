@@ -859,6 +859,7 @@ function chooseOption(optionId) {
   state.resolution = resolution;
   state.history.push(resolution);
   state.screen = isEmergency ? "emergency_resolution" : "resolution";
+  stopPhaseTimer();
   render();
 }
 
@@ -927,6 +928,7 @@ function advanceAfterNormalDecision({ allowRandomModifier = true, allowMicroEven
     state.activeChaos = step.chaosEvents[0];
     state.triggeredChaosByPhase[step.id] = state.activeChaos.id;
     state.screen = "step";
+    resumePhaseTimer();
     state.lastSignalTone = getProjectSignalTone();
     render();
     return;
@@ -955,6 +957,7 @@ function advanceAfterNormalDecision({ allowRandomModifier = true, allowMicroEven
   }
 
   state.screen = "step";
+  resumePhaseTimer();
 
   state.lastSignalTone = getProjectSignalTone();
   render();
@@ -1023,7 +1026,7 @@ function continueAfterResolution() {
 
     // Go back to step, not next step
     state.screen = "step";
-    startPhaseTimer();
+    resumePhaseTimer();
     state.lastSignalTone = getProjectSignalTone();
     render();
     return;
@@ -1698,14 +1701,6 @@ function handleRootClick(event) {
   if (warningCancel) {
     state.showTokenWarningModal = false;
     render();
-    return;
-  }
-
-  const optionButton = target.closest(".choice");
-  if (optionButton) {
-    const index = parseInt(optionButton.dataset.index, 10);
-    stopPhaseTimer();
-    resolveStep(step, index);
     return;
   }
 
@@ -3282,9 +3277,11 @@ function triggerTimeOut() {
   render();
 }
 
-function startPhaseTimer() {
+function startPhaseTimer(reset = true) {
   stopPhaseTimer();
-  state.phaseTimerValue = 60;
+  if (reset) {
+    state.phaseTimerValue = 60;
+  }
   updatePhaseTimerUI();
   
   const display = document.getElementById('global-phase-timer');
@@ -3299,6 +3296,10 @@ function startPhaseTimer() {
       }
     }
   }, 1000);
+}
+
+function resumePhaseTimer() {
+  startPhaseTimer(false);
 }
 
 function stopPhaseTimer() {
