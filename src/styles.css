@@ -9303,3 +9303,21 @@ canvas {
   word-break: break-word;
   font-family: var(--font-ui);
 }
+
+/* Phase Timer */
+.phase-timer-display {
+  transition: color 0.3s ease;
+  min-width: 60px;
+  text-align: center;
+}
+
+.phase-timer-display.phase-timer--critical {
+  color: #ff907f !important;
+  animation: pulse-danger 1s infinite;
+}
+
+@keyframes pulse-danger {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}

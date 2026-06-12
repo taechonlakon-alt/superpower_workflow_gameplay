@@ -80,6 +80,9 @@ function createInitialState() {
     minigameCards: [],
     minigameSelectedIndices: [],
     minigameMatchedPairs: 0,
+    phaseTimerValue: 60,
+    phaseTimerIntervalId: null,
+    timeoutFailed: false,
   };
 }
 
@@ -863,14 +866,12 @@ function advanceAfterNormalDecision({ allowRandomModifier = true, allowMicroEven
     state.screen = "result";
     state.lastSignalTone = getProjectSignalTone();
     render();
-    return;
-  }
-
-  if (state.risk >= EMERGENCY_RISK_THRESHOLD && !state.emergencyTriggered) {
+if (state.risk >= EMERGENCY_RISK_THRESHOLD && !state.emergencyTriggered) {
     state.emergencyTriggered = true;
     state.resolution = null;
     state.screen = "emergency_step";
     state.emergencyCharacterFailed = false;
+    stopPhaseTimer();
     render();
     return;
   }
@@ -880,6 +881,7 @@ function advanceAfterNormalDecision({ allowRandomModifier = true, allowMicroEven
   if (!step) {
     state.characterPos = null;
     state.screen = "result";
+    stopPhaseTimer();
     state.lastSignalTone = getProjectSignalTone();
     render();
     return;
@@ -899,10 +901,16 @@ function advanceAfterNormalDecision({ allowRandomModifier = true, allowMicroEven
     state.hasPlayedMinigameThisPhase = false;
 
     if (oldLevel !== newLevel) {
+      stopPhaseTimer();
       triggerEvolutionTransition(oldLevel, newLevel);
       return;
     } else {
       state.screen = state.index >= game.steps.length ? "result" : "step";
+      if (state.screen === "step") {
+        startPhaseTimer();
+      } else {
+        stopPhaseTimer();
+      }
     }
 
     state.lastSignalTone = getProjectSignalTone();
@@ -924,6 +932,7 @@ function advanceAfterNormalDecision({ allowRandomModifier = true, allowMicroEven
     state.resolution = microEvent;
     state.history.push(microEvent);
     state.screen = "resolution";
+    stopPhaseTimer();
     render();
     return;
   }
@@ -934,6 +943,7 @@ function advanceAfterNormalDecision({ allowRandomModifier = true, allowMicroEven
       state.resolution = randomModifier;
       state.history.push(randomModifier);
       state.screen = "resolution";
+      stopPhaseTimer();
       render();
       return;
     }
@@ -983,6 +993,7 @@ function continueAfterResolution() {
       return;
     } else {
       state.screen = state.index >= game.steps.length ? "result" : "step";
+      if (state.screen === "step") startPhaseTimer();
     }
     state.lastSignalTone = getProjectSignalTone();
     render();
@@ -1007,6 +1018,7 @@ function continueAfterResolution() {
 
     // Go back to step, not next step
     state.screen = "step";
+    startPhaseTimer();
     state.lastSignalTone = getProjectSignalTone();
     render();
     return;
@@ -1104,6 +1116,7 @@ function startMission() {
   if (state.skills.length !== game.maxSkills) return;
   state.activeSkillDetail = null;
   state.screen = "step";
+  startPhaseTimer();
   render();
 }
 
@@ -1123,6 +1136,7 @@ function selectStage(stageId) {
 }
 
 function restart() {
+  stopPhaseTimer();
   playRestartSound();
   state = createInitialState();
   render();
@@ -1682,6 +1696,14 @@ function handleRootClick(event) {
     return;
   }
 
+  const optionButton = target.closest(".choice");
+  if (optionButton) {
+    const index = parseInt(optionButton.dataset.index, 10);
+    stopPhaseTimer();
+    resolveStep(step, index);
+    return;
+  }
+
   const choiceButton = target.closest(".choice");
   if (choiceButton) {
     chooseOption(choiceButton.dataset.option);
@@ -2011,7 +2033,7 @@ function choiceCardMarkup(option, index) {
   const isLocked = (isSkill || isSynergy) && state.token < 3;
 
   return `
-    <button class="choice action-slot action-slot--${visualTone} ${isSkill ? "choice--skill" : ""} ${isSynergy ? "choice--synergy" : ""} ${isLocked ? "choice--locked" : ""}" data-option="${option.id}" style="--choice-delay:${index * 65}ms">
+    <button class="choice action-slot action-slot--${visualTone} ${isSkill ? "choice--skill" : ""} ${isSynergy ? "choice--synergy" : ""} ${isLocked ? "choice--locked" : ""}" data-option="${option.id}" data-index="${index}" style="--choice-delay:${index * 65}ms">
       <span class="action-slot__body">
         <strong class="action-slot__title">${escapeHtml(option.label)}</strong>
         <span class="action-slot__helper">${escapeHtml(truncateHelper(option.helper || ""))}</span>
@@ -2136,7 +2158,7 @@ function renderSetup() {
                 <h2 class="phase-title">${lang.selectSuperpowers.replace('{max}', game.maxSkills)}</h2>
                 <span class="phase-badge" aria-hidden="true">${eventIconMarkup()}</span>
               </div>
-              <div class="phase-body">
+              <div class="panel-body">
                 <p>${lang.clickCardForDetails.replace('{max}', game.maxSkills)}</p>
               </div>
             </div>
@@ -2179,6 +2201,7 @@ function renderStep(step, isEmergency = false) {
   const characterLevel = Math.min(5, (state.index || 0) + 1);
   const isChaos = !!state.activeChaos;
   const issueLabel = `${step.title} Issue`;
+  const timeRemaining = Math.max(0, game.caps.time - state.time);
 
   const characterSrc = isEmergency && state.emergencyCharacterFailed
     ? `/assets/catfail/lv${characterLevel}fail.gif`
@@ -2236,6 +2259,14 @@ function renderStep(step, isEmergency = false) {
       <section class="${shellClass()}">
         <section class="phasebar" style="display: flex; align-items: center; justify-content: space-between;">
           <ol class="phases" style="flex: 1;">${phaseMarkup(state.index)}</ol>
+          <div style="display: flex; gap: 16px; align-items: center;">
+            <div class="phase-timer-display" style="font-family: var(--font-pixel); font-size: 1.5rem; color: #fff; font-weight: bold;">
+              --:--
+            </div>
+            <div class="timer-display" style="font-family: var(--font-pixel); font-size: 1.2rem; color: ${timeRemaining <= 10 ? '#ff907f' : '#fff'};" title="Time Budget">
+              ⏱️ ${timeRemaining}
+            </div>
+          </div>
           ${soundButtonMarkup()}
         </section>
         <section class="playfield">
@@ -2720,20 +2751,27 @@ function getFinalResult() {
   const randomModifiers = state.randomModifiersTriggered || [];
   const shippedRiskyShortcut = state.history.some((item) => item.optionId === "ship_now") && state.risk >= 6;
   const crashed = state.risk >= game.caps.risk && state.index < game.steps.length;
-  const failed = crashed || state.risk >= game.caps.risk || state.quality < 1 || shippedRiskyShortcut;
+  let failed = crashed || state.risk >= game.caps.risk || state.quality < 1 || shippedRiskyShortcut;
 
-  const title = crashed ? lang.resultTitleCrashed : failed ? lang.resultTitleDamaged : lang.resultTitleSurvived;
-  const summary = crashed
+  let title = crashed ? lang.resultTitleCrashed : failed ? lang.resultTitleDamaged : lang.resultTitleSurvived;
+  let summary = crashed
     ? lang.resultSummaryCrashed
     : failed
       ? lang.resultSummaryDamaged
       : lang.resultSummarySurvived;
 
-  const lesson = crashed
+  let lesson = crashed
     ? lang.resultLessonCrashed
     : failed
       ? lang.resultLessonDamaged
       : lang.resultLessonSurvived;
+
+  if (state.timeoutFailed) {
+    title = lang.timeOutTitle || "TIME OUT";
+    summary = lang.timeOutSummary || "The project ran out of time during the phase.";
+    lesson = lang.timeOutLesson || "Time management is crucial.";
+    failed = true;
+  }
 
   const workflowScore = calculateWorkflowScore({ failed, protectedEvents, riskyChoices, skillUses, overBudget, overtime });
   const scoreTier = getScoreTier(workflowScore);
@@ -3231,8 +3269,56 @@ function renderEvolution() {
   root.querySelector('.evolution-next-btn')?.addEventListener('click', () => {
     state.characterPos = null;
     state.screen = state.index >= game.steps.length ? "result" : "step";
+    if (state.screen === "step") {
+      startPhaseTimer();
+    } else {
+      stopPhaseTimer();
+    }
     render();
   });
+}
+
+function triggerTimeOut() {
+  stopPhaseTimer();
+  state.timeoutFailed = true;
+  state.screen = "result";
+  render();
+}
+
+function startPhaseTimer() {
+  stopPhaseTimer();
+  state.phaseTimerValue = 60;
+  updatePhaseTimerUI();
+  state.phaseTimerIntervalId = setInterval(() => {
+    if (state.phaseTimerValue > 0) {
+      state.phaseTimerValue -= 1;
+      updatePhaseTimerUI();
+      if (state.phaseTimerValue <= 0) {
+        triggerTimeOut();
+      }
+    }
+  }, 1000);
+}
+
+function stopPhaseTimer() {
+  if (state.phaseTimerIntervalId) {
+    clearInterval(state.phaseTimerIntervalId);
+    state.phaseTimerIntervalId = null;
+  }
+}
+
+function updatePhaseTimerUI() {
+  const display = document.querySelector('.phase-timer-display');
+  if (display) {
+    const minutes = Math.floor(state.phaseTimerValue / 60).toString().padStart(2, '0');
+    const seconds = (state.phaseTimerValue % 60).toString().padStart(2, '0');
+    display.textContent = `${minutes}:${seconds}`;
+    if (state.phaseTimerValue <= 10) {
+      display.classList.add('phase-timer--critical');
+    } else {
+      display.classList.remove('phase-timer--critical');
+    }
+  }
 }
 
 function render() {
