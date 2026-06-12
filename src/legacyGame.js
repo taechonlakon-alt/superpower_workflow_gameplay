@@ -2264,14 +2264,6 @@ function renderStep(step, isEmergency = false) {
       <section class="${shellClass()}">
         <section class="phasebar" style="display: flex; align-items: center; justify-content: space-between;">
           <ol class="phases" style="flex: 1;">${phaseMarkup(state.index)}</ol>
-          <div style="display: flex; gap: 16px; align-items: center;">
-            <div class="phase-timer-display" style="font-family: var(--font-pixel); font-size: 1.5rem; color: #fff; font-weight: bold;">
-              --:--
-            </div>
-            <div class="timer-display" style="font-family: var(--font-pixel); font-size: 1.2rem; color: ${timeRemaining <= 10 ? '#ff907f' : '#fff'};" title="Time Budget">
-              ⏱️ ${timeRemaining}
-            </div>
-          </div>
           ${soundButtonMarkup()}
         </section>
         <section class="playfield">
@@ -3294,6 +3286,10 @@ function startPhaseTimer() {
   stopPhaseTimer();
   state.phaseTimerValue = 60;
   updatePhaseTimerUI();
+  
+  const display = document.getElementById('global-phase-timer');
+  if (display) display.style.display = 'block';
+
   state.phaseTimerIntervalId = setInterval(() => {
     if (state.phaseTimerValue > 0) {
       state.phaseTimerValue -= 1;
@@ -3310,17 +3306,21 @@ function stopPhaseTimer() {
     clearInterval(state.phaseTimerIntervalId);
     state.phaseTimerIntervalId = null;
   }
+  const display = document.getElementById('global-phase-timer');
+  if (display) display.style.display = 'none';
 }
 
 function updatePhaseTimerUI() {
-  const display = document.querySelector('.phase-timer-display');
+  const display = document.getElementById('global-phase-timer');
   if (display) {
     const minutes = Math.floor(state.phaseTimerValue / 60).toString().padStart(2, '0');
     const seconds = (state.phaseTimerValue % 60).toString().padStart(2, '0');
     display.textContent = `${minutes}:${seconds}`;
     if (state.phaseTimerValue <= 10) {
+      display.style.color = '#ff907f';
       display.classList.add('phase-timer--critical');
     } else {
+      display.style.color = '#fff';
       display.classList.remove('phase-timer--critical');
     }
   }
@@ -3391,6 +3391,25 @@ export function mountLegacyGame(container) {
     render,
     renderResult
   };
+
+  // --- PHASE TIMER LAYER ---
+  let timerLayer = document.getElementById("global-phase-timer");
+  if (!timerLayer) {
+    timerLayer = document.createElement("div");
+    timerLayer.id = "global-phase-timer";
+    timerLayer.style.position = "fixed";
+    timerLayer.style.top = "10px";
+    timerLayer.style.left = "50%";
+    timerLayer.style.transform = "translateX(-50%)";
+    timerLayer.style.zIndex = "10000";
+    timerLayer.style.fontFamily = "var(--font-pixel)";
+    timerLayer.style.fontSize = "2rem";
+    timerLayer.style.color = "#fff";
+    timerLayer.style.textShadow = "2px 2px 0 #000";
+    timerLayer.style.pointerEvents = "none";
+    timerLayer.style.display = "none";
+    document.body.appendChild(timerLayer);
+  }
 
   // --- TOYS PHYSICS ENGINE ---
   let toyLayer = document.getElementById("toy-layer");
