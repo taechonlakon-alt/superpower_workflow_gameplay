@@ -1,9 +1,11 @@
+"use client";
+
 import { allStagesEN, allStagesTH } from "./data/gameData.js";
 import { i18n } from "./data/i18n.js";
 import { getPhaseMoment, getRunIdentity } from "./gameFeel.js";
 
 let root = null;
-let currentLang = localStorage.getItem("sp_workflow_lang") || "th";
+let currentLang = typeof window !== "undefined" ? localStorage.getItem("sp_workflow_lang") || "th" : "th";
 let allStages = currentLang === "th" ? allStagesTH : allStagesEN;
 let game = allStages[0];
 const starterWorkflowSkills = [];
@@ -866,7 +868,10 @@ function advanceAfterNormalDecision({ allowRandomModifier = true, allowMicroEven
     state.screen = "result";
     state.lastSignalTone = getProjectSignalTone();
     render();
-if (state.risk >= EMERGENCY_RISK_THRESHOLD && !state.emergencyTriggered) {
+    return;
+  }
+
+  if (state.risk >= EMERGENCY_RISK_THRESHOLD && !state.emergencyTriggered) {
     state.emergencyTriggered = true;
     state.resolution = null;
     state.screen = "emergency_step";
