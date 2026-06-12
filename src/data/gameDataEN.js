@@ -9,7 +9,7 @@ const stage01 = {
   maxSkills: 3,
   caps: {
     time: 20,
-    token: 14,
+    token: 11,
     risk: 10,
   },
   randomModifierConfig: {
@@ -268,7 +268,7 @@ const stage01 = {
           outcome: "The team understands the core goals and users before discussing the flow, but slot rules and confirmation remain unknown.",
           lesson: "Brainstorming should begin by reading docs and summarizing goals, not jumping straight to a solution.",
           progress: 35,
-          effects: { time: 1, token: 0, risk: 0, quality: 2 },
+          effects: { time: 3, token: 0, risk: 1, quality: 2 },
         },
         {
           id: "ai_persona",
@@ -295,7 +295,7 @@ const stage01 = {
           lesson: "Past experience helps kickstart things, but you must distinguish between actual evidence and assumptions.",
           problem: "Misleading Confidence",
           progress: 40,
-          effects: { time: 0, token: 0, risk: 4, quality: -1 },
+          effects: { time: 2, token: 0, risk: 6, quality: -1 },
         },
       ],
       skillOptions: [
@@ -444,7 +444,7 @@ const stage01 = {
           outcome: "The team knows which files and tasks to start with, but lacks answers on what to test first or how to verify completed tasks.",
           lesson: "An outline helps kickstart the Plan, but is insufficient without tests, verification, and risk guards.",
           progress: 35,
-          effects: { time: 1, token: 0, risk: -1, quality: 2 },
+          effects: { time: 3, token: 0, risk: 1, quality: 2 },
         },
         {
           id: "rush_execute",
@@ -881,7 +881,7 @@ const stage01 = {
           outcome: "The team catches visible issues, but lacks evidence that requirements are fully met and no files were modified out of scope.",
           lesson: "Manual checks are better than no testing, but cannot replace a comprehensive Code Review.",
           progress: 40,
-          effects: { time: 1, token: 0, risk: -1, quality: 1 },
+          effects: { time: 4, token: 0, risk: 3, quality: 1 },
         },
         {
           id: "ai_self_review",
@@ -909,7 +909,7 @@ const stage01 = {
           lesson: "AI makes code look finished quickly, but that doesn't mean it is truly ready to ship.",
           problem: "Misleading Confidence",
           progress: 60,
-          effects: { time: 0, token: 0, risk: 5, quality: -3 },
+          effects: { time: 0, token: 0, risk: 8, quality: -3 },
         },
       ],
       skillOptions: [

@@ -72,6 +72,14 @@ function createInitialState() {
     microEventTriggered: false,
     lastSignalTone: "stable",
     emergencyCharacterFailed: false,
+    showTokenWarningModal: false,
+    hasPlayedMinigameThisPhase: false,
+    minigameActive: false,
+    minigameShowResult: false,
+    minigameTimer: 0,
+    minigameCards: [],
+    minigameSelectedIndices: [],
+    minigameMatchedPairs: 0,
   };
 }
 
@@ -825,6 +833,14 @@ function chooseOption(optionId) {
   const option = getAvailableOptions(step).find((item) => item.id === optionId);
   if (!step || !option) return;
 
+  const isSkill = Boolean(option.skill);
+  const isSynergy = Boolean(option.requires);
+  if ((isSkill || isSynergy) && state.token < 3) {
+    state.showTokenWarningModal = true;
+    render();
+    return;
+  }
+
   playChoiceSound(option);
   const resolution = buildResolution(step, option);
   applyEffects(option.effects || { time: 0, token: 0, risk: 0, quality: 0 });
@@ -870,6 +886,9 @@ function advanceAfterNormalDecision({ allowRandomModifier = true, allowMicroEven
   }
 
   if (state.progress >= step.requiredProgress) {
+    if (state.token < 3) {
+      state.risk = clamp(state.risk + 3, 0, game.caps.risk + 8);
+    }
     const phaseSummary = buildPhaseSummary(step);
     state.phaseSummaries = [...state.phaseSummaries, phaseSummary];
     state.pendingPhaseMoment = buildPendingPhaseMoment(phaseSummary);
@@ -877,6 +896,7 @@ function advanceAfterNormalDecision({ allowRandomModifier = true, allowMicroEven
     state.index += 1;
     const newLevel = Math.min(5, state.index + 1);
     state.progress = 0;
+    state.hasPlayedMinigameThisPhase = false;
 
     if (oldLevel !== newLevel) {
       triggerEvolutionTransition(oldLevel, newLevel);
@@ -1292,6 +1312,208 @@ document.addEventListener("mouseover", (event) => {
   }
 });
 
+function playMatchSound() {
+  beep({ frequency: 523, duration: 0.08, volume: 0.03, type: "sine" });
+  beep({ frequency: 659, duration: 0.12, volume: 0.025, delay: 0.06, type: "sine" });
+}
+
+function playMismatchSound() {
+  beep({ frequency: 220, duration: 0.1, volume: 0.035, type: "sawtooth" });
+}
+
+function startMinigame() {
+  state.minigameActive = true;
+  state.minigameShowResult = false;
+  state.minigameTimer = 15;
+  state.minigameMatchedPairs = 0;
+  state.minigameSelectedIndices = [];
+
+  const allStageSkills = game.skills;
+  const selectedSkillsForCards = [];
+  for (let i = 0; i < 6; i++) {
+    const skill = allStageSkills[i % allStageSkills.length];
+    selectedSkillsForCards.push(skill);
+  }
+
+  let cards = [];
+  selectedSkillsForCards.forEach((skill) => {
+    cards.push({ id: skill.id, name: skill.name, icon: skill.icon, flipped: false, matched: false });
+    cards.push({ id: skill.id, name: skill.name, icon: skill.icon, flipped: false, matched: false });
+  });
+
+  // Shuffle
+  for (let i = cards.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [cards[i], cards[j]] = [cards[j], cards[i]];
+  }
+  state.minigameCards = cards;
+
+  beep({ frequency: 440, duration: 0.05, volume: 0.03 });
+  beep({ frequency: 554, duration: 0.05, volume: 0.025, delay: 0.05 });
+  beep({ frequency: 659, duration: 0.08, volume: 0.02, delay: 0.1 });
+
+  state.minigameIntervalId = setInterval(() => {
+    state.minigameTimer -= 1;
+    if (state.minigameTimer <= 0) {
+      clearInterval(state.minigameIntervalId);
+      endMinigame();
+    } else {
+      render();
+    }
+  }, 1000);
+
+  render();
+}
+
+function flipMinigameCard(cardIndex) {
+  if (!state.minigameActive || state.minigameShowResult) return;
+  
+  const card = state.minigameCards[cardIndex];
+  if (card.flipped || card.matched || state.minigameSelectedIndices.length >= 2) return;
+
+  card.flipped = true;
+  playHoverSound();
+  state.minigameSelectedIndices.push(cardIndex);
+  render();
+
+  if (state.minigameSelectedIndices.length === 2) {
+    const [firstIdx, secondIdx] = state.minigameSelectedIndices;
+    const firstCard = state.minigameCards[firstIdx];
+    const secondCard = state.minigameCards[secondIdx];
+
+    if (firstCard.id === secondCard.id) {
+      firstCard.matched = true;
+      secondCard.matched = true;
+      state.minigameMatchedPairs += 1;
+      state.minigameSelectedIndices = [];
+      playMatchSound();
+      
+      if (state.minigameMatchedPairs === 6) {
+        clearInterval(state.minigameIntervalId);
+        setTimeout(() => {
+          endMinigame();
+        }, 500);
+      } else {
+        render();
+      }
+    } else {
+      playMismatchSound();
+      setTimeout(() => {
+        firstCard.flipped = false;
+        secondCard.flipped = false;
+        state.minigameSelectedIndices = [];
+        render();
+      }, 800);
+    }
+  }
+}
+
+function endMinigame() {
+  if (state.minigameIntervalId) {
+    clearInterval(state.minigameIntervalId);
+    state.minigameIntervalId = null;
+  }
+  state.minigameShowResult = true;
+  
+  // Play intermediate sound
+  beep({ frequency: 587, duration: 0.1, volume: 0.03 });
+  beep({ frequency: 784, duration: 0.15, volume: 0.025, delay: 0.08 });
+  
+  render();
+}
+
+function closeMinigameResult() {
+  state.minigameActive = false;
+  state.minigameShowResult = false;
+
+  const tokensGained = state.minigameMatchedPairs * 3;
+  state.token = Math.min(game.caps.token, state.token + tokensGained);
+  state.time = Math.max(0, state.time + 3);
+  state.hasPlayedMinigameThisPhase = true;
+
+  // Play final success sound
+  beep({ frequency: 659, duration: 0.1, volume: 0.03 });
+  beep({ frequency: 880, duration: 0.15, volume: 0.025, delay: 0.08 });
+
+  render();
+}
+
+function minigameModalMarkup() {
+  const lang = i18n[currentLang];
+  const timeText = lang.minigameTimeRemaining.replace("{time}", state.minigameTimer);
+  const tokensGained = state.minigameMatchedPairs * 3;
+  
+  if (state.minigameShowResult) {
+    return `
+      <div class="minigame-overlay" role="dialog" aria-modal="true" aria-labelledby="minigame-result-title">
+        <div class="minigame-content">
+          <h2 class="minigame-title" id="minigame-result-title" style="color: #ffd969;">${escapeHtml(lang.minigameTitle)}</h2>
+          <p style="font-size: 1.25rem; color: #fff; margin: 24px 0 16px; font-family: var(--font-pixel); text-align: center;">
+            ${escapeHtml(lang.minigameSuccess.replace("{tokens}", tokensGained))}
+          </p>
+          <p style="font-size: 0.9rem; color: #ff907f; margin: 0 0 24px; font-family: var(--font-pixel); text-align: center;">
+            ${escapeHtml(currentLang === "th" ? "ใช้เวลาเพิ่มขึ้น +3" : "Time Cost: +3")}
+          </p>
+          <button class="restart minigame-close-btn" type="button" style="padding: 12px 24px;">
+            ${escapeHtml(lang.continue)}
+          </button>
+        </div>
+      </div>
+    `;
+  }
+  
+  return `
+    <div class="minigame-overlay" role="dialog" aria-modal="true" aria-labelledby="minigame-title">
+      <div class="minigame-content">
+        <div class="minigame-header">
+          <h2 class="minigame-title" id="minigame-title">${escapeHtml(lang.minigameTitle)}</h2>
+          <p class="minigame-inst">${escapeHtml(lang.minigameInstructions)}</p>
+        </div>
+        <div class="minigame-timer-row">
+          <span class="minigame-timer">${escapeHtml(timeText)}</span>
+          <span class="minigame-score">${escapeHtml(lang.selected)}: ${state.minigameMatchedPairs} / 6</span>
+        </div>
+        <div class="minigame-grid">
+          ${state.minigameCards.map((card, idx) => `
+            <button class="minigame-card ${card.flipped ? "minigame-card--flipped" : ""} ${card.matched ? "minigame-card--matched" : ""}" data-card-idx="${idx}" type="button" aria-label="Card ${idx + 1}">
+              <span class="minigame-card__inner minigame-card__back">?</span>
+              <span class="minigame-card__inner minigame-card__front">
+                <span class="minigame-card__icon">${escapeHtml(card.icon || "SK")}</span>
+                <span class="minigame-card__name">${escapeHtml(card.name)}</span>
+              </span>
+            </button>
+          `).join("")}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function tokenWarningModalMarkup() {
+  const lang = i18n[currentLang];
+  const message = lang.insufficientTokensMessage.replace("{token}", state.token);
+  return `
+    <div class="minigame-overlay" role="dialog" aria-modal="true" aria-labelledby="warning-title">
+      <div class="minigame-content" style="max-width: 400px; padding: 24px; border: 4px solid #b44f47; background: #2a1f1f; box-shadow: 0 4px 0 rgba(0,0,0,0.5);">
+        <h2 class="minigame-title" id="warning-title" style="color: #ff907f; text-shadow: 0 2px 0 #000; font-size: 1.3rem;">
+          ${escapeHtml(lang.insufficientTokensTitle)}
+        </h2>
+        <p style="font-size: 0.88rem; color: #fff; margin: 16px 0 20px; font-family: var(--font-pixel); line-height: 1.4; text-align: center; white-space: pre-line;">
+          ${escapeHtml(message)}
+        </p>
+        <div style="display: flex; gap: 10px; justify-content: center; width: 100%;">
+          <button class="restart warning-confirm-btn" type="button" style="padding: 10px 16px; background: linear-gradient(180deg, #ffd969 0%, #c48a17 100%); color: #232019; border: 3px solid #7a4d29;">
+            ${escapeHtml(currentLang === "th" ? "เล่นมินิเกม" : "Play Minigame")}
+          </button>
+          <button class="restart warning-cancel-btn" type="button" style="padding: 10px 16px; background: #555; color: #fff; border: 3px solid #333;">
+            ${escapeHtml(currentLang === "th" ? "ยกเลิก" : "Cancel")}
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 function soundButtonMarkup() {
   return `
     <button class="sound-toggle ${soundEnabled ? "on" : "off"}" type="button" aria-label="Toggle sound">
@@ -1428,6 +1650,38 @@ function handleRootClick(event) {
     return;
   }
 
+  const refactorButton = target.closest(".refactor-btn");
+  if (refactorButton) {
+    startMinigame();
+    return;
+  }
+
+  const minigameCard = target.closest(".minigame-card");
+  if (minigameCard) {
+    flipMinigameCard(parseInt(minigameCard.dataset.cardIdx, 10));
+    return;
+  }
+
+  const minigameClose = target.closest(".minigame-close-btn");
+  if (minigameClose) {
+    closeMinigameResult();
+    return;
+  }
+
+  const warningConfirm = target.closest(".warning-confirm-btn");
+  if (warningConfirm) {
+    state.showTokenWarningModal = false;
+    startMinigame();
+    return;
+  }
+
+  const warningCancel = target.closest(".warning-cancel-btn");
+  if (warningCancel) {
+    state.showTokenWarningModal = false;
+    render();
+    return;
+  }
+
   const choiceButton = target.closest(".choice");
   if (choiceButton) {
     chooseOption(choiceButton.dataset.option);
@@ -1528,17 +1782,17 @@ function resourceBarMarkup() {
     <div class="resource-bar" aria-label="Resource Bar">
       ${resources
       .map((resource) => `
-            <div class="resource-meter resource-meter--${resource.key} resource-meter--${resource.tone} ${resource.flash || ''}" aria-label="${resource.label}: ${resource.value}">
-              <span class="resource-meter__topline">
-                <span class="resource-meter__label">${resource.label}</span>
-                <strong class="resource-meter__value">${resource.value}</strong>
-              </span>
-              <span class="resource-meter__track" aria-hidden="true">
-                <span class="resource-meter__fill" style="width: ${resource.fill}%;"></span>
-              </span>
-              <span class="resource-meter__helper">${resource.helper}</span>
-            </div>
-          `)
+          <div class="resource-meter resource-meter--${resource.key} resource-meter--${resource.tone} ${resource.flash || ''}" aria-label="${resource.label}: ${resource.value}">
+            <span class="resource-meter__topline">
+              <span class="resource-meter__label">${resource.label}</span>
+              <strong class="resource-meter__value">${resource.value}</strong>
+            </span>
+            <span class="resource-meter__track" aria-hidden="true">
+              <span class="resource-meter__fill" style="width: ${resource.fill}%;"></span>
+            </span>
+            <span class="resource-meter__helper">${resource.helper}</span>
+          </div>
+        `)
       .join("")}
       </div>
   `;
@@ -1754,9 +2008,10 @@ function choiceCardMarkup(option, index) {
       ? `${lang.comboTool} ${option.requires.map((req) => getSkill(req)?.name).join(" + ")}`
       : "";
   const visualTone = isSynergy ? "combo" : isSkill ? "skill" : "base";
+  const isLocked = (isSkill || isSynergy) && state.token < 3;
 
   return `
-    <button class="choice action-slot action-slot--${visualTone} ${isSkill ? "choice--skill" : ""} ${isSynergy ? "choice--synergy" : ""}" data-option="${option.id}" style="--choice-delay:${index * 65}ms">
+    <button class="choice action-slot action-slot--${visualTone} ${isSkill ? "choice--skill" : ""} ${isSynergy ? "choice--synergy" : ""} ${isLocked ? "choice--locked" : ""}" data-option="${option.id}" style="--choice-delay:${index * 65}ms">
       <span class="action-slot__body">
         <strong class="action-slot__title">${escapeHtml(option.label)}</strong>
         <span class="action-slot__helper">${escapeHtml(truncateHelper(option.helper || ""))}</span>
@@ -1767,7 +2022,7 @@ function choiceCardMarkup(option, index) {
       </span>
       <span class="action-slot__footer">
         ${unlock ? `<span class="action-slot__unlock">${escapeHtml(unlock)}</span>` : ""}
-        <span class="action-slot__select">${lang.select}</span>
+        <span class="action-slot__select">${isLocked ? lang.rateLimited : lang.select}</span>
       </span>
     </button>
   `;
@@ -1919,6 +2174,7 @@ function renderTitle() {
 }
 
 function renderStep(step, isEmergency = false) {
+  const lang = i18n[currentLang];
   const options = getAvailableOptions(step);
   const characterLevel = Math.min(5, (state.index || 0) + 1);
   const isChaos = !!state.activeChaos;
@@ -2005,6 +2261,8 @@ function renderStep(step, isEmergency = false) {
         </section>
       </section>
       ${selectedSkillHandMarkup()}
+      ${state.minigameActive ? minigameModalMarkup() : ""}
+      ${state.showTokenWarningModal ? tokenWarningModalMarkup() : ""}
     </main>
   `;
 
@@ -2370,12 +2628,12 @@ function getScoreCeilingDetails({ failed, overBudget, overtime, riskyChoices, sk
     capScore(84, overBudget ? lang.ceilingBudget : lang.ceilingTime);
   }
 
-  if (tokenDebt >= 10) {
-    capScore(68, lang.ceilingToken10);
-  } else if (tokenDebt >= 5) {
-    capScore(76, lang.ceilingToken5);
+  if (tokenDebt >= 5) {
+    capScore(60, lang.ceilingToken10);
+  } else if (tokenDebt >= 3) {
+    capScore(70, lang.ceilingToken5);
   } else if (tokenDebt >= 1) {
-    capScore(84, lang.ceilingToken1);
+    capScore(80, lang.ceilingToken1);
   }
 
   if (timeOverflow >= Math.ceil(game.caps.time * 0.6)) {

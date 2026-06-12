@@ -8,7 +8,7 @@ const stage01 = {
   "maxSkills": 3,
   "caps": {
     "time": 20,
-    "token": 14,
+    "token": 11,
     "risk": 10
   },
   "randomModifierConfig": {
@@ -355,9 +355,9 @@ const stage01 = {
           "lesson": "Brainstorming ควรเริ่มจากการอ่าน Docs และสรุปเป้าหมาย ไม่ใช่กระโดดไปหาวิธีแก้ปัญหาเลย",
           "progress": 35,
           "effects": {
-            "time": 1,
+            "time": 3,
             "token": 0,
-            "risk": 0,
+            "risk": 1,
             "quality": 2
           },
           "purpose": "อ่านบรีฟและสรุปเป้าหมาย, ผู้ใช้หลัก, และตัวชี้วัดความสำเร็จก่อนเสนอ Flow",
@@ -404,9 +404,9 @@ const stage01 = {
           "problem": "ความมั่นใจที่ผิดพลาด",
           "progress": 80,
           "effects": {
-            "time": 0,
+            "time": 2,
             "token": 0,
-            "risk": 4,
+            "risk": 6,
             "quality": -1
           },
           "purpose": "ทีมใช้แพตเทิร์นจากโปรเจกต์เก่าเพื่อร่าง Flow โด·ี่ยังมีข้อสงสัย",
@@ -643,9 +643,9 @@ const stage01 = {
           "lesson": "แผนงานที่ดีควรระบุถึงการส่งต่อข้อมูล (Data Handoff) และการจัดการ State ด้วย",
           "progress": 35,
           "effects": {
-            "time": 1,
+            "time": 3,
             "token": 0,
-            "risk": -1,
+            "risk": 1,
             "quality": 2
           },
           "purpose": "ระบุไฟล์ที่จะดูและงานหลักๆ: หน้าเลือกบริการ, เวลา, ฟอร์ม, ยืนยัน, และรายการจอง",
@@ -1373,9 +1373,9 @@ const stage01 = {
           "lesson": "Manual Test ดี แต่ไม่พอสำหรับการทำระบบให้พร้อม Production",
           "progress": 40,
           "effects": {
-            "time": 1,
+            "time": 4,
             "token": 0,
-            "risk": -1,
+            "risk": 3,
             "quality": 1
           },
           "purpose": "ลองรันแอป, ลองกดเลือกบริการ, เลือกเวลา, กรอกข้อมูล, คอนเฟิร์ม, แล้วเปิดดูรายการในระบบ",
@@ -1425,7 +1425,7 @@ const stage01 = {
           "effects": {
             "time": 0,
             "token": 0,
-            "risk": 5,
+            "risk": 8,
             "quality": -3
           },
           "purpose": "ปล่อยงานทันที เพราะ AI แจ้งว่าไม่มี Error และหน้าตาเดโมก็ดูดี",

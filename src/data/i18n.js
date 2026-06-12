@@ -75,6 +75,15 @@ export const i18n = {
     pressure: "Pressure",
     danger: "Danger",
     select: "Select",
+    rateLimited: "Rate Limited (Need >= 3 Tokens)",
+    insufficientTokensTitle: "Insufficient Tokens!",
+    insufficientTokensMessage: "This choice requires at least 3 Tokens. You only have {token} Tokens. Would you like to play the minigame to recover tokens? (Costs Time +3)",
+    refactorButton: "Refactor / Optimize (Mini-game)",
+    refactorTimeCost: "Costs Time +3",
+    minigameTitle: "Prompt Optimization Mini-game",
+    minigameInstructions: "Match skill pairs before time runs out! Each pair gives +3 Tokens.",
+    minigameTimeRemaining: "Time Left: {time}s",
+    minigameSuccess: "Refactoring Done! Gained +{tokens} Tokens.",
     solves: "Solves",
     tradeoff: "Tradeoff",
     choiceMeaning: "Choice Meaning",
@@ -215,9 +224,9 @@ export const i18n = {
     ,ceilingBudgetAndTime: "AI budget & deadline exceeded"
     ,ceilingBudget: "Token debt (Cap 84)"
     ,ceilingTime: "Overtime (Cap 84)"
-    ,ceilingToken10: "Token debt 10+ (Cap 68)"
-    ,ceilingToken5: "Token debt 5-9 (Cap 76)"
-    ,ceilingToken1: "Token debt 1-4 (Cap 84)"
+    ,ceilingToken10: "Token debt 5+ (Cap 60)"
+    ,ceilingToken5: "Token debt 3-4 (Cap 70)"
+    ,ceilingToken1: "Token debt 1-2 (Cap 80)"
     ,ceilingTimeHeavy: "Heavy overtime (Cap 68)"
     ,ceilingTimeModerate: "Moderate overtime (Cap 76)"
     ,ceilingTimeLight: "Light overtime (Cap 84)"
@@ -331,6 +340,15 @@ export const i18n = {
     pressure: "แรงกดดัน",
     danger: "อันตราย",
     select: "เลือก",
+    rateLimited: "จำกัด (ต้องมี >= 3 Token)",
+    insufficientTokensTitle: "Token ไม่เพียงพอ!",
+    insufficientTokensMessage: "ตัวเลือกนี้ต้องการขั้นต่ำ 3 Token แต่ปัจจุบันคุณมีเพียง {token} Token\n\nต้องการเล่นมินิเกมปรับจูน Prompt เพื่อฟื้นฟู Token หรือไม่? (ใช้เวลา +3)",
+    refactorButton: "รีแฟกเตอร์ / ปรับจูน Prompt (มินิเกม)",
+    refactorTimeCost: "ใช้เวลา +3",
+    minigameTitle: "มินิเกมปรับจูน Prompt",
+    minigameInstructions: "จับคู่สกิลที่เหมือนกันก่อนหมดเวลา! แต่ละคู่ได้รับ +3 Token",
+    minigameTimeRemaining: "เวลาที่เหลือ: {time} วินาที",
+    minigameSuccess: "รีแฟกเตอร์สำเร็จ! ได้รับ +{tokens} Token",
     solves: "แก้ปัญหา",
     tradeoff: "ข้อแลกเปลี่ยน",
     choiceMeaning: "ความหมายของตัวเลือก",
@@ -471,9 +489,9 @@ export const i18n = {
     ,ceilingBudgetAndTime: "เกินทั้งงบ AI และเวลา"
     ,ceilingBudget: "หนี้ Token (คะแนนสูงสุด 84)"
     ,ceilingTime: "เกินเวลา (คะแนนสูงสุด 84)"
-    ,ceilingToken10: "หนี้ Token 10+ (คะแนนสูงสุด 68)"
-    ,ceilingToken5: "หนี้ Token 5-9 (คะแนนสูงสุด 76)"
-    ,ceilingToken1: "หนี้ Token 1-4 (คะแนนสูงสุด 84)"
+    ,ceilingToken10: "หนี้ Token 5+ (คะแนนสูงสุด 60)"
+    ,ceilingToken5: "หนี้ Token 3-4 (คะแนนสูงสุด 70)"
+    ,ceilingToken1: "หนี้ Token 1-2 (คะแนนสูงสุด 80)"
     ,ceilingTimeHeavy: "ล่วงเวลาหนัก (คะแนนสูงสุด 68)"
     ,ceilingTimeModerate: "ล่วงเวลาปานกลาง (คะแนนสูงสุด 76)"
     ,ceilingTimeLight: "ล่วงเวลาเล็กน้อย (คะแนนสูงสุด 84)"
