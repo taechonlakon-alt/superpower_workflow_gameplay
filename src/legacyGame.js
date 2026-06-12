@@ -859,7 +859,6 @@ function chooseOption(optionId) {
   state.resolution = resolution;
   state.history.push(resolution);
   state.screen = isEmergency ? "emergency_resolution" : "resolution";
-  stopPhaseTimer();
   render();
 }
 
@@ -928,7 +927,6 @@ function advanceAfterNormalDecision({ allowRandomModifier = true, allowMicroEven
     state.activeChaos = step.chaosEvents[0];
     state.triggeredChaosByPhase[step.id] = state.activeChaos.id;
     state.screen = "step";
-    resumePhaseTimer();
     state.lastSignalTone = getProjectSignalTone();
     render();
     return;
@@ -939,7 +937,6 @@ function advanceAfterNormalDecision({ allowRandomModifier = true, allowMicroEven
     state.resolution = microEvent;
     state.history.push(microEvent);
     state.screen = "resolution";
-    stopPhaseTimer();
     render();
     return;
   }
@@ -950,14 +947,12 @@ function advanceAfterNormalDecision({ allowRandomModifier = true, allowMicroEven
       state.resolution = randomModifier;
       state.history.push(randomModifier);
       state.screen = "resolution";
-      stopPhaseTimer();
       render();
       return;
     }
   }
 
   state.screen = "step";
-  resumePhaseTimer();
 
   state.lastSignalTone = getProjectSignalTone();
   render();
@@ -1026,7 +1021,6 @@ function continueAfterResolution() {
 
     // Go back to step, not next step
     state.screen = "step";
-    resumePhaseTimer();
     state.lastSignalTone = getProjectSignalTone();
     render();
     return;
@@ -3270,27 +3264,53 @@ function renderEvolution() {
   });
 }
 
+function getGlobalTimerEl() {
+  return document.getElementById('global-phase-timer');
+}
+
+function updateGlobalTimerDisplay() {
+  const el = getGlobalTimerEl();
+  if (!el) return;
+  const minutes = Math.floor(state.phaseTimerValue / 60).toString().padStart(2, '0');
+  const seconds = (state.phaseTimerValue % 60).toString().padStart(2, '0');
+  el.textContent = `${minutes}:${seconds}`;
+  if (state.phaseTimerValue <= 10) {
+    el.style.color = '#ff4444';
+    el.style.animation = 'timer-pulse 0.5s ease-in-out infinite alternate';
+  } else {
+    el.style.color = '#ffeb3b';
+    el.style.animation = 'none';
+  }
+}
+
+function showGlobalTimer() {
+  const el = getGlobalTimerEl();
+  if (el) el.style.display = 'block';
+}
+
+function hideGlobalTimer() {
+  const el = getGlobalTimerEl();
+  if (el) el.style.display = 'none';
+}
+
 function triggerTimeOut() {
   stopPhaseTimer();
+  hideGlobalTimer();
   state.timeoutFailed = true;
   state.screen = "result";
   render();
 }
 
-function startPhaseTimer(reset = true) {
+function startPhaseTimer() {
   stopPhaseTimer();
-  if (reset) {
-    state.phaseTimerValue = 60;
-  }
-  updatePhaseTimerUI();
-  
-  const display = document.getElementById('global-phase-timer');
-  if (display) display.style.display = 'block';
+  state.phaseTimerValue = 60;
+  showGlobalTimer();
+  updateGlobalTimerDisplay();
 
   state.phaseTimerIntervalId = setInterval(() => {
     if (state.phaseTimerValue > 0) {
       state.phaseTimerValue -= 1;
-      updatePhaseTimerUI();
+      updateGlobalTimerDisplay();
       if (state.phaseTimerValue <= 0) {
         triggerTimeOut();
       }
@@ -3299,7 +3319,20 @@ function startPhaseTimer(reset = true) {
 }
 
 function resumePhaseTimer() {
-  startPhaseTimer(false);
+  // Don't reset value, just restart interval
+  stopPhaseTimer();
+  showGlobalTimer();
+  updateGlobalTimerDisplay();
+
+  state.phaseTimerIntervalId = setInterval(() => {
+    if (state.phaseTimerValue > 0) {
+      state.phaseTimerValue -= 1;
+      updateGlobalTimerDisplay();
+      if (state.phaseTimerValue <= 0) {
+        triggerTimeOut();
+      }
+    }
+  }, 1000);
 }
 
 function stopPhaseTimer() {
@@ -3307,24 +3340,7 @@ function stopPhaseTimer() {
     clearInterval(state.phaseTimerIntervalId);
     state.phaseTimerIntervalId = null;
   }
-  const display = document.getElementById('global-phase-timer');
-  if (display) display.style.display = 'none';
-}
-
-function updatePhaseTimerUI() {
-  const display = document.getElementById('global-phase-timer');
-  if (display) {
-    const minutes = Math.floor(state.phaseTimerValue / 60).toString().padStart(2, '0');
-    const seconds = (state.phaseTimerValue % 60).toString().padStart(2, '0');
-    display.textContent = `${minutes}:${seconds}`;
-    if (state.phaseTimerValue <= 10) {
-      display.style.color = '#ff907f';
-      display.classList.add('phase-timer--critical');
-    } else {
-      display.style.color = '#fff';
-      display.classList.remove('phase-timer--critical');
-    }
-  }
+  hideGlobalTimer();
 }
 
 function render() {
@@ -3393,23 +3409,40 @@ export function mountLegacyGame(container) {
     renderResult
   };
 
-  // --- PHASE TIMER LAYER ---
-  let timerLayer = document.getElementById("global-phase-timer");
-  if (!timerLayer) {
-    timerLayer = document.createElement("div");
-    timerLayer.id = "global-phase-timer";
-    timerLayer.style.position = "fixed";
-    timerLayer.style.top = "10px";
-    timerLayer.style.left = "50%";
-    timerLayer.style.transform = "translateX(-50%)";
-    timerLayer.style.zIndex = "10000";
-    timerLayer.style.fontFamily = "var(--font-pixel)";
-    timerLayer.style.fontSize = "2rem";
-    timerLayer.style.color = "#fff";
-    timerLayer.style.textShadow = "2px 2px 0 #000";
-    timerLayer.style.pointerEvents = "none";
-    timerLayer.style.display = "none";
-    document.body.appendChild(timerLayer);
+  // --- GLOBAL PHASE TIMER (outside render cycle) ---
+  let timerEl = document.getElementById('global-phase-timer');
+  if (!timerEl) {
+    timerEl = document.createElement('div');
+    timerEl.id = 'global-phase-timer';
+    timerEl.style.cssText = `
+      position: fixed;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10000;
+      font-family: var(--font-pixel);
+      font-size: 2rem;
+      font-weight: bold;
+      color: #ffeb3b;
+      text-shadow: 2px 2px 0 #000, -1px -1px 0 #000;
+      pointer-events: none;
+      display: none;
+      letter-spacing: 2px;
+    `;
+    document.body.appendChild(timerEl);
+  }
+
+  // Add pulse animation if not exists
+  if (!document.getElementById('timer-pulse-style')) {
+    const style = document.createElement('style');
+    style.id = 'timer-pulse-style';
+    style.textContent = `
+      @keyframes timer-pulse {
+        from { opacity: 1; transform: translateX(-50%) scale(1); }
+        to { opacity: 0.4; transform: translateX(-50%) scale(1.15); }
+      }
+    `;
+    document.head.appendChild(style);
   }
 
   // --- TOYS PHYSICS ENGINE ---
