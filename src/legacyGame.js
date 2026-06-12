@@ -16,7 +16,7 @@ function getCharacterInlineStyle() {
   return `position: fixed; left: ${state.characterPos.x}px; top: ${state.characterPos.y}px; z-index: 9999; margin: 0; transition: none; cursor: var(--cursor-grab); touch-action: none; pointer-events: none; transform: none;`;
 }
 
-function getCharacterHitboxStyle(lv) {
+function getCharacterHitboxStyle(lv, isFailed = false) {
   const spriteMetrics = {
     1: { width: 1774, height: 887, bbox: [350, 300, 689, 681] },
     2: { width: 1774, height: 887, bbox: [587, 289, 1038, 694] },
@@ -24,7 +24,16 @@ function getCharacterHitboxStyle(lv) {
     4: { width: 1774, height: 887, bbox: [410, 135, 1009, 819] },
     5: { width: 1419, height: 709, bbox: [512, 148, 906, 615] },
   };
-  const metrics = spriteMetrics[lv] || spriteMetrics[1];
+
+  const failMetrics = {
+    1: { width: 1064, height: 532, bbox: [380, 128, 673, 453] },
+    2: { width: 1064, height: 532, bbox: [272, 86, 779, 484] },
+    3: { width: 1064, height: 532, bbox: [340, 78, 718, 483] },
+    4: { width: 1419, height: 709, bbox: [530, 100, 956, 652] },
+    5: { width: 1419, height: 709, bbox: [473, 94, 978, 677] },
+  };
+
+  const metrics = isFailed && failMetrics[lv] ? failMetrics[lv] : (spriteMetrics[lv] || spriteMetrics[1]);
   const [left, top, right, bottom] = metrics.bbox;
   const leftPct = (left / metrics.width) * 100;
   const topPct = (top / metrics.height) * 100;
@@ -1958,7 +1967,7 @@ function renderStep(step, isEmergency = false) {
     <main class="app phase-enter">
       <div class="phase-character" aria-hidden="true" style="${getCharacterInlineStyle()}">
         <img src="${characterSrc}" alt="Hero Lv${characterLevel}" class="phase-character-img" draggable="false" onerror="this.onerror=null; this.src='${characterFallback}';" />
-        <div class="character-hitbox" style="${getCharacterHitboxStyle(characterLevel)}"></div>
+        <div class="character-hitbox" style="${getCharacterHitboxStyle(characterLevel, isEmergency && state.emergencyCharacterFailed)}"></div>
       </div>
       <section class="${shellClass()}">
         <section class="phasebar" style="display: flex; align-items: center; justify-content: space-between;">
@@ -2054,7 +2063,7 @@ function renderResolution() {
     <main class="app">
       <div class="phase-character" aria-hidden="true" style="${getCharacterInlineStyle()}">
         <img src="${characterSrc}" alt="Hero Lv${characterLevel}" class="phase-character-img" draggable="false" onerror="this.onerror=null; this.src='${characterFallback}';" />
-        <div class="character-hitbox" style="${getCharacterHitboxStyle(characterLevel)}"></div>
+        <div class="character-hitbox" style="${getCharacterHitboxStyle(characterLevel, isEmergency)}"></div>
       </div>
       <section class="${shellClass()}">
         <section class="phasebar" style="display: flex; align-items: center; justify-content: space-between;">
@@ -2673,7 +2682,7 @@ function renderResult() {
     <main class="app phase-enter ${bgClass}">
       <div class="phase-character" aria-hidden="true" style="${getCharacterInlineStyle()}">
         <img src="${characterSrc}" alt="Hero Lv${characterLevel}" class="phase-character-img ${auraClass}" draggable="false" onerror="this.onerror=null; this.src='${characterFallback}';" />
-        <div class="character-hitbox" style="${getCharacterHitboxStyle(characterLevel)}"></div>
+        <div class="character-hitbox" style="${getCharacterHitboxStyle(characterLevel, result.failed)}"></div>
       </div>
       <section class="${shellClass()}">
         <section class="phasebar" style="display: flex; align-items: center; justify-content: space-between;">
