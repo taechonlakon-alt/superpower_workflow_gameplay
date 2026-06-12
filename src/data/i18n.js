@@ -4,9 +4,9 @@ export const i18n = {
     projectSurvivalGame: "Project Survival Game",
     chooseStage: "Choose Your Stage",
     missionSelect: "Mission Select",
-    selectStageToDraft: "Select a stage to draft your Superpowers and begin the mission.",
-    superpowerDraft: "Superpower Draft",
-    selectSuperpowers: "Select {max} Superpowers",
+    selectStageToDraft: "Select a stage to draft your skills and begin the mission.",
+    superpowerDraft: "Skill Draft",
+    selectSuperpowers: "{max} skills",
     clickCardForDetails: "Click a card for details, and select {max} tools before starting Brainstorm.",
     selected: "Selected",
     available: "Available",
@@ -57,14 +57,14 @@ export const i18n = {
     guardrails: "Guardrails",
     riskyCalls: "Risky Calls",
     toolUses: "Tool Uses",
-    draftedSuperpowers: "Drafted Superpowers",
-    superpowersUsed: "Superpowers Used",
+    draftedSuperpowers: "Drafted Skills",
+    superpowersUsed: "Skills Used",
     problemsTriggered: "Problems Triggered",
     scoreLimits: "Score Limits",
     randomModifiers: "Random Modifiers",
     phaseLearnings: "Phase Learnings",
-    noDraftedSuperpowers: "No superpowers drafted",
-    noSuperpowersUsed: "Superpowers selected but not used",
+    noDraftedSuperpowers: "No skills drafted",
+    noSuperpowersUsed: "Skills selected but not used",
     noProblemsTriggered: "No major problems triggered",
     noScoreLimits: "No additional score ceiling reasons",
     noRandomModifiers: "No external signals encountered this run.",
@@ -96,8 +96,8 @@ export const i18n = {
     increasedEvidenceAndQuality: "Increased evidence and work quality",
     madeWorkMoreVerifiable: "Made work more verifiable",
     counteredIssueInPhase: "Countered issue occurring in this phase",
-    combinedSuperpowersToCloseGaps: "Combined superpowers to close multiple gaps simultaneously",
-    usedSpecificSuperpowerToResolvePressure: "Used specific superpower to resolve current pressure",
+    combinedSuperpowersToCloseGaps: "Combined skills to close multiple gaps simultaneously",
+    usedSpecificSuperpowerToResolvePressure: "Used specific skill to resolve current pressure",
     boughtSpeedAcceptedRisk: "Bought speed or momentum, but accepted increased risk",
     providedTacticalOption: "Provided tactical option for this situation",
     highlyIncreasedRisk: "Highly increased risk, might open phase issue immediately",
@@ -228,7 +228,7 @@ export const i18n = {
     ,randomModifierBadgeHelper: "External signals triggered {count} time(s)"
     ,evidenceGuardrailsHelper: "Number of events prevented by workflow"
     ,evidenceRiskyCallsHelper: "Number of shortcuts that increased risk"
-    ,evidenceToolUsesHelper: "Number of times a superpower was used to make decisions"
+    ,evidenceToolUsesHelper: "Number of times a skill was used to make decisions"
     ,playLogTitle: "Play Log / Decision History"
     ,carryRhythm: "Carry this rhythm into the next phase."
     ,emergencyBrief: "Emergency Brief"
@@ -241,23 +241,36 @@ export const i18n = {
     ,modifierWorkflowResilient: "WORKFLOW RESILIENT"
     ,modifierExternalPressure: "EXTERNAL PRESSURE BUILDING"
     ,modifierReactionCopy: "The game throws an external signal to test your adaptability without changing the phase goal."
+    ,qualityLabel: "Quality"
+    ,tokenLabel: "Token"
+    ,reportTab: "Report"
+    ,chaosAverted: "Chaos Averted: {event} was mitigated in time."
+    ,damageBlocked: "Damage was successfully blocked."
+    ,chaosImpact: "Chaos Impact: {event}"
+    ,lostProgress: "Lost Progress {amount}%"
+    ,emergencyLabel: "Emergency: {event}"
+    ,actionCompleted: "Action Completed"
+    ,progressGain: "Progress +{amount}%"
+    ,systemSignalLine: "This signal stems from cumulative resources, not a random event."
+    ,currentPhase: "current"
+    ,noResourceChange: "No resource change"
   },
   th: {
     startMission: "เริ่มภารกิจ",
     projectSurvivalGame: "เกมเอาชีวิตรอดในโปรเจกต์",
     chooseStage: "เลือกด่านของคุณ",
     missionSelect: "เลือกภารกิจ",
-    selectStageToDraft: "เลือกด่านเพื่อเลือก Superpower และเริ่มภารกิจ",
-    superpowerDraft: "เลือก Superpower",
-    selectSuperpowers: "เลือก {max} Superpower",
+    selectStageToDraft: "เลือกด่านเพื่อเลือก skill และเริ่มภารกิจ",
+    superpowerDraft: "เลือก skill",
+    selectSuperpowers: "{max} skills",
     clickCardForDetails: "คลิกการ์ดเพื่อดูรายละเอียด และเลือก {max} เครื่องมือด่านก่อนเริ่ม Brainstorm",
     selected: "เลือกแล้ว",
     available: "พร้อมเล่น",
     comingSoon: "เร็วๆ นี้",
     details: "รายละเอียด",
-    selectSkill: "เลือกทักษะ",
-    removeSkill: "นำทักษะออก",
-    maxSkillsSelected: "เลือกทักษะครบ {max} อย่างแล้ว",
+    selectSkill: "เลือก Skill",
+    removeSkill: "นำ Skill ออก",
+    maxSkillsSelected: "เลือก Skill ครบ {max} อย่างแล้ว",
     close: "ปิด",
     description: "คำอธิบาย",
     teaches: "สิ่งที่สอน",
@@ -300,14 +313,14 @@ export const i18n = {
     guardrails: "การป้องกัน",
     riskyCalls: "การตัดสินใจเสี่ยง",
     toolUses: "การใช้เครื่องมือ",
-    draftedSuperpowers: "Superpower ที่เลือกมา",
-    superpowersUsed: "Superpower ที่ได้ใช้",
+    draftedSuperpowers: "skill ที่เลือกมา",
+    superpowersUsed: "skill ที่ได้ใช้",
     problemsTriggered: "ปัญหาที่ถูกเรียกออกมา",
     scoreLimits: "ข้อจำกัดคะแนน",
     randomModifiers: "สัญญาณภายนอก",
     phaseLearnings: "บทเรียนรายเฟส",
-    noDraftedSuperpowers: "ยังไม่ได้เลือก Superpower",
-    noSuperpowersUsed: "เลือก Superpower มาแต่ยังไม่ได้ใช้",
+    noDraftedSuperpowers: "ยังไม่ได้เลือก skill",
+    noSuperpowersUsed: "เลือก skill มาแต่ยังไม่ได้ใช้",
     noProblemsTriggered: "ไม่มีปัญหาใหญ่ถูกกระตุ้น",
     noScoreLimits: "ไม่มีเพดานคะแนนเพิ่มเติม",
     noRandomModifiers: "รอบนี้ไม่เจอสัญญาณภายนอก",
@@ -328,9 +341,9 @@ export const i18n = {
     tutorial: "วิธีเล่น",
     back: "ย้อนกลับ",
     next: "ถัดไป",
-    startDraft: "เริ่มเลือก Superpower",
+    startDraft: "เริ่มเลือก skill",
     workflowTool: "เครื่องมือ:",
-    comboTool: "ทักษะคอมโบ:",
+    comboTool: "คอมโบ Skill:",
     closedPhaseInOneMove: "ผ่านเฟสนี้ได้ในเทิร์นเดียว",
     acceleratedPhaseProgress: "เร่งความคืบหน้าของเฟสอย่างชัดเจน",
     advancedWorkRoomForAdjustments: "ดันงานคืบหน้าโดยยังเผื่อพื้นที่ไว้ปรับแก้",
@@ -340,7 +353,7 @@ export const i18n = {
     madeWorkMoreVerifiable: "ทำให้งานสามารถตรวจสอบได้ง่ายขึ้น",
     counteredIssueInPhase: "รับมือกับปัญหาที่เกิดขึ้นในเฟสนี้ได้พอดี",
     combinedSuperpowersToCloseGaps: "รวมพลังเพื่อปิดช่องโหว่หลายจุดพร้อมกัน",
-    usedSpecificSuperpowerToResolvePressure: "ใช้ทักษะเฉพาะทางเพื่อรับมือแรงกดดัน",
+    usedSpecificSuperpowerToResolvePressure: "ใช้ Skill เฉพาะทางเพื่อรับมือแรงกดดัน",
     boughtSpeedAcceptedRisk: "แลกความเร็วมาด้วยความเสี่ยงที่เพิ่มขึ้น",
     providedTacticalOption: "เป็นทางเลือกตามสถานการณ์เฉพาะหน้า",
     highlyIncreasedRisk: "ความเสี่ยงเพิ่มขึ้นสูงมาก อาจเกิดปัญหาแทรกซ้อนทันที",
@@ -466,12 +479,12 @@ export const i18n = {
     ,ceilingTimeLight: "ล่วงเวลาเล็กน้อย (คะแนนสูงสุด 84)"
     ,ceilingQuality: "คุณภาพ < 6 (คะแนนสูงสุด 80)"
     ,ceilingRiskyChoices: "เสี่ยง 3+ ครั้ง (คะแนนสูงสุด 75)"
-    ,ceilingMasterReady: "Workflow Master ต้องมีความเสี่ยง <= 3, คุณภาพ >= 12, ไม่เป็นหนี้ Token, ตัดสินใจเสี่ยง <= 1 ครั้ง และใช้ทักษะ 3+ ครั้ง"
+    ,ceilingMasterReady: "Workflow Master ต้องมีความเสี่ยง <= 3, คุณภาพ >= 12, ไม่เป็นหนี้ Token, ตัดสินใจเสี่ยง <= 1 ครั้ง และใช้ Skill 3+ ครั้ง"
     ,randomModifierBadgeLabel: "เจอสัญญาณรบกวน"
     ,randomModifierBadgeHelper: "มีสัญญาณภายนอกแทรกเข้ามา {count} ครั้ง"
     ,evidenceGuardrailsHelper: "จำนวนเหตุการณ์ที่ถูกป้องกันไว้ได้โดย Workflow"
     ,evidenceRiskyCallsHelper: "จำนวนครั้งของการใช้ทางลัดที่เพิ่มความเสี่ยง"
-    ,evidenceToolUsesHelper: "จำนวนครั้งที่ใช้ Superpower ช่วยตัดสินใจ"
+    ,evidenceToolUsesHelper: "จำนวนครั้งที่ใช้ Skill ช่วยตัดสินใจ"
     ,playLogTitle: "ประวัติการตัดสินใจ (Play Log)"
     ,carryRhythm: "รักษารูปแบบที่ดีนี้ไว้ในเฟสถัดไป"
     ,emergencyBrief: "สถานการณ์ฉุกเฉิน"
@@ -481,8 +494,21 @@ export const i18n = {
     ,modifierLesson: "นี่คือสัญญาณรบกวนจากภายนอก ไม่ใช่ปัญหาที่เกิดจากการตัดสินใจของคุณโดยตรง แต่ทรัพยากรที่เสียไปสะท้อนให้เห็นถึงแรงกดดันในรอบนี้"
     ,modifierHint: "คำใบ้: หากสัญญาณนี้ผลาญทรัพยากร ให้ใช้การตัดสินใจครั้งถัดไปเพื่อลดแรงกดดันด้วยหลักฐานอ้างอิง แทนที่จะเร่งงาน"
     ,modifierExternalSignal: "สัญญาณรบกวนภายนอกหลังจบเฟส"
-    ,modifierWorkflowResilient: "WORKFLOW RESILIENT"
-    ,modifierExternalPressure: "EXTERNAL PRESSURE BUILDING"
+    ,modifierWorkflowResilient: "Workflow คุมเกมอยู่ (WORKFLOW RESILIENT)"
+    ,modifierExternalPressure: "แรงกดดันภายนอกเพิ่มขึ้น (EXTERNAL PRESSURE BUILDING)"
     ,modifierReactionCopy: "เกมสุ่มส่งสัญญาณรบกวนมาเพื่อทดสอบการปรับตัวของคุณ โดยเป้าหมายของเฟสยังคงเดิม"
+    ,qualityLabel: "คุณภาพ"
+    ,tokenLabel: "Token"
+    ,reportTab: "รายงาน"
+    ,chaosAverted: "หลบเลี่ยงความโกลาหล: บรรเทาผลกระทบจาก {event} ได้ทันเวลา"
+    ,damageBlocked: "บล็อกความเสียหายได้สำเร็จ"
+    ,chaosImpact: "ผลกระทบความโกลาหล: {event}"
+    ,lostProgress: "สูญเสียความคืบหน้า {amount}%"
+    ,emergencyLabel: "เหตุฉุกเฉิน: {event}"
+    ,actionCompleted: "ดำเนินการเสร็จสิ้น"
+    ,progressGain: "ความคืบหน้า +{amount}%"
+    ,systemSignalLine: "สัญญาณนี้เกิดขึ้นจากทรัพยากรสะสม ไม่ใช่เหตุการณ์สุ่ม"
+    ,currentPhase: "เฟสปัจจุบัน"
+    ,noResourceChange: "ไม่มีการเปลี่ยนแปลงทรัพยากร"
   }
 };

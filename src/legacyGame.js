@@ -313,8 +313,9 @@ function getInPlayHint(step, option, countered) {
 }
 
 function buildMicroEvent({ id, title, icon, tags, tradeoff, outcome, lesson, effects, reaction }) {
+  const lang = i18n[currentLang];
   return {
-    phase: "System Signal",
+    phase: lang.systemSignal,
     eventId: id,
     eventTitle: title,
     optionId: id,
@@ -328,7 +329,7 @@ function buildMicroEvent({ id, title, icon, tags, tradeoff, outcome, lesson, eff
     lesson,
     countered: false,
     effects,
-    lines: ["This signal stems from cumulative resources, not a random event."],
+    lines: [lang.systemSignalLine],
     reaction,
     isMicroEvent: true,
   };
@@ -337,24 +338,30 @@ function buildMicroEvent({ id, title, icon, tags, tradeoff, outcome, lesson, eff
 function formatRandomEffectDelta(effects) {
   const safeEffects = normalizeEffects(effects);
   const deltas = [];
+  const lang = i18n[currentLang];
+
+  const timeLabel = lang.time || "Time";
+  const tokenLabel = lang.tokenLabel || "Token";
+  const riskLabel = lang.risk || "Risk";
+  const qualityLabel = lang.qualityLabel || "Quality";
 
   if (safeEffects.time !== 0) {
-    deltas.push(`Time ${safeEffects.time > 0 ? "+" : ""}${safeEffects.time}`);
+    deltas.push(`${timeLabel} ${safeEffects.time > 0 ? "+" : ""}${safeEffects.time}`);
   }
 
   if (safeEffects.token !== 0) {
-    deltas.push(`Token ${safeEffects.token > 0 ? "-" : "+"}${Math.abs(safeEffects.token)}`);
+    deltas.push(`${tokenLabel} ${safeEffects.token > 0 ? "-" : "+"}${Math.abs(safeEffects.token)}`);
   }
 
   if (safeEffects.risk !== 0) {
-    deltas.push(`Risk ${safeEffects.risk > 0 ? "+" : ""}${safeEffects.risk}`);
+    deltas.push(`${riskLabel} ${safeEffects.risk > 0 ? "+" : ""}${safeEffects.risk}`);
   }
 
   if (safeEffects.quality !== 0) {
-    deltas.push(`Quality ${safeEffects.quality > 0 ? "+" : ""}${safeEffects.quality}`);
+    deltas.push(`${qualityLabel} ${safeEffects.quality > 0 ? "+" : ""}${safeEffects.quality}`);
   }
 
-  return deltas.length ? deltas.join(" / ") : "No resource change";
+  return deltas.length ? deltas.join(" / ") : lang.noResourceChange || "No resource change";
 }
 
 function buildRandomModifierEvent(modifier, step) {
@@ -363,7 +370,7 @@ function buildRandomModifierEvent(modifier, step) {
   const tone = modifier.tone || (effects.risk > 0 || effects.token > 0 || effects.time > 0 ? "warn" : "safe");
 
   return {
-    phase: "External Signal",
+    phase: lang.externalSignal,
     eventId: modifier.id,
     eventTitle: modifier.title,
     optionId: modifier.id,
@@ -380,7 +387,7 @@ function buildRandomModifierEvent(modifier, step) {
     effects,
     progress: 0,
     lines: [
-      `${lang.modifierExternalSignal} ${step?.title || "current"}`,
+      `${lang.modifierExternalSignal} ${step?.title || lang.currentPhase}`,
       modifier.copy,
       formatRandomEffectDelta(effects),
     ],
@@ -580,24 +587,25 @@ function buildResolution(step, option) {
   let eventLine = "";
   let projectMood = "";
   let countered = false;
+  const lang = i18n[currentLang];
 
   if (state.activeChaos) {
     eventTitle = state.activeChaos.title;
     if (option.preventPenalty) {
       countered = true;
-      eventLine = `Chaos Averted: ${state.activeChaos.title} was mitigated in time.`;
-      projectMood = "Damage was successfully blocked.";
+      eventLine = lang.chaosAverted.replace("{event}", state.activeChaos.title);
+      projectMood = lang.damageBlocked;
     } else {
-      eventLine = `Chaos Impact: ${state.activeChaos.title}`;
-      projectMood = `Lost Progress ${state.activeChaos.progressPenalty}%`;
+      eventLine = lang.chaosImpact.replace("{event}", state.activeChaos.title);
+      projectMood = lang.lostProgress.replace("{amount}", state.activeChaos.progressPenalty);
     }
   } else if (step.event) {
     eventTitle = step.event.title;
-    eventLine = `Emergency: ${step.event.title}`;
+    eventLine = lang.emergencyLabel.replace("{event}", step.event.title);
     projectMood = step.event.copy || option.outcome || "";
   } else {
-    eventTitle = "Action Completed";
-    eventLine = `Progress +${option.progress || 0}%`;
+    eventTitle = lang.actionCompleted;
+    eventLine = lang.progressGain.replace("{amount}", option.progress || 0);
     projectMood = option.outcome || "";
   }
 
@@ -670,8 +678,8 @@ function getPhaseFocus({ riskDelta, tokenDelta, timeDelta, qualityDelta, riskyCh
 
   if (problems.length && counteredEvents === 0) {
     return currentLang === "th"
-      ? "โฟกัสที่การเลือก Superpower ให้ตรงกับ edge case ของเฟสนี้ในจังหวะที่ใช่"
-      : "Focus on selecting the right Superpower to counter the edge cases of this phase at the right moment.";
+      ? "โฟกัสที่การเลือก skill ให้ตรงกับ edge case ของเฟสนี้ในจังหวะที่ใช่"
+      : "Focus on selecting the right skill to counter the edge cases of this phase at the right moment.";
   }
 
   return currentLang === "th"
@@ -1574,7 +1582,8 @@ function getTotalPhaseCount() {
 }
 
 function phaseMarkup(currentIndex) {
-  const labels = [...game.steps.map((step) => step.title), "Report"];
+  const lang = i18n[currentLang];
+  const labels = [...game.steps.map((step) => step.title), lang.reportTab || "Report"];
   return labels
     .map((label, index) => {
       const isReport = index === labels.length - 1;
@@ -2855,11 +2864,11 @@ function tutorialMarkup() {
   const pages = currentLang === 'th' ? [
     { title: "ยินดีต้อนรับสู่ Project Survival", content: "คุณคือผู้พัฒนาที่ต้องรับผิดชอบโปรเจกต์สำคัญ การตัดสินใจของคุณจะชี้ชะตาว่าโปรเจกต์นี้จะรอดหรือจะร่วง" },
     { title: "บริหารจัดการทรัพยากร", content: "สังเกตแถบสถานะของคุณให้ดี:<br><br><b>เวลา (Time):</b> จะลดลงเมื่อคุณทำงาน หากใช้เวลาเกินกำหนด ความเสี่ยงจะเพิ่มขึ้น<br><b>Token:</b> งบประมาณ AI ของคุณ หากใช้มากเกินไป คุณภาพโค้ดจะแย่ลง<br><b>ความเสี่ยง (Risk):</b> หากความเสี่ยงถึง 100% โปรเจกต์จะล่มทันที" },
-    { title: "ตัดสินใจให้ถูกต้อง", content: "แต่ละเฟสจะมีความท้าทายที่แตกต่างกัน คุณจะต้องเลือก 3 Workflow Superpowers ก่อนเริ่มงาน จงใช้มันอย่างฉลาดเพื่อบริหารทรัพยากรและปกป้องโปรเจกต์ของคุณ" }
+    { title: "ตัดสินใจให้ถูกต้อง", content: "แต่ละเฟสจะมีความท้าทายที่แตกต่างกัน คุณจะต้องเลือก 3 skills ก่อนเริ่มงาน จงใช้มันอย่างฉลาดเพื่อบริหารทรัพยากรและปกป้องโปรเจกต์ของคุณ" }
   ] : [
     { title: "Welcome to Project Survival", content: "You are a developer handling a critical project. Your choices will determine whether the project ships successfully or crashes and burns." },
     { title: "Managing Resources", content: "Pay attention to your Resource Bar:<br><br><b>Time:</b> Runs out as you work. Overtime increases Risk.<br><b>Token:</b> Your AI Budget. Using too much reduces code Quality.<br><b>Risk:</b> If Risk reaches 100%, the project fails." },
-    { title: "Make the Right Decisions", content: "Each phase presents different challenges. You will select 3 Workflow Superpowers before starting. Use them wisely to manage your resources and protect the project." }
+    { title: "Make the Right Decisions", content: "Each phase presents different challenges. You will select 3 skills before starting. Use them wisely to manage your resources and protect the project." }
   ];
   const page = pages[state.tutorialPage];
 
