@@ -1849,23 +1849,7 @@ function resourceBarMarkup() {
   if (state.resourceFlashes) {
     state.resourceFlashes = null;
   }
-  const mood = getRunMood({
-    risk: state.risk,
-    tokenDebt: getTokenDebt(),
-    time: state.time,
-    lastSignalTone: state.lastSignalTone,
-    pendingPhaseMomentTone: state.pendingPhaseMoment ? state.pendingPhaseMoment.tone : null
-  }, i18n[currentLang]);
-
   return `
-    <div class="run-mood-container" style="margin-bottom: 12px; padding: 10px; background: rgba(0,0,0,0.3); border: 2px solid #555; border-radius: 4px; font-family: var(--font-pixel);">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span class="run-mood-badge" style="padding: 2px 6px; font-size: 0.75rem; border-radius: 3px; font-weight: bold; text-transform: uppercase; background: ${
-          mood.key === 'surging' ? '#4caf50' : mood.key === 'critical' ? '#f44336' : mood.key === 'tense' ? '#ff9800' : '#2196f3'
-        }; color: #fff;">${escapeHtml(mood.label)}</span>
-        <span class="run-mood-copy" style="font-size: 0.8rem; color: #ccc;">${escapeHtml(mood.copy)}</span>
-      </div>
-    </div>
     <div class="resource-bar" aria-label="Resource Bar">
       ${resources
       .map((resource) => `
@@ -2119,16 +2103,7 @@ function briefMarkup(step, isEmergency = false, isChaos = false) {
   const lang = i18n[currentLang];
   const label = isEmergency ? lang.emergencyBrief : isChaos ? lang.issueBrief : lang.briefLabel;
 
-  let guidanceHtml = "";
-  if (!isEmergency && !isChaos) {
-    const presentation = getPhasePresentation(step.id, i18n[currentLang]);
-    guidanceHtml = `
-      <div class="phase-presentation-guidance" style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed #555; font-family: var(--font-pixel);">
-        <strong style="color: #ffd969; font-size: 0.8rem; display: block; margin-bottom: 4px;">🎯 ${escapeHtml(presentation.label)}</strong>
-        <p style="font-size: 0.78rem; color: #aaa; margin: 0; line-height: 1.3;">${escapeHtml(presentation.copy)}</p>
-      </div>
-    `;
-  }
+  const guidanceHtml = "";
 
   return `
     <div class="brief-card">
