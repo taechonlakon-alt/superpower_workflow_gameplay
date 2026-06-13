@@ -2,7 +2,7 @@
 
 import { allStagesEN, allStagesTH } from "./data/gameData.js";
 import { i18n } from "./data/i18n.js";
-import { getPhaseMoment, getRunIdentity } from "./gameFeel.js";
+import { getPhaseMoment, getRunIdentity, getRunMood, getEvolutionPerk, getPhasePresentation } from "./gameFeel.js";
 
 let root = null;
 let currentLang = typeof window !== "undefined" ? localStorage.getItem("sp_workflow_lang") || "th" : "th";
@@ -85,6 +85,8 @@ function createInitialState() {
     phaseTimerValue: 60,
     phaseTimerIntervalId: null,
     timeoutFailed: false,
+    showTimeoutWarningModal: false,
+    hadTokenDebt: false,
   };
 }
 
@@ -495,53 +497,54 @@ function maybeTriggerMicroEvent() {
   if (state.microEventTriggered) return null;
 
   let microEvent = null;
+  const lang = i18n[currentLang];
 
   if (getTokenSpent() >= 11) {
     microEvent = buildMicroEvent({
       id: "context_drift",
-      title: "AI Context Drift",
+      title: lang.micro_context_drift_title,
       icon: "AI",
-      tags: ["AI Fatigue", "Needs Filtering", "Risk Increase"],
-      tradeoff: "Using AI heavily makes answers require closer scrutiny.",
-      outcome: "AI starts repeating the same patterns and proposing good-looking but off-brief text.",
-      lesson: "AI budget is not a score. The more you use it, the more verification systems you need.",
+      tags: [lang.micro_context_drift_tag_fatigue, lang.micro_context_drift_tag_filtering, lang.micro_context_drift_tag_risk],
+      tradeoff: lang.micro_context_drift_tradeoff,
+      outcome: lang.micro_context_drift_outcome,
+      lesson: lang.micro_context_drift_lesson,
       effects: { time: 0, token: 0, risk: 1, quality: -1 },
       reaction: {
         tone: "warn",
-        title: "AI starts drifting from the brief",
-        copy: "Answers still look reasonable, but the team needs more effort to filter them as context overflows.",
+        title: lang.micro_context_drift_reaction_title,
+        copy: lang.micro_context_drift_reaction_copy,
       },
     });
   } else if (state.risk >= 5) {
     microEvent = buildMicroEvent({
       id: "client_trust_shake",
-      title: "Client Trust Shakes",
+      title: lang.micro_client_trust_shake_title,
       icon: "!",
-      tags: ["Client Anxious", "Trust Shaken", "Needs Evidence"],
-      tradeoff: "Accumulated risk forces every answer to be backed by solid evidence.",
-      outcome: "Client starts questioning why the website copy doesn't match the agreed features.",
-      lesson: "Unmanaged risk inevitably leads to credibility questions.",
+      tags: [lang.micro_client_trust_shake_tag_anxious, lang.micro_client_trust_shake_tag_trust, lang.micro_client_trust_shake_tag_evidence],
+      tradeoff: lang.micro_client_trust_shake_tradeoff,
+      outcome: lang.micro_client_trust_shake_outcome,
+      lesson: lang.micro_client_trust_shake_lesson,
       effects: { time: 0, token: 0, risk: 1, quality: 0 },
       reaction: {
         tone: "danger",
-        title: "Trust begins to crack",
-        copy: "The team can still move forward, but the client starts looking for proof that this website is telling the truth.",
+        title: lang.micro_client_trust_shake_reaction_title,
+        copy: lang.micro_client_trust_shake_reaction_copy,
       },
     });
   } else if (state.time >= 14) {
     microEvent = buildMicroEvent({
       id: "deadline_squeeze",
-      title: "Deadline Squeeze",
+      title: lang.micro_deadline_squeeze_title,
       icon: "CLK",
-      tags: ["Time Squeeze", "Harder Decisions", "Risk Increase"],
-      tradeoff: "Time spent narrows down your late-game options.",
-      outcome: "The team starts cutting scope to meet the demo deadline, requiring sharper reviews.",
-      lesson: "Time spent on workflow should buy back confidence, not just add ritualistic steps.",
+      tags: [lang.micro_deadline_squeeze_tag_squeeze, lang.micro_deadline_squeeze_tag_decisions, lang.micro_deadline_squeeze_tag_risk],
+      tradeoff: lang.micro_deadline_squeeze_tradeoff,
+      outcome: lang.micro_deadline_squeeze_outcome,
+      lesson: lang.micro_deadline_squeeze_lesson,
       effects: { time: 0, token: 0, risk: 1, quality: 0 },
       reaction: {
         tone: "warn",
-        title: "Deadline starts squeezing decisions",
-        copy: "Late-game options are narrowing. The team must choose options that truly reduce risk.",
+        title: lang.micro_deadline_squeeze_reaction_title,
+        copy: lang.micro_deadline_squeeze_reaction_copy,
       },
     });
   }
@@ -563,16 +566,22 @@ function applyEffects(effects) {
     risk: safeEffects.risk !== 0 ? (safeEffects.risk < 0 ? 'green' : 'red') : null,
   };
 
+  const wasInDebt = state.token < 0;
+  const wasOvertime = state.time > game.caps.time;
+
   state.time = Math.max(0, state.time + safeEffects.time);
   state.token = Math.min(game.caps.token, state.token - safeEffects.token);
   state.risk = clamp(state.risk + safeEffects.risk, 0, game.caps.risk + 8);
   state.quality += safeEffects.quality;
 
   if (state.token < 0) {
-    state.risk = clamp(state.risk + 1, 0, game.caps.risk + 8);
+    state.hadTokenDebt = true;
+    if (!wasInDebt) {
+      state.risk = clamp(state.risk + 1, 0, game.caps.risk + 8);
+    }
   }
 
-  if (state.time > game.caps.time) {
+  if (state.time > game.caps.time && !wasOvertime) {
     state.risk = clamp(state.risk + 1, 0, game.caps.risk + 8);
   }
 }
@@ -838,17 +847,55 @@ function chooseOption(optionId) {
   const option = getAvailableOptions(step).find((item) => item.id === optionId);
   if (!step || !option) return;
 
-  const isSkill = Boolean(option.skill);
-  const isSynergy = Boolean(option.requires);
-  if ((isSkill || isSynergy) && state.token < 3) {
+  const optionEffects = normalizeEffects(option.effects);
+  if (state.token < optionEffects.token) {
     state.showTokenWarningModal = true;
     render();
     return;
   }
 
+  const phaseHistory = state.history.filter((item) => item.phase === step.title);
+  const usedOptionIds = phaseHistory.map((item) => item.optionId);
+  const repeatCount = usedOptionIds.filter((id) => id === optionId).length;
+
+  const isSkill = Boolean(option.skill);
+  const isSynergy = Boolean(option.requires);
+
+  if (isSkill || isSynergy) {
+    if (repeatCount > 0) {
+      return;
+    }
+  } else {
+    // Base option repeated
+    if (repeatCount > 0) {
+      const allAvailable = getAvailableOptions(step);
+      const unusedSkillOrSynergy = allAvailable.filter((opt) => {
+        const isOptSkill = Boolean(opt.skill);
+        const isOptSynergy = Boolean(opt.requires);
+        if (!isOptSkill && !isOptSynergy) return false;
+        const optRepeat = usedOptionIds.filter((id) => id === opt.id).length;
+        return optRepeat === 0;
+      });
+      if (unusedSkillOrSynergy.length > 0) {
+        return;
+      }
+    }
+  }
+
   playChoiceSound(option);
   const resolution = buildResolution(step, option);
-  applyEffects(option.effects || { time: 0, token: 0, risk: 0, quality: 0 });
+
+  // Apply diminishing returns factor for repeated base options
+  if (!isSkill && !isSynergy && repeatCount > 0) {
+    const factor = Math.max(0, 1.0 - repeatCount * 0.5);
+    resolution.progress = Math.round(resolution.progress * factor);
+    resolution.effects.quality = Math.round(resolution.effects.quality * factor);
+
+    const lang = i18n[currentLang];
+    resolution.lines[0] = lang.progressGain.replace("{amount}", resolution.progress);
+  }
+
+  applyEffects(resolution.effects);
   state.progress = clamp(state.progress + resolution.progress, 0, 100);
 
   if (state.activeChaos) {
@@ -876,7 +923,6 @@ function advanceAfterNormalDecision({ allowRandomModifier = true, allowMicroEven
     state.resolution = null;
     state.screen = "emergency_step";
     state.emergencyCharacterFailed = false;
-    stopPhaseTimer();
     render();
     return;
   }
@@ -886,7 +932,6 @@ function advanceAfterNormalDecision({ allowRandomModifier = true, allowMicroEven
   if (!step) {
     state.characterPos = null;
     state.screen = "result";
-    stopPhaseTimer();
     state.lastSignalTone = getProjectSignalTone();
     render();
     return;
@@ -906,15 +951,12 @@ function advanceAfterNormalDecision({ allowRandomModifier = true, allowMicroEven
     state.hasPlayedMinigameThisPhase = false;
 
     if (oldLevel !== newLevel) {
-      stopPhaseTimer();
       triggerEvolutionTransition(oldLevel, newLevel);
       return;
     } else {
       state.screen = state.index >= game.steps.length ? "result" : "step";
       if (state.screen === "step") {
-        startPhaseTimer();
-      } else {
-        stopPhaseTimer();
+        state.phaseTimerValue = 60;
       }
     }
 
@@ -980,24 +1022,7 @@ function triggerEvolutionTransition(oldLevel, newLevel) {
 function continueAfterResolution() {
   if (state.screen === "emergency_resolution") {
     state.resolution = null;
-    const step = getCurrentStep();
-    if (step) {
-      const phaseSummary = buildPhaseSummary(step);
-      state.phaseSummaries = [...state.phaseSummaries, phaseSummary];
-      state.pendingPhaseMoment = buildPendingPhaseMoment(phaseSummary);
-    }
-    const oldLevel = Math.min(5, state.index + 1);
-    state.index += 1;
-    const newLevel = Math.min(5, state.index + 1);
-    state.progress = 0;
-
-    if (oldLevel !== newLevel) {
-      triggerEvolutionTransition(oldLevel, newLevel);
-      return;
-    } else {
-      state.screen = state.index >= game.steps.length ? "result" : "step";
-      if (state.screen === "step") startPhaseTimer();
-    }
+    state.screen = "step";
     state.lastSignalTone = getProjectSignalTone();
     render();
     return;
@@ -1118,7 +1143,6 @@ function startMission() {
   if (state.skills.length !== game.maxSkills) return;
   state.activeSkillDetail = null;
   state.screen = "step";
-  startPhaseTimer();
   render();
 }
 
@@ -1146,6 +1170,7 @@ function restart() {
 
 function ensureAudio() {
   if (!soundEnabled) return null;
+  if (typeof window === "undefined") return null;
   if (!audioContext) {
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     if (!AudioCtx) return null;
@@ -1320,13 +1345,15 @@ function playClickSound() {
   beep({ frequency: 800, duration: 0.04, volume: 0.02, delay: 0.02, type: "square" });
 }
 
-document.addEventListener("mouseover", (event) => {
-  const target = event.target;
-  if (!(target instanceof Element)) return;
-  if (target.closest("button, .choice, .stage-card, .skill-card, .superpower-hand__card, .phase-goal-start, .lang-btn")) {
-    playHoverSound();
-  }
-});
+if (typeof document !== "undefined") {
+  document.addEventListener("mouseover", (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    if (target.closest("button, .choice, .stage-card, .skill-card, .superpower-hand__card, .phase-goal-start, .lang-btn")) {
+      playHoverSound();
+    }
+  });
+}
 
 function playMatchSound() {
   beep({ frequency: 523, duration: 0.08, volume: 0.03, type: "sine" });
@@ -1494,7 +1521,7 @@ function minigameModalMarkup() {
             <button class="minigame-card ${card.flipped ? "minigame-card--flipped" : ""} ${card.matched ? "minigame-card--matched" : ""}" data-card-idx="${idx}" type="button" aria-label="Card ${idx + 1}">
               <span class="minigame-card__inner minigame-card__back">?</span>
               <span class="minigame-card__inner minigame-card__front">
-                <span class="minigame-card__icon">${escapeHtml(card.icon || "SK")}</span>
+                <img src="/assets/minigame/${card.id}.jpg" alt="${escapeHtml(card.name)}" class="minigame-card__img" />
                 <span class="minigame-card__name">${escapeHtml(card.name)}</span>
               </span>
             </button>
@@ -1523,6 +1550,27 @@ function tokenWarningModalMarkup() {
           </button>
           <button class="restart warning-cancel-btn" type="button" style="padding: 10px 16px; background: #555; color: #fff; border: 3px solid #333;">
             ${escapeHtml(currentLang === "th" ? "ยกเลิก" : "Cancel")}
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function timeoutWarningModalMarkup() {
+  const lang = i18n[currentLang];
+  return `
+    <div class="minigame-overlay" role="dialog" aria-modal="true" aria-labelledby="timeout-warning-title">
+      <div class="minigame-content" style="max-width: 400px; padding: 24px; border: 4px solid #b44f47; background: #2a1f1f; box-shadow: 0 4px 0 rgba(0,0,0,0.5);">
+        <h2 class="minigame-title" id="timeout-warning-title" style="color: #ff907f; text-shadow: 0 2px 0 #000; font-size: 1.3rem;">
+          ${escapeHtml(lang.timeoutWarningTitle)}
+        </h2>
+        <p style="font-size: 0.88rem; color: #fff; margin: 16px 0 20px; font-family: var(--font-pixel); line-height: 1.4; text-align: center; white-space: pre-line;">
+          ${escapeHtml(lang.timeoutWarningMessage)}
+        </p>
+        <div style="display: flex; gap: 10px; justify-content: center; width: 100%;">
+          <button class="restart timeout-warning-confirm-btn" type="button" style="padding: 10px 16px; background: linear-gradient(180deg, #ffd969 0%, #c48a17 100%); color: #232019; border: 3px solid #7a4d29;">
+            ${escapeHtml(currentLang === "th" ? "รับทราบ" : "I understand")}
           </button>
         </div>
       </div>
@@ -1698,6 +1746,13 @@ function handleRootClick(event) {
     return;
   }
 
+  const timeoutWarningConfirm = target.closest(".timeout-warning-confirm-btn");
+  if (timeoutWarningConfirm) {
+    state.showTimeoutWarningModal = false;
+    render();
+    return;
+  }
+
   const choiceButton = target.closest(".choice");
   if (choiceButton) {
     chooseOption(choiceButton.dataset.option);
@@ -1794,7 +1849,23 @@ function resourceBarMarkup() {
   if (state.resourceFlashes) {
     state.resourceFlashes = null;
   }
+  const mood = getRunMood({
+    risk: state.risk,
+    tokenDebt: getTokenDebt(),
+    time: state.time,
+    lastSignalTone: state.lastSignalTone,
+    pendingPhaseMomentTone: state.pendingPhaseMoment ? state.pendingPhaseMoment.tone : null
+  }, i18n[currentLang]);
+
   return `
+    <div class="run-mood-container" style="margin-bottom: 12px; padding: 10px; background: rgba(0,0,0,0.3); border: 2px solid #555; border-radius: 4px; font-family: var(--font-pixel);">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span class="run-mood-badge" style="padding: 2px 6px; font-size: 0.75rem; border-radius: 3px; font-weight: bold; text-transform: uppercase; background: ${
+          mood.key === 'surging' ? '#4caf50' : mood.key === 'critical' ? '#f44336' : mood.key === 'tense' ? '#ff9800' : '#2196f3'
+        }; color: #fff;">${escapeHtml(mood.label)}</span>
+        <span class="run-mood-copy" style="font-size: 0.8rem; color: #ccc;">${escapeHtml(mood.copy)}</span>
+      </div>
+    </div>
     <div class="resource-bar" aria-label="Resource Bar">
       ${resources
       .map((resource) => `
@@ -2048,12 +2119,24 @@ function briefMarkup(step, isEmergency = false, isChaos = false) {
   const lang = i18n[currentLang];
   const label = isEmergency ? lang.emergencyBrief : isChaos ? lang.issueBrief : lang.briefLabel;
 
+  let guidanceHtml = "";
+  if (!isEmergency && !isChaos) {
+    const presentation = getPhasePresentation(step.id, i18n[currentLang]);
+    guidanceHtml = `
+      <div class="phase-presentation-guidance" style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed #555; font-family: var(--font-pixel);">
+        <strong style="color: #ffd969; font-size: 0.8rem; display: block; margin-bottom: 4px;">🎯 ${escapeHtml(presentation.label)}</strong>
+        <p style="font-size: 0.78rem; color: #aaa; margin: 0; line-height: 1.3;">${escapeHtml(presentation.copy)}</p>
+      </div>
+    `;
+  }
+
   return `
     <div class="brief-card">
       <p class="brief-label">${label}</p>
       <div class="brief-copy">
         ${step.briefing.map((line) => `<p>${line}</p>`).join("")}
       </div>
+      ${guidanceHtml}
     </div>
   `;
 }
@@ -2280,6 +2363,7 @@ function renderStep(step, isEmergency = false) {
       ${selectedSkillHandMarkup()}
       ${state.minigameActive ? minigameModalMarkup() : ""}
       ${state.showTokenWarningModal ? tokenWarningModalMarkup() : ""}
+      ${state.showTimeoutWarningModal ? timeoutWarningModalMarkup() : ""}
     </main>
   `;
 
@@ -3174,6 +3258,9 @@ function tutorialMarkup() {
 }
 function renderEvolution() {
   const lang = i18n[currentLang];
+  const runIdentity = getCurrentRunIdentity();
+  const perk = getEvolutionPerk(runIdentity.key, state.evolutionNewLevel, i18n[currentLang]);
+
   const getEvolutionSpriteLayout = (lv) => {
     const spriteMetrics = {
       1: { width: 1774, height: 887, bbox: [350, 300, 689, 681] },
@@ -3219,8 +3306,12 @@ function renderEvolution() {
           <img src="/assets/cathappy/lv${state.evolutionNewLevel}.gif" alt="Evolution Complete!" onerror="this.onerror=null; this.src='/assets/cathappy/lv${state.evolutionNewLevel}.png';" />
         </div>
       </div>
-      <div class="evolution-text" style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+      <div class="evolution-text" style="display: flex; flex-direction: column; align-items: center; gap: 12px; max-width: 500px; text-align: center;">
         <h2>${lang.evolving}</h2>
+        <div class="evolution-perk-container" style="display: none; padding: 12px; border: 2px dashed #ffeb3b; background: rgba(0,0,0,0.4); border-radius: 4px; font-family: var(--font-pixel); margin-bottom: 8px;">
+          <strong style="color: #ffd969; font-size: 0.9rem; display: block; margin-bottom: 4px;">🎁 ${escapeHtml(perk.label)}</strong>
+          <p style="font-size: 0.8rem; color: #ccc; margin: 0; line-height: 1.4;">${escapeHtml(perk.copy)}</p>
+        </div>
         <button class="evolution-next-btn btn primary-btn" style="display:none; z-index: 100;">${lang.continueNextWorkflow}</button>
       </div>
     </main>
@@ -3247,18 +3338,20 @@ function renderEvolution() {
         title.classList.add('glow-text');
       }
 
+      const perkContainer = root.querySelector('.evolution-perk-container');
+      if (perkContainer) perkContainer.style.display = 'block';
+
       const btn = root.querySelector('.evolution-next-btn');
       if (btn) btn.style.display = 'block';
     }, 1000); // 1s into the flash
   }, 2000); // 2s of shaking before flash
 
   root.querySelector('.evolution-next-btn')?.addEventListener('click', () => {
+    applyEffects(perk.effects);
     state.characterPos = null;
     state.screen = state.index >= game.steps.length ? "result" : "step";
     if (state.screen === "step") {
-      startPhaseTimer();
-    } else {
-      stopPhaseTimer();
+      state.phaseTimerValue = 60;
     }
     render();
   });
@@ -3295,9 +3388,10 @@ function hideGlobalTimer() {
 
 function triggerTimeOut() {
   stopPhaseTimer();
-  hideGlobalTimer();
-  state.timeoutFailed = true;
-  state.screen = "result";
+  state.time = Math.max(0, state.time + 2);
+  state.risk = clamp(state.risk + 1, 0, game.caps.risk + 8);
+  state.phaseTimerValue = 60;
+  state.showTimeoutWarningModal = true;
   render();
 }
 
@@ -3343,7 +3437,30 @@ function stopPhaseTimer() {
   hideGlobalTimer();
 }
 
+function adjustTimerState() {
+  if (!state) return;
+  const step = getCurrentStep();
+  const shouldRun = state.screen === "step" &&
+                    step &&
+                    state.seenPhaseGoals.includes(step.id) &&
+                    !state.minigameActive &&
+                    !state.showTutorial &&
+                    !state.showTimeoutWarningModal &&
+                    !state.showTokenWarningModal;
+
+  if (shouldRun) {
+    if (!state.phaseTimerIntervalId) {
+      resumePhaseTimer();
+    }
+  } else {
+    if (state.phaseTimerIntervalId) {
+      stopPhaseTimer();
+    }
+  }
+}
+
 function render() {
+  if (!root) return;
   if (state.screen === "title") {
     renderTitle();
   } else if (state.screen === "stage_select") {
@@ -3398,6 +3515,7 @@ function render() {
   }
 
   renderSkillDetailPopup();
+  adjustTimerState();
 }
 
 export function mountLegacyGame(container) {
@@ -3698,3 +3816,34 @@ if (import.meta.hot) {
     window.location.reload();
   });
 }
+
+// Test/simulation exports
+export function getGameState() {
+  return state;
+}
+export function setGameState(s) {
+  state = s;
+}
+export function getGameConfig() {
+  return game;
+}
+export function setGameConfig(g) {
+  game = g;
+}
+
+export {
+  createInitialState,
+  chooseOption,
+  getCurrentStep,
+  getCurrentRunIdentity,
+  applyEffects,
+  advanceAfterNormalDecision,
+  selectStage,
+  startMission,
+  confirmPhaseGoal,
+  continueAfterResolution,
+  startMinigame,
+  closeMinigameResult,
+  getAvailableOptions,
+  getFinalResult,
+};

@@ -9243,6 +9243,8 @@ canvas {
   position: relative;
   transition: transform 150ms ease;
   user-select: none;
+  transform-style: preserve-3d;
+  perspective: 1000px;
 }
 .minigame-card:hover {
   transform: scale(1.03);
@@ -9257,6 +9259,8 @@ canvas {
   padding: 6px;
   text-align: center;
   backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15);
 }
 .minigame-card__back {
   background: linear-gradient(135deg, #a86a32 0%, #6f3f1f 100%);
@@ -9265,25 +9269,31 @@ canvas {
   font-size: 2rem;
   font-weight: bold;
   text-shadow: 2px 2px 0 rgba(0,0,0,0.4);
+  transform: rotateY(0deg);
+  z-index: 2;
+  opacity: 1;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15), opacity 0.4s ease;
 }
 .minigame-card__front {
   background: linear-gradient(135deg, #f5f2e8 0%, #d9d3c7 100%);
   color: #232019;
+  transform: rotateY(180deg);
+  z-index: 1;
   opacity: 0;
   pointer-events: none;
-  transform: rotateY(180deg);
-  transition: opacity 150ms ease;
-}
-.minigame-card--flipped {
-  transform: rotateY(180deg);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15), opacity 0.4s ease;
 }
 .minigame-card--flipped .minigame-card__back {
+  transform: rotateY(-180deg);
   opacity: 0;
   pointer-events: none;
+  z-index: 1;
 }
 .minigame-card--flipped .minigame-card__front {
+  transform: rotateY(0deg);
   opacity: 1;
   pointer-events: auto;
+  z-index: 2;
 }
 .minigame-card--matched {
   border-color: #77c243 !important;
@@ -9295,6 +9305,18 @@ canvas {
   font-weight: bold;
   margin-bottom: 4px;
   color: #7a4d29;
+}
+.minigame-card__img {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  margin-bottom: 6px;
+  border-radius: 4px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  background: #3d342a;
+  padding: 2px;
+  border: 2px solid #a8a08f;
 }
 .minigame-card__name {
   font-size: 0.65rem;
