@@ -87,6 +87,9 @@ function createInitialState() {
     timeoutFailed: false,
     showTimeoutWarningModal: false,
     hadTokenDebt: false,
+    hasSeenSkillDiminishingHint: false,
+    showSkillDiminishingHint: false,
+    pendingSkillOptionId: null,
   };
 }
 
@@ -854,6 +857,14 @@ function chooseOption(optionId) {
     return;
   }
 
+  // Show one-time hint popup the first time a skill option is used in the run
+  if (Boolean(option.skill) && !state.hasSeenSkillDiminishingHint) {
+    state.showSkillDiminishingHint = true;
+    state.pendingSkillOptionId = optionId;
+    render();
+    return;
+  }
+
   const phaseHistory = state.history.filter((item) => item.phase === step.title);
   const usedOptionIds = phaseHistory.map((item) => item.optionId);
   const repeatCount = usedOptionIds.filter((id) => id === optionId).length;
@@ -861,35 +872,24 @@ function chooseOption(optionId) {
   const isSkill = Boolean(option.skill);
   const isSynergy = Boolean(option.requires);
 
-  if (isSkill || isSynergy) {
-    if (repeatCount > 0) {
-      return;
-    }
-  } else {
-    // Base option repeated
-    if (repeatCount > 0) {
-      const allAvailable = getAvailableOptions(step);
-      const unusedSkillOrSynergy = allAvailable.filter((opt) => {
-        const isOptSkill = Boolean(opt.skill);
-        const isOptSynergy = Boolean(opt.requires);
-        if (!isOptSkill && !isOptSynergy) return false;
-        const optRepeat = usedOptionIds.filter((id) => id === opt.id).length;
-        return optRepeat === 0;
-      });
-      if (unusedSkillOrSynergy.length > 0) {
-        return;
-      }
-    }
+  // Synergy: hard block — once per phase only
+  if (isSynergy && repeatCount > 0) {
+    return;
+  }
+
+  // Skills + base options: diminishing returns (x0.5 per repeat, x0 = blocked at 3rd play)
+  const effectiveFactor = Math.max(0, 1.0 - repeatCount * 0.5);
+  if (effectiveFactor === 0) {
+    return;
   }
 
   playChoiceSound(option);
   const resolution = buildResolution(step, option);
 
-  // Apply diminishing returns factor for repeated base options
-  if (!isSkill && !isSynergy && repeatCount > 0) {
-    const factor = Math.max(0, 1.0 - repeatCount * 0.5);
-    resolution.progress = Math.round(resolution.progress * factor);
-    resolution.effects.quality = Math.round(resolution.effects.quality * factor);
+  // Apply diminishing returns for repeats (skills and base options alike)
+  if (repeatCount > 0) {
+    resolution.progress = Math.round(resolution.progress * effectiveFactor);
+    resolution.effects.quality = Math.round(resolution.effects.quality * effectiveFactor);
 
     const lang = i18n[currentLang];
     resolution.lines[0] = lang.progressGain.replace("{amount}", resolution.progress);
@@ -1532,6 +1532,50 @@ function minigameModalMarkup() {
   `;
 }
 
+function skillDiminishingHintModalMarkup() {
+  const isTH = currentLang === "th";
+  const step = getCurrentStep();
+  const option = step ? getAvailableOptions(step).find(o => o.id === state.pendingSkillOptionId) : null;
+  const skillName = option ? (option.label || option.id) : "";
+  return `
+    <div class="minigame-overlay" role="dialog" aria-modal="true" aria-labelledby="skill-hint-title">
+      <div class="minigame-content" style="max-width: 420px; padding: 24px; border: 4px solid #5b8cff; background: #1a1f2e; box-shadow: 0 4px 0 rgba(0,0,0,0.5);">
+        <h2 class="minigame-title" id="skill-hint-title" style="color: #8ab4ff; text-shadow: 0 2px 0 #000; font-size: 1.1rem; margin-bottom: 8px;">
+          ${isTH ? "⚡ กฎของ Superpower" : "⚡ Superpower Rule"}
+        </h2>
+        <p style="font-size: 0.82rem; color: #aac4ff; margin: 0 0 16px; font-family: var(--font-pixel); line-height: 1.5; text-align: center;">
+          ${escapeHtml(skillName)}
+        </p>
+        <div style="display: grid; gap: 8px; margin-bottom: 20px; font-family: var(--font-pixel); font-size: 0.8rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(76,175,80,0.15); border: 2px solid #4caf50; border-radius: 4px;">
+            <span style="color: #ccc;">${isTH ? "ครั้งที่ 1" : "1st use"}</span>
+            <strong style="color: #81c784;">+100% progress</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(255,152,0,0.15); border: 2px solid #ff9800; border-radius: 4px;">
+            <span style="color: #ccc;">${isTH ? "ครั้งที่ 2" : "2nd use"}</span>
+            <strong style="color: #ffb74d;">+50% progress</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(180,79,71,0.15); border: 2px solid #b44f47; border-radius: 4px;">
+            <span style="color: #ccc;">${isTH ? "ครั้งที่ 3" : "3rd use"}</span>
+            <strong style="color: #ef9a9a;">🔒 ${isTH ? "ล็อก" : "Locked"}</strong>
+          </div>
+        </div>
+        <p style="font-size: 0.75rem; color: #888; margin: 0 0 20px; font-family: var(--font-pixel); line-height: 1.4; text-align: center;">
+          ${isTH ? "ใช้ Skill ก่อน แล้วค่อย Base option — ได้ผลดีที่สุด" : "Use Skills first, then Base options — best outcome."}
+        </p>
+        <div style="display: flex; gap: 10px; justify-content: center; width: 100%;">
+          <button class="skill-hint-confirm-btn btn primary-btn" type="button" style="padding: 10px 20px;">
+            ${isTH ? "เข้าใจแล้ว — ใช้ Skill" : "Got it — Use Skill"}
+          </button>
+          <button class="skill-hint-cancel-btn" type="button" style="padding: 10px 16px; background: #444; color: #fff; border: 3px solid #333; font-family: var(--font-pixel); font-size: 0.8rem; cursor: pointer;">
+            ${isTH ? "ยกเลิก" : "Cancel"}
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 function tokenWarningModalMarkup() {
   const lang = i18n[currentLang];
   const message = lang.insufficientTokensMessage.replace("{token}", state.token);
@@ -1729,6 +1773,24 @@ function handleRootClick(event) {
   const minigameClose = target.closest(".minigame-close-btn");
   if (minigameClose) {
     closeMinigameResult();
+    return;
+  }
+
+  const skillHintConfirm = target.closest(".skill-hint-confirm-btn");
+  if (skillHintConfirm) {
+    const pendingId = state.pendingSkillOptionId;
+    state.hasSeenSkillDiminishingHint = true;
+    state.showSkillDiminishingHint = false;
+    state.pendingSkillOptionId = null;
+    if (pendingId) chooseOption(pendingId);
+    return;
+  }
+
+  const skillHintCancel = target.closest(".skill-hint-cancel-btn");
+  if (skillHintCancel) {
+    state.showSkillDiminishingHint = false;
+    state.pendingSkillOptionId = null;
+    render();
     return;
   }
 
@@ -2337,6 +2399,7 @@ function renderStep(step, isEmergency = false) {
       </section>
       ${selectedSkillHandMarkup()}
       ${state.minigameActive ? minigameModalMarkup() : ""}
+      ${state.showSkillDiminishingHint ? skillDiminishingHintModalMarkup() : ""}
       ${state.showTokenWarningModal ? tokenWarningModalMarkup() : ""}
       ${state.showTimeoutWarningModal ? timeoutWarningModalMarkup() : ""}
     </main>
@@ -3234,7 +3297,6 @@ function tutorialMarkup() {
 function renderEvolution() {
   const lang = i18n[currentLang];
   const runIdentity = getCurrentRunIdentity();
-  const perk = getEvolutionPerk(runIdentity.key, state.evolutionNewLevel, i18n[currentLang]);
 
   const getEvolutionSpriteLayout = (lv) => {
     const spriteMetrics = {
@@ -3283,10 +3345,6 @@ function renderEvolution() {
       </div>
       <div class="evolution-text" style="display: flex; flex-direction: column; align-items: center; gap: 12px; max-width: 500px; text-align: center;">
         <h2>${lang.evolving}</h2>
-        <div class="evolution-perk-container" style="display: none; padding: 12px; border: 2px dashed #ffeb3b; background: rgba(0,0,0,0.4); border-radius: 4px; font-family: var(--font-pixel); margin-bottom: 8px;">
-          <strong style="color: #ffd969; font-size: 0.9rem; display: block; margin-bottom: 4px;">🎁 ${escapeHtml(perk.label)}</strong>
-          <p style="font-size: 0.8rem; color: #ccc; margin: 0; line-height: 1.4;">${escapeHtml(perk.copy)}</p>
-        </div>
         <button class="evolution-next-btn btn primary-btn" style="display:none; z-index: 100;">${lang.continueNextWorkflow}</button>
       </div>
     </main>
@@ -3313,16 +3371,12 @@ function renderEvolution() {
         title.classList.add('glow-text');
       }
 
-      const perkContainer = root.querySelector('.evolution-perk-container');
-      if (perkContainer) perkContainer.style.display = 'block';
-
       const btn = root.querySelector('.evolution-next-btn');
       if (btn) btn.style.display = 'block';
     }, 1000); // 1s into the flash
   }, 2000); // 2s of shaking before flash
 
   root.querySelector('.evolution-next-btn')?.addEventListener('click', () => {
-    applyEffects(perk.effects);
     state.characterPos = null;
     state.screen = state.index >= game.steps.length ? "result" : "step";
     if (state.screen === "step") {
