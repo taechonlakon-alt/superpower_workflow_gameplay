@@ -76,6 +76,8 @@ export const i18n = {
     danger: "Danger",
     select: "Select",
     rateLimited: "Rate Limited (Need >= 3 Tokens)",
+    choiceLocked: "Locked (Max Repeats)",
+    synergyLocked: "Locked (Combo Used)",
     insufficientTokensTitle: "Insufficient Tokens!",
     insufficientTokensMessage: "This choice requires at least 3 Tokens. You only have {token} Tokens. Would you like to play the minigame to recover tokens? (Costs Time +3)",
     refactorButton: "Refactor / Optimize (Mini-game)",
@@ -294,6 +296,19 @@ export const i18n = {
     ,micro_deadline_squeeze_reaction_copy: "Late-game options are narrowing. The team must choose options that truly reduce risk."
     ,timeoutWarningTitle: "⚠️ Phase Time Out Warning"
     ,timeoutWarningMessage: "Time has run out! The team feels the pressure. Time +2, Risk +1. Timer has been reset to 60s. Control the workflow pacing!"
+    ,catNameLabel: "Player Cat Name"
+    ,catNamePlaceholder: "Enter cat name..."
+    ,leaderboardTitle: "Leaderboard"
+    ,leaderboardRank: "Rank"
+    ,leaderboardCatName: "Cat Name"
+    ,leaderboardScore: "Score"
+    ,leaderboardBadge: "Badge"
+    ,leaderboardLoading: "Loading leaderboard..."
+    ,leaderboardError: "Failed to load leaderboard"
+    ,leaderboardSubmitError: "Failed to save score"
+    ,defaultCatName: "Orange Cat"
+    ,viewLeaderboard: "View Score"
+    ,backToTitle: "Back to Title"
   },
   th: {
     startMission: "เริ่มภารกิจ",
@@ -372,6 +387,8 @@ export const i18n = {
     danger: "อันตราย",
     select: "เลือก",
     rateLimited: "จำกัด (ต้องมี >= 3 Token)",
+    choiceLocked: "ล็อก (ใช้ซ้ำครบแล้ว)",
+    synergyLocked: "ล็อก (ใช้คอมโบแล้ว)",
     insufficientTokensTitle: "Token ไม่เพียงพอ!",
     insufficientTokensMessage: "ตัวเลือกนี้ต้องการขั้นต่ำ 3 Token แต่ปัจจุบันคุณมีเพียง {token} Token\n\nต้องการเล่นมินิเกมปรับจูน Prompt เพื่อฟื้นฟู Token หรือไม่? (ใช้เวลา +3)",
     refactorButton: "รีแฟกเตอร์ / ปรับจูน Prompt (มินิเกม)",
@@ -590,5 +607,18 @@ export const i18n = {
     ,micro_deadline_squeeze_reaction_copy: "ทางเลือกเริ่มน้อยลง ทีมจำเป็นต้องตัดสินใจเลือกวิธีที่ลดความเสี่ยงลงจริงๆ"
     ,timeoutWarningTitle: "⚠️ แจ้งเตือนเวลาเฟสหมดลง"
     ,timeoutWarningMessage: "เวลาหมดลงแล้ว! ทีมงานกำลังรับความกดดัน เวลา +2, ความเสี่ยง +1 รีเซ็ตตัวจับเวลาเป็น 60 วินาที คุมจังหวะให้มีระเบียบ!"
+    ,catNameLabel: "ชื่อน้องแมวของคุณ"
+    ,catNamePlaceholder: "ระบุชื่อน้องแมว..."
+    ,leaderboardTitle: "บอร์ดคะแนนสูงสุด"
+    ,leaderboardRank: "อันดับ"
+    ,leaderboardCatName: "ชื่อผู้เล่น"
+    ,leaderboardScore: "คะแนน"
+    ,leaderboardBadge: "ฉายา"
+    ,leaderboardLoading: "กำลังโหลดบอร์ดคะแนน..."
+    ,leaderboardError: "โหลดบอร์ดคะแนนไม่สำเร็จ"
+    ,leaderboardSubmitError: "บันทึกคะแนนไม่สำเร็จ"
+    ,defaultCatName: "เจ้าเหมียวส้ม"
+    ,viewLeaderboard: "ดูคะแนน"
+    ,backToTitle: "กลับหน้าแรก"
   }
 };

@@ -3,6 +3,7 @@
 import { allStagesEN, allStagesTH } from "./data/gameData.js";
 import { i18n } from "./data/i18n.js";
 import { getPhaseMoment, getRunIdentity, getRunMood, getEvolutionPerk, getPhasePresentation } from "./gameFeel.js";
+import { submitScore, fetchLeaderboard } from "./lib/supabase.js";
 
 let root = null;
 let currentLang = typeof window !== "undefined" ? localStorage.getItem("sp_workflow_lang") || "th" : "th";
@@ -90,6 +91,10 @@ function createInitialState() {
     hasSeenSkillDiminishingHint: false,
     showSkillDiminishingHint: false,
     pendingSkillOptionId: null,
+    catName: "",
+    scoreSubmitted: null,
+    leaderboardData: [],
+    leaderboardStatus: "idle",
   };
 }
 
@@ -502,7 +507,7 @@ function maybeTriggerMicroEvent() {
   let microEvent = null;
   const lang = i18n[currentLang];
 
-  if (getTokenSpent() >= 11) {
+  if (getTokenSpent() >= 13) {
     microEvent = buildMicroEvent({
       id: "context_drift",
       title: lang.micro_context_drift_title,
@@ -1156,7 +1161,9 @@ function selectStage(stageId) {
   const stage = allStages.find((s) => s.id === stageId);
   if (!stage || stage.status === "coming_soon") return;
   game = stage;
+  const previousCatName = state ? state.catName : "";
   state = createInitialState();
+  state.catName = previousCatName;
   state.screen = "setup";
   render();
 }
@@ -1164,7 +1171,9 @@ function selectStage(stageId) {
 function restart() {
   stopPhaseTimer();
   playRestartSound();
+  const previousCatName = state ? state.catName : "";
   state = createInitialState();
+  state.catName = previousCatName;
   render();
 }
 
@@ -1688,6 +1697,19 @@ function handleRootClick(event) {
 
   const heroStartButton = target.closest(".hero-start-btn");
   if (heroStartButton) {
+    const inputEl = document.getElementById("cat-name-input");
+    let name = state.catName || "";
+    if (inputEl) {
+      name = inputEl.value.trim();
+      state.catName = name;
+    } else {
+      name = name.trim();
+    }
+
+    if (!name) {
+      return;
+    }
+
     if (state.showHeroPopup && heroStartButton.closest(".hero-popup-overlay")) {
       state.showHeroPopup = false;
       render();
@@ -1696,6 +1718,13 @@ function handleRootClick(event) {
 
     state.showTutorial = true;
     state.tutorialPage = 0;
+    render();
+    return;
+  }
+
+  const retryBtn = target.closest(".leaderboard-retry-btn");
+  if (retryBtn) {
+    state.scoreSubmitted = null;
     render();
     return;
   }
@@ -1817,6 +1846,7 @@ function handleRootClick(event) {
 
   const choiceButton = target.closest(".choice");
   if (choiceButton) {
+    if (choiceButton.disabled || choiceButton.hasAttribute("disabled")) return;
     chooseOption(choiceButton.dataset.option);
     return;
   }
@@ -1824,6 +1854,19 @@ function handleRootClick(event) {
   const continueButton = target.closest(".continue-button");
   if (continueButton) {
     continueAfterResolution();
+    return;
+  }
+
+  const viewLeaderboardBtn = target.closest(".view-leaderboard-btn");
+  if (viewLeaderboardBtn) {
+    state.screen = "leaderboard";
+    render();
+    return;
+  }
+
+  const backToTitleBtn = target.closest(".back-to-title-btn");
+  if (backToTitleBtn) {
+    restart();
     return;
   }
 
@@ -2048,7 +2091,11 @@ function heroMarkup() {
           <strong>${game.stage}</strong>
         </div>
         <p class="start-copy">${game.intro}</p>
-        <button class="hero-start-btn restart" type="button">${lang.startMission}</button>
+        <div class="cat-name-input-group">
+          <label for="cat-name-input">${lang.catNameLabel}</label>
+          <input type="text" id="cat-name-input" maxlength="20" placeholder="${lang.catNamePlaceholder}" value="${escapeHtml(state.catName || '')}" oninput="const val = this.value.trim(); if(window.__game && window.__game.state) { window.__game.state.catName = this.value; } const btn = this.closest('.start-board').querySelector('.hero-start-btn'); if(btn) { btn.disabled = !val; }" />
+        </div>
+        <button class="hero-start-btn restart" type="button" ${!(state.catName || "").trim() ? "disabled" : ""}>${lang.startMission}</button>
       </div>
       <div class="start-ground" aria-hidden="true"></div>
     </header>
@@ -2143,8 +2190,30 @@ function choiceCardMarkup(option, index) {
   const visualTone = isSynergy ? "combo" : isSkill ? "skill" : "base";
   const isLocked = (isSkill || isSynergy) && state.token < 3;
 
+  const isEmergency = state.screen === "emergency_step";
+  const step = isEmergency ? game.emergencyStep : getCurrentStep();
+  const phaseHistory = step ? state.history.filter((item) => item.phase === step.title) : [];
+  const usedOptionIds = phaseHistory.map((item) => item.optionId);
+  const repeatCount = usedOptionIds.filter((id) => id === option.id).length;
+
+  let isBlocked = false;
+  if (isSynergy) {
+    isBlocked = repeatCount > 0;
+  } else {
+    isBlocked = (1.0 - repeatCount * 0.5 <= 0);
+  }
+
+  const disabledAttr = isBlocked ? "disabled" : "";
+
+  let selectText = lang.select;
+  if (isLocked) {
+    selectText = lang.rateLimited;
+  } else if (isBlocked) {
+    selectText = isSynergy ? lang.synergyLocked : lang.choiceLocked;
+  }
+
   return `
-    <button class="choice action-slot action-slot--${visualTone} ${isSkill ? "choice--skill" : ""} ${isSynergy ? "choice--synergy" : ""} ${isLocked ? "choice--locked" : ""}" data-option="${option.id}" data-index="${index}" style="--choice-delay:${index * 65}ms">
+    <button class="choice action-slot action-slot--${visualTone} ${isSkill ? "choice--skill" : ""} ${isSynergy ? "choice--synergy" : ""} ${isLocked ? "choice--locked" : ""}" data-option="${option.id}" data-index="${index}" style="--choice-delay:${index * 65}ms" ${disabledAttr}>
       <span class="action-slot__body">
         <strong class="action-slot__title">${escapeHtml(option.label)}</strong>
         <span class="action-slot__helper">${escapeHtml(truncateHelper(option.helper || ""))}</span>
@@ -2155,7 +2224,7 @@ function choiceCardMarkup(option, index) {
       </span>
       <span class="action-slot__footer">
         ${unlock ? `<span class="action-slot__unlock">${escapeHtml(unlock)}</span>` : ""}
-        <span class="action-slot__select">${isLocked ? lang.rateLimited : lang.select}</span>
+        <span class="action-slot__select">${selectText}</span>
       </span>
     </button>
   `;
@@ -2771,7 +2840,7 @@ function getScoreCeilingDetails({ failed, overBudget, overtime, riskyChoices, sk
     capScore(60, lang.ceilingToken10);
   } else if (tokenDebt >= 3) {
     capScore(70, lang.ceilingToken5);
-  } else if (tokenDebt >= 1) {
+  } else if (tokenDebt >= 2) {
     capScore(80, lang.ceilingToken1);
   }
 
@@ -2797,7 +2866,7 @@ function getScoreCeilingDetails({ failed, overBudget, overtime, riskyChoices, sk
     && !overtime
     && state.risk <= 3
     && state.quality >= 12
-    && tokenDebt === 0
+    && tokenDebt <= 1
     && riskyChoices <= 1
     && skillUses >= 3;
 
@@ -2853,8 +2922,8 @@ function getFinalResult() {
   const tokenSpent = getTokenSpent();
   const tokenRemaining = getTokenRemaining();
   const tokenDebt = getTokenDebt();
-  const overBudget = tokenDebt > 0;
-  const overtime = state.time > game.caps.time;
+  const overBudget = tokenDebt > 1;
+  const overtime = state.time > game.caps.time + 1;
   const phaseSummaries = state.phaseSummaries || [];
   const randomModifiers = state.randomModifiersTriggered || [];
   const shippedRiskyShortcut = state.history.some((item) => item.optionId === "ship_now") && state.risk >= 6;
@@ -3087,6 +3156,88 @@ function animateScoreSlot() {
   requestAnimationFrame(tick);
 }
 
+function renderLeaderboardScreen() {
+  const lang = i18n[currentLang];
+  let content = "";
+
+  if (state.leaderboardStatus === "loading") {
+    content = `
+      <div class="leaderboard-loading">
+        ⏳ ${lang.leaderboardLoading}
+      </div>
+    `;
+  } else if (state.leaderboardStatus === "error") {
+    const errorMsg = state.scoreSubmitted === "error" 
+      ? lang.leaderboardSubmitError 
+      : lang.leaderboardError;
+    content = `
+      <div class="leaderboard-error">
+        ❌ ${errorMsg}
+        <br />
+        <button class="leaderboard-retry-btn" type="button" style="margin-top: 15px; padding: 10px 20px;">${currentLang === "th" ? "ลองใหม่" : "Retry"}</button>
+      </div>
+    `;
+  } else if (state.leaderboardStatus === "success" && Array.isArray(state.leaderboardData)) {
+    const result = getFinalResult();
+    const rows = state.leaderboardData.map((row, idx) => {
+      const isCurrent = row.cat_name === state.catName && row.score === result.workflowScore;
+      const rankEmoji = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `${idx + 1}`;
+      
+      return `
+        <tr class="${isCurrent ? 'leaderboard-row--current' : ''}">
+          <td style="font-weight: bold; text-align: center; font-size: 1.1rem; padding: 10px;">${rankEmoji}</td>
+          <td style="font-size: 1.1rem; padding: 10px;">${escapeHtml(row.cat_name)}</td>
+          <td style="font-weight: bold; text-align: right; font-size: 1.1rem; padding: 10px;">${row.score}/100</td>
+        </tr>
+      `;
+    }).join("");
+
+    content = `
+      <table class="leaderboard-table" style="font-size: 0.95rem; margin-top: 15px;">
+        <thead>
+          <tr>
+            <th style="width: 80px; text-align: center; font-size: 1rem; padding: 10px;">${lang.leaderboardRank}</th>
+            <th style="font-size: 1rem; padding: 10px;">${lang.leaderboardCatName}</th>
+            <th style="text-align: right; font-size: 1rem; padding: 10px;">${lang.leaderboardScore}</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows || `<tr><td colspan="3" style="text-align: center; padding: 20px;">No scores yet.</td></tr>`}
+        </tbody>
+      </table>
+    `;
+  }
+
+  root.innerHTML = `
+    <main class="app phase-enter">
+      <section class="${shellClass()}">
+        <section class="phasebar" style="display: flex; align-items: center; justify-content: space-between;">
+          <ol class="phases" style="flex: 1;">${phaseMarkup(game.steps.length)}</ol>
+          ${soundButtonMarkup()}
+        </section>
+        <section class="playfield">
+          <section class="panel" style="max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; height: 100%;">
+            <div class="panel-head" style="text-align: center;">
+              <p class="phase-tag" style="margin: 0 auto 8px;">${lang.leaderboardTitle}</p>
+              <div class="panel-title-row" style="justify-content: center;">
+                <h2 class="phase-title" style="font-size: 2.2rem;">${lang.leaderboardTitle}</h2>
+              </div>
+            </div>
+            
+            <div style="flex: 1; overflow-y: auto; padding: 10px 0;">
+              ${content}
+            </div>
+
+            <div style="display: flex; gap: 15px; justify-content: center; margin-top: 20px; padding-top: 15px; border-top: 4px double #7c5b32;">
+              <button class="restart" type="button" style="padding: 10px 20px;">${lang.playAgain}</button>
+            </div>
+          </section>
+        </section>
+      </section>
+    </main>
+  `;
+}
+
 function renderResult() {
   const lang = i18n[currentLang];
   const result = getFinalResult();
@@ -3186,7 +3337,10 @@ function renderResult() {
 
             <div class="mission-report__footer">
               <p class="result-lesson">${result.lesson}</p>
-              <button class="restart">${lang.playAgain}</button>
+              <div style="display: flex; gap: 12px; align-items: center; flex-shrink: 0;">
+                <button class="restart view-leaderboard-btn" type="button" style="background: linear-gradient(180deg, #ffd969 0%, #c48a17 100%); color: #232019; border: 3px solid #7a4d29;">${lang.viewLeaderboard}</button>
+                <button class="restart" type="button">${lang.playAgain}</button>
+              </div>
             </div>
           </section>
         </section>
@@ -3490,6 +3644,31 @@ function adjustTimerState() {
 
 function render() {
   if (!root) return;
+
+  if ((state.screen === "result" || state.screen === "leaderboard") && state.scoreSubmitted === null) {
+    const result = getFinalResult();
+    state.scoreSubmitted = "submitting";
+    state.leaderboardStatus = "loading";
+    (async () => {
+      const badgeText = result.titleBadge.label;
+      const ok = await submitScore(state.catName, result.workflowScore, badgeText);
+      if (ok) {
+        state.scoreSubmitted = "success";
+        const data = await fetchLeaderboard();
+        if (data) {
+          state.leaderboardData = data;
+          state.leaderboardStatus = "success";
+        } else {
+          state.leaderboardStatus = "error";
+        }
+      } else {
+        state.scoreSubmitted = "error";
+        state.leaderboardStatus = "error";
+      }
+      render();
+    })();
+  }
+
   if (state.screen === "title") {
     renderTitle();
   } else if (state.screen === "stage_select") {
@@ -3500,6 +3679,8 @@ function render() {
     renderResolution();
   } else if (state.screen === "result") {
     renderResult();
+  } else if (state.screen === "leaderboard") {
+    renderLeaderboardScreen();
   } else if (state.screen === "evolution") {
     renderEvolution();
   } else if (state.screen === "emergency_step") {
