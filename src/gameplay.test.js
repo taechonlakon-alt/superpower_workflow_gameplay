@@ -191,6 +191,26 @@ test("Emergency resolution returns player to the original step index and origina
   assert.equal(finalState.emergencyTriggered, true, "Emergency triggered remains true");
 });
 
+test("Progress changes expand the jigsaw widget and reveal next-form tiles", () => {
+  selectStage("stage_01");
+  const state = getGameState();
+  state.index = 0;
+  state.progress = 0;
+  state.screen = "step";
+  state.showSkillDiminishingHint = false;
+  state.hasSeenSkillDiminishingHint = true;
+  setGameState(state);
+
+  const step = getCurrentStep();
+  const option = step.baseOptions[0];
+  chooseOption(option.id);
+
+  const nextState = getGameState();
+  assert.equal(nextState.jigsawExpanded, true);
+  assert.equal(nextState.jigsawPulse, "gain");
+  assert.ok(nextState.progress > 0);
+});
+
 // 4. Choice farming and fallback protection
 test("Prevents double skill/synergy plays, repeated base option scaling, and fallback rules", () => {
   selectStage("stage_01");

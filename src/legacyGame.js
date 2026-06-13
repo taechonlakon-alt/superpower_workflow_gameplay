@@ -3,6 +3,7 @@
 import { allStagesEN, allStagesTH } from "./data/gameData.js";
 import { i18n } from "./data/i18n.js";
 import { getPhaseMoment, getRunIdentity, getRunMood, getEvolutionPerk, getPhasePresentation } from "./gameFeel.js";
+import { getJigsawProgressState } from "./jigsawWidget.js";
 import { submitScore, fetchLeaderboard } from "./lib/supabase.js";
 
 let root = null;
@@ -95,6 +96,12 @@ function createInitialState() {
     scoreSubmitted: null,
     leaderboardData: [],
     leaderboardStatus: "idle",
+    jigsawExpanded: false,
+    jigsawPinned: false,
+    jigsawPulse: null,
+    jigsawPulseStart: -1,
+    jigsawPulseEnd: -1,
+    jigsawAutoCollapseId: null,
   };
 }
 
@@ -142,6 +149,95 @@ function getCurrentStep() {
 
 function getCurrentRunIdentity() {
   return getRunIdentity(state.skills, i18n[currentLang]);
+}
+
+function getJigsawUiText() {
+  return currentLang === "th"
+    ? {
+      label: "ร่างถัดไป",
+      hint: "ประกอบตาม progress",
+      progress: "ความคืบหน้า",
+      open: "เปิดดูจิ๊กซอว์",
+      close: "พับจิ๊กซอว์",
+      complete: "ภาพพร้อมกลายร่าง",
+    }
+    : {
+      label: "Next Form",
+      hint: "Builds with progress",
+      progress: "Progress",
+      open: "Open jigsaw preview",
+      close: "Collapse jigsaw preview",
+      complete: "Full reveal ready",
+    };
+}
+
+function getCurrentJigsawState(stepOverride = getCurrentStep()) {
+  if (!stepOverride || stepOverride.requiredProgress == null) return null;
+
+  return getJigsawProgressState({
+    progress: state.progress,
+    requiredProgress: stepOverride.requiredProgress || 100,
+    currentLevel: Math.min(5, (state.index || 0) + 1),
+  });
+}
+
+function clearJigsawAutoCollapse() {
+  if (state.jigsawAutoCollapseId) {
+    clearTimeout(state.jigsawAutoCollapseId);
+    state.jigsawAutoCollapseId = null;
+  }
+}
+
+function scheduleJigsawAutoCollapse() {
+  if (!root) return;
+  clearJigsawAutoCollapse();
+  state.jigsawAutoCollapseId = setTimeout(() => {
+    if (state.jigsawPinned) return;
+    state.jigsawExpanded = false;
+    state.jigsawPulse = null;
+    state.jigsawPulseStart = -1;
+    state.jigsawPulseEnd = -1;
+    state.jigsawAutoCollapseId = null;
+    render();
+  }, 1800);
+}
+
+function toggleJigsawWidget() {
+  const shouldExpand = !state.jigsawExpanded;
+  state.jigsawExpanded = shouldExpand;
+  state.jigsawPinned = shouldExpand;
+  state.jigsawPulse = null;
+  state.jigsawPulseStart = -1;
+  state.jigsawPulseEnd = -1;
+
+  if (!shouldExpand) {
+    clearJigsawAutoCollapse();
+  }
+
+  render();
+}
+
+function syncJigsawWidgetProgress(previousProgress, nextProgress, requiredProgress = 100) {
+  const currentLevel = Math.min(5, (state.index || 0) + 1);
+  const previous = getJigsawProgressState({
+    progress: previousProgress,
+    requiredProgress,
+    currentLevel,
+  });
+  const next = getJigsawProgressState({
+    progress: nextProgress,
+    requiredProgress,
+    currentLevel,
+  });
+
+  if (previous.revealedCount === next.revealedCount) return;
+
+  state.jigsawExpanded = true;
+  state.jigsawPinned = false;
+  state.jigsawPulse = next.revealedCount > previous.revealedCount ? "gain" : "loss";
+  state.jigsawPulseStart = Math.min(previous.revealedCount, next.revealedCount);
+  state.jigsawPulseEnd = Math.max(previous.revealedCount, next.revealedCount);
+  scheduleJigsawAutoCollapse();
 }
 
 function getAvailableOptions(step) {
@@ -901,7 +997,9 @@ function chooseOption(optionId) {
   }
 
   applyEffects(resolution.effects);
+  const previousProgress = state.progress;
   state.progress = clamp(state.progress + resolution.progress, 0, 100);
+  syncJigsawWidgetProgress(previousProgress, state.progress, step.requiredProgress || 100);
 
   if (state.activeChaos) {
     state.activeChaos = null; // Cleared
@@ -954,6 +1052,12 @@ function advanceAfterNormalDecision({ allowRandomModifier = true, allowMicroEven
     const newLevel = Math.min(5, state.index + 1);
     state.progress = 0;
     state.hasPlayedMinigameThisPhase = false;
+    state.jigsawExpanded = false;
+    state.jigsawPinned = false;
+    state.jigsawPulse = null;
+    state.jigsawPulseStart = -1;
+    state.jigsawPulseEnd = -1;
+    clearJigsawAutoCollapse();
 
     if (oldLevel !== newLevel) {
       triggerEvolutionTransition(oldLevel, newLevel);
@@ -1787,6 +1891,12 @@ function handleRootClick(event) {
     return;
   }
 
+  const jigsawToggle = target.closest(".jigsaw-widget__toggle");
+  if (jigsawToggle) {
+    toggleJigsawWidget();
+    return;
+  }
+
   const refactorButton = target.closest(".refactor-btn");
   if (refactorButton) {
     startMinigame();
@@ -2004,6 +2114,71 @@ function selectedSkillHandMarkup() {
         ${slots.join("")}
       </div>
     </section>
+  `;
+}
+
+function jigsawWidgetMarkup(stepOverride = getCurrentStep(), variant = "floating") {
+  const jigsaw = getCurrentJigsawState(stepOverride);
+  if (!jigsaw) return "";
+
+  const uiText = getJigsawUiText();
+  const progressText = `${uiText.progress} ${jigsaw.percentage}%`;
+  const widgetLabel = state.jigsawExpanded ? uiText.close : uiText.open;
+  const pieceText = `${jigsaw.revealedCount}/${jigsaw.totalTiles}`;
+  const variantClass =
+    variant === "inline"
+      ? "jigsaw-widget--inline"
+      : variant === "dock"
+        ? "jigsaw-widget--dock"
+        : "";
+
+  if (variant === "inline") {
+    return `
+      <aside class="jigsaw-widget ${variantClass}" aria-label="${escapeHtml(uiText.label)}">
+        <button class="jigsaw-widget__toggle" type="button" aria-label="${escapeHtml(widgetLabel)}">
+          <span class="jigsaw-widget__corner">${state.jigsawExpanded ? "×" : "◆"}</span>
+          <span class="jigsaw-widget__meta">
+            <strong>${jigsaw.percentage}%</strong>
+            <small>${escapeHtml(uiText.label)}</small>
+          </span>
+        </button>
+      </aside>
+    `;
+  }
+
+  return `
+    <aside class="jigsaw-widget ${variantClass} ${state.jigsawExpanded ? "is-expanded" : ""} ${state.jigsawPulse ? `is-${state.jigsawPulse}` : ""}" aria-label="${escapeHtml(uiText.label)}">
+      <section class="jigsaw-widget__panel" aria-hidden="${state.jigsawExpanded ? "false" : "true"}">
+        <div class="jigsaw-widget__panel-head">
+          <div class="jigsaw-widget__title">
+            <p class="mini-label">${escapeHtml(uiText.label)}</p>
+            <h3>LV ${jigsaw.nextLevel}</h3>
+            <span class="jigsaw-widget__piece-count">${escapeHtml(pieceText)}</span>
+          </div>
+          <div class="jigsaw-widget__status">
+            <strong>${escapeHtml(progressText)}</strong>
+            <small>${jigsaw.revealedCount === jigsaw.totalTiles ? escapeHtml(uiText.complete) : escapeHtml(uiText.hint)}</small>
+          </div>
+        </div>
+        <div class="jigsaw-widget__frame">
+          <div
+            class="jigsaw-widget__grid"
+            style="--jigsaw-ratio: ${jigsaw.imageAspectRatio}; --jigsaw-image: url('${jigsaw.imageSrc}');"
+          >
+          ${jigsaw.pieces.map((piece) => `
+            <span
+              class="jigsaw-widget__tile ${piece.revealed ? "is-revealed" : "is-hidden"} ${state.jigsawPulse === "gain" && piece.index >= state.jigsawPulseStart && piece.index < state.jigsawPulseEnd ? "is-new" : ""}"
+              style="${piece.style}"
+            ></span>
+          `).join("")}
+          </div>
+        </div>
+        <div class="jigsaw-widget__panel-foot">
+          <span>${escapeHtml(uiText.label)}: LV ${jigsaw.nextLevel}</span>
+          <span>${escapeHtml(pieceText)}</span>
+        </div>
+      </section>
+    </aside>
   `;
 }
 
@@ -2423,7 +2598,10 @@ function renderStep(step, isEmergency = false) {
     <div class="progress-bar-container">
       <div class="progress-bar-header">
         <span>Phase Progress</span>
-        <span>${state.progress}% / ${step.requiredProgress}%</span>
+        <div class="progress-bar-meta">
+          <span>${state.progress}% / ${step.requiredProgress}%</span>
+          ${jigsawWidgetMarkup(step, "inline")}
+        </div>
       </div>
       <div class="progress-bar-track">
         <div class="progress-bar-fill" style="width: ${state.progress}%;"></div>
@@ -2467,6 +2645,7 @@ function renderStep(step, isEmergency = false) {
         </section>
       </section>
       ${selectedSkillHandMarkup()}
+      ${state.jigsawExpanded ? jigsawWidgetMarkup(step, "dock") : ""}
       ${state.minigameActive ? minigameModalMarkup() : ""}
       ${state.showSkillDiminishingHint ? skillDiminishingHintModalMarkup() : ""}
       ${state.showTokenWarningModal ? tokenWarningModalMarkup() : ""}
@@ -2525,6 +2704,7 @@ function renderResolution() {
     : result.countered ? "resolution-panel--safe" : "resolution-panel--warn";
 
   const characterLevel = Math.min(5, (state.index || 0) + 1);
+  const step = getCurrentStep() || game.steps[Math.max(0, state.index - 1)] || null;
   const isEmergency = state.screen === "emergency_resolution";
   const characterSrc = isEmergency
     ? `/assets/catfail/lv${characterLevel}fail.gif`
@@ -2588,6 +2768,7 @@ function renderResolution() {
         </section>
       </section>
       ${selectedSkillHandMarkup()}
+      ${state.jigsawExpanded ? jigsawWidgetMarkup(step, "dock") : ""}
     </main>
   `;
 
@@ -3994,7 +4175,7 @@ export function mountLegacyGame(container) {
 
   const enhancedRootClick = (event) => {
     const target = event.target;
-    const isInteractive = target.closest("button, .choice, .stage-card, .skill-card, .superpower-hand__card, .phase-goal-start, .lang-btn, .game-toy, .playfield");
+    const isInteractive = target.closest("button, .choice, .stage-card, .skill-card, .superpower-hand__card, .phase-goal-start, .lang-btn, .game-toy, .playfield, .jigsaw-widget");
     if (!isInteractive && !(target instanceof HTMLImageElement)) {
       const emojis = ["☕", "🐟", "🐛", "📄", "📎", "📦"];
       spawnToy(event.clientX - 16, event.clientY - 16, "toy-emoji", emojis[Math.floor(Math.random() * emojis.length)]);
