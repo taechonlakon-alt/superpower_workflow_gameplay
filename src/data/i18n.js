@@ -309,6 +309,11 @@ export const i18n = {
     ,defaultCatName: "Orange Cat"
     ,viewLeaderboard: "View Score"
     ,backToTitle: "Back to Title"
+    ,snakesLaddersTitle: "🎲 Snakes & Ladders Event!"
+    ,snakesLaddersDescription: "During a quick break, a teammate challenges you to a game of Snakes and Ladders... care to test your luck?"
+    ,rollDiceButton: "Roll the Dice 🎲"
+    ,snakesLaddersSnakeResult: "🐍 Oh no! You landed on a snake and fell back to a previous phase!"
+    ,snakesLaddersLadderResult: "🪜 Phew! Safe space. You can proceed with your work!"
   },
   th: {
     startMission: "เริ่มภารกิจ",
@@ -620,5 +625,10 @@ export const i18n = {
     ,defaultCatName: "เจ้าเหมียวส้ม"
     ,viewLeaderboard: "ดูคะแนน"
     ,backToTitle: "กลับหน้าแรก"
+    ,snakesLaddersTitle: "🎲 มินิเกมบันไดงู!"
+    ,snakesLaddersDescription: "ระหว่างช่วงพักเบรก มีคนชวนคุณเล่นเกมกระดานบันไดงู... ทอยลูกเต๋าวัดดวงกันหน่อยไหม?"
+    ,rollDiceButton: "ทอยลูกเต๋า 🎲"
+    ,snakesLaddersSnakeResult: "🐍 ซวยแล้ว! คุณตกช่องงู โดนลากกลับไปเฟสเก่า!"
+    ,snakesLaddersLadderResult: "🪜 โชคดี! รอดตัวไป ลุยงานเฟสต่อไปได้เลย!"
   }
 };

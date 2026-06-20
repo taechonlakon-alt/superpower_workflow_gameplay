@@ -84,6 +84,13 @@ function createInitialState() {
     minigameCards: [],
     minigameSelectedIndices: [],
     minigameMatchedPairs: 0,
+    snakesLaddersActive: false,
+    snakesLaddersTriggeredCount: 0,
+    snakesLaddersResult: null,
+    snakesLaddersDiceValue: null,
+    snakesLaddersIsRolling: false,
+    snakesLaddersCurrentPos: 1,
+    snakesLaddersIsJumping: false,
     phaseTimerValue: 60,
     phaseTimerIntervalId: null,
     timeoutFailed: false,
@@ -1066,6 +1073,11 @@ function advanceAfterNormalDecision({ allowRandomModifier = true, allowMicroEven
       state.screen = state.index >= game.steps.length ? "result" : "step";
       if (state.screen === "step") {
         state.phaseTimerValue = 60;
+        
+        // 15% chance to trigger Snakes & Ladders minigame
+        if (state.snakesLaddersTriggeredCount < 2 && Math.random() < 0.15) {
+          triggerSnakesLadders();
+        }
       }
     }
 
@@ -1592,6 +1604,231 @@ function closeMinigameResult() {
   beep({ frequency: 880, duration: 0.15, volume: 0.025, delay: 0.08 });
 
   render();
+}
+
+function triggerSnakesLadders() {
+  state.snakesLaddersActive = true;
+  state.snakesLaddersResult = null;
+  state.snakesLaddersDiceValue = null;
+  state.snakesLaddersIsRolling = false;
+  state.snakesLaddersCurrentPos = 1;
+  state.snakesLaddersIsJumping = false;
+  state.snakesLaddersTriggeredCount += 1;
+  render();
+}
+
+window.rollSnakesLaddersDice = function() {
+  if (!state) return;
+  if (state.snakesLaddersIsRolling || state.snakesLaddersResult) return;
+  state.snakesLaddersIsRolling = true;
+  
+  // Set start position to 0 if not set
+  if (typeof state.snakesLaddersCurrentPos === "undefined") {
+    state.snakesLaddersCurrentPos = 0;
+  }
+  
+  beep({ frequency: 800, duration: 0.05, volume: 0.05 });
+
+  // Dice roll animation: cycle through random numbers rapidly
+  const finalDiceValue = Math.floor(Math.random() * 6) + 1;
+  let rollCount = 0;
+  const totalRolls = 12; // Number of times to cycle
+  const diceRollInterval = setInterval(() => {
+    state.snakesLaddersDiceValue = Math.floor(Math.random() * 6) + 1;
+    beep({ frequency: 300 + Math.random() * 400, duration: 0.02, volume: 0.02 });
+    render();
+    rollCount++;
+    if (rollCount >= totalRolls) {
+      clearInterval(diceRollInterval);
+      // Land on the final value
+      state.snakesLaddersDiceValue = finalDiceValue;
+      state.snakesLaddersIsRolling = false;
+      beep({ frequency: 600, duration: 0.1, volume: 0.05 });
+      render();
+
+      // Start walking after a brief pause
+      const targetPos = finalDiceValue;
+      setTimeout(() => {
+        let jumpInterval = setInterval(() => {
+          state.snakesLaddersCurrentPos++;
+          state.snakesLaddersIsJumping = true;
+          beep({ frequency: 400 + (state.snakesLaddersCurrentPos * 50), duration: 0.05, volume: 0.03 });
+          render();
+          
+          setTimeout(() => {
+            state.snakesLaddersIsJumping = false;
+            render();
+          }, 150);
+
+          if (state.snakesLaddersCurrentPos >= targetPos) {
+            clearInterval(jumpInterval);
+            
+            setTimeout(() => {
+              // Logic based on the visual board:
+              // 1: Snake (slide down)
+              // 4: Snake (slide down)
+              // 2: Ladder (climb to 4)
+              // 6: Ladder (climb to 7)
+              // 3, 5: Safe
+              if (targetPos === 1 || targetPos === 4) {
+                state.snakesLaddersResult = "snake";
+                state.snakesLaddersEffectValue = Math.floor(Math.random() * 3) + 1;
+                beep({ frequency: 200, duration: 0.5, type: 'sawtooth', volume: 0.1 });
+                setTimeout(() => {
+                  state.snakesLaddersCurrentPos = targetPos === 1 ? 0 : 1;
+                  render();
+                }, 600);
+              } else {
+                state.snakesLaddersResult = "ladder";
+                state.snakesLaddersEffectValue = (targetPos === 2 || targetPos === 6) ? 1 : 0;
+                beep({ frequency: 600, duration: 0.1, delay: 0 });
+                beep({ frequency: 800, duration: 0.2, delay: 0.1 });
+                
+                if (targetPos === 2) {
+                   setTimeout(() => { state.snakesLaddersCurrentPos = 4; render(); }, 500);
+                } else if (targetPos === 6) {
+                   setTimeout(() => { state.snakesLaddersCurrentPos = 7; render(); }, 500);
+                }
+              }
+              render();
+            }, 300);
+          }
+        }, 400);
+      }, 400);
+    }
+  }, 100); // Cycle every 100ms for rapid number change
+};
+
+window.endSnakesLadders = function() {
+  state.snakesLaddersActive = false;
+  
+  if (state.snakesLaddersResult === "snake") {
+    state.index = Math.max(0, state.index - (state.snakesLaddersEffectValue || 1));
+    state.progress = 0;
+    state.hasPlayedMinigameThisPhase = false;
+    state.phaseTimerValue = 60;
+    state.screen = "step";
+  } else if (state.snakesLaddersResult === "ladder") {
+    if (state.snakesLaddersEffectValue > 0 && state.index < game.steps.length - 1) {
+      state.index = Math.min(game.steps.length - 1, state.index + state.snakesLaddersEffectValue);
+      state.progress = 0;
+      state.hasPlayedMinigameThisPhase = false;
+      state.phaseTimerValue = 60;
+    }
+  }
+  
+  state.snakesLaddersResult = null;
+  state.snakesLaddersDiceValue = null;
+  state.snakesLaddersCurrentPos = 1;
+  render();
+};
+
+function snakesLaddersModalMarkup() {
+  const lang = i18n[currentLang];
+  if (!state.snakesLaddersActive) return "";
+
+  // Character sprite based on level
+  const characterLevel = Math.min(5, (state.index || 0) + 1);
+  const characterSrc = `/assets/cathappy/lv${characterLevel}.png`;
+  
+  // Calculate X, Y coords for the cat in 3x3 grid (130px per cell, cat 130px)
+  const getPosCoords = (pos) => {
+    const coords = {
+      0: {x: 0, y: 310},  // Start (below board)
+      1: {x: 0, y: 260}, 2: {x: 130, y: 260}, 3: {x: 260, y: 260},
+      4: {x: 260, y: 130}, 5: {x: 130, y: 130},  6: {x: 0, y: 130},
+      7: {x: 0, y: 0},  8: {x: 130, y: 0},  9: {x: 260, y: 0},
+    };
+    return coords[pos] || coords[0];
+  };
+  const cPos = getPosCoords(state.snakesLaddersCurrentPos || 1);
+  const catStyle = `transform: translate(${cPos.x}px, ${cPos.y}px);`;
+
+  let boardContent = `
+    <div class="sl-track-container">
+      <div class="sl-board">
+        <div class="sl-cell" style="grid-column:1; grid-row:1;">7</div>
+        <div class="sl-cell" style="grid-column:2; grid-row:1;">8</div>
+        <div class="sl-cell" style="grid-column:3; grid-row:1;">9</div>
+        <div class="sl-cell" style="grid-column:1; grid-row:2;">6</div>
+        <div class="sl-cell" style="grid-column:2; grid-row:2;">5</div>
+        <div class="sl-cell" style="grid-column:3; grid-row:2;">4</div>
+        <div class="sl-cell start" style="grid-column:1; grid-row:3;">1<span>Start</span></div>
+        <div class="sl-cell" style="grid-column:2; grid-row:3;">2</div>
+        <div class="sl-cell" style="grid-column:3; grid-row:3;">3</div>
+        
+        <div class="sl-character ${state.snakesLaddersIsJumping ? 'jumping' : ''} ${state.snakesLaddersResult === 'snake' ? 'falling' : ''}" style="${catStyle}">
+          <img src="${characterSrc}" alt="Player Cat" onerror="this.onerror=null; this.src='/assets/cathappy/lv1.png';" />
+        </div>
+      </div>
+    </div>
+  `;
+  
+  // Helper: render dice face as dot pattern (3x3 grid positions)
+  const getDiceDots = (val) => {
+    // Each position in the 3x3 grid: TL TC TR ML MC MR BL BC BR
+    const patterns = {
+      1: [0,0,0, 0,1,0, 0,0,0],
+      2: [0,0,1, 0,0,0, 1,0,0],
+      3: [0,0,1, 0,1,0, 1,0,0],
+      4: [1,0,1, 0,0,0, 1,0,1],
+      5: [1,0,1, 0,1,0, 1,0,1],
+      6: [1,0,1, 1,0,1, 1,0,1],
+    };
+    const p = patterns[val] || patterns[1];
+    return p.map(v => `<span class="dot ${v ? '' : 'hidden'}"></span>`).join('');
+  };
+
+  let resultContent = "";
+  if (state.snakesLaddersResult) {
+    let msg = "";
+    let btn = "";
+    if (state.snakesLaddersResult === "snake") {
+      msg = `🐍 โชคร้าย! โดนงูกัด ลื่นตกลงมา! (ร่วง ${state.snakesLaddersEffectValue || 1} เฟส)`;
+      btn = "กลับไปตั้งหลักใหม่...";
+    } else {
+      if (state.snakesLaddersEffectValue > 0) {
+        msg = `🪜 โชคดีสุดๆ! ได้ปีนบันไดข้ามเฟสฟรี! (ข้าม ${state.snakesLaddersEffectValue} เฟส)`;
+        btn = "ลุยต่อเลยสุดยอด!";
+      } else {
+        msg = `🪜 โชคดี! รอดพ้นอันตรายแถมได้ปีนบันไดอีกต่างหาก!`;
+        btn = "ลุยงานเฟสต่อไปได้เลย!";
+      }
+    }
+
+    resultContent = `
+      <div class="sl-dice-section">
+        <div class="sl-dice">${getDiceDots(state.snakesLaddersDiceValue)}</div>
+        <div class="sl-result-msg ${state.snakesLaddersResult}">
+          ${msg}
+        </div>
+        <button class="button ui-button block primary" onclick="endSnakesLadders()">
+          ${btn}
+        </button>
+      </div>
+    `;
+  } else {
+    const diceVal = state.snakesLaddersDiceValue || 1;
+    resultContent = `
+      <div class="sl-dice-section">
+        <div class="sl-dice ${state.snakesLaddersIsRolling ? 'rolling' : ''}">${getDiceDots(diceVal)}</div>
+        ${state.snakesLaddersIsRolling 
+          ? `<p style="opacity: 0.5;">กำลังทอย...</p>` 
+          : `<button class="button ui-button block primary" onclick="rollSnakesLaddersDice()">ทอยลูกเต๋า</button>`}
+      </div>
+    `;
+  }
+
+  return `
+    <div class="minigame-overlay" role="dialog" aria-modal="true">
+      <div class="snakes-ladders-modal">
+        <h2 class="sl-title">${lang.snakesLaddersTitle}</h2>
+        <p class="sl-desc">${lang.snakesLaddersDescription}</p>
+        ${boardContent}
+        ${resultContent}
+      </div>
+    </div>
+  `;
 }
 
 function minigameModalMarkup() {
@@ -3716,6 +3953,10 @@ function renderEvolution() {
     state.screen = state.index >= game.steps.length ? "result" : "step";
     if (state.screen === "step") {
       state.phaseTimerValue = 60;
+      // 15% chance to trigger Snakes & Ladders minigame
+      if (state.snakesLaddersTriggeredCount < 2 && Math.random() < 0.15) {
+        triggerSnakesLadders();
+      }
     }
     render();
   });
@@ -3888,6 +4129,11 @@ function render() {
       </div>
     `;
     root.insertAdjacentHTML("beforeend", popupHtml);
+  }
+
+  const snakesLaddersHtml = snakesLaddersModalMarkup();
+  if (snakesLaddersHtml) {
+    root.insertAdjacentHTML("beforeend", snakesLaddersHtml);
   }
 
   const tutorialHtml = tutorialMarkup();
