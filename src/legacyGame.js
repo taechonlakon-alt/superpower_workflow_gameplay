@@ -2922,27 +2922,7 @@ function renderTitle() {
       ${heroMarkup()}
     </main>
     <!-- DEBUG BUTTON: remove when done testing -->
-    <button
-      id="debug-sl-btn"
-      onclick="window.__debugTriggerSL()"
-      style="
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        z-index: 99999;
-        background: #1a1a2e;
-        color: #ff6b6b;
-        border: 3px dashed #ff6b6b;
-        padding: 10px 18px;
-        font-family: monospace;
-        font-size: 0.85rem;
-        font-weight: bold;
-        cursor: pointer;
-        border-radius: 8px;
-        letter-spacing: 0.05em;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-      "
-    >🐍 [DEBUG] เปิดมินิเกมงู</button>
+    
   `;
 }
 
