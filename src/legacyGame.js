@@ -92,7 +92,7 @@ function createInitialState() {
     snakesLaddersDice2: null,
     snakesLaddersRollCount: 0,
     snakesLaddersIsRolling: false,
-    snakesLaddersCurrentPos: 1,
+    snakesLaddersCurrentPos: 0,
     snakesLaddersIsJumping: false,
     phaseTimerValue: 60,
     phaseTimerIntervalId: null,
@@ -1617,7 +1617,7 @@ function triggerSnakesLadders() {
   state.snakesLaddersDice2 = null;
   state.snakesLaddersRollCount = 0;
   state.snakesLaddersIsRolling = false;
-  state.snakesLaddersCurrentPos = 1;
+  state.snakesLaddersCurrentPos = 0;
   state.snakesLaddersIsJumping = false;
   state.snakesLaddersTriggeredCount += 1;
   render();
@@ -1634,8 +1634,8 @@ function rollSnakesLaddersDice() {
   state.snakesLaddersRollCount += 1;
   state.snakesLaddersIsRolling = true;
 
-  if (typeof state.snakesLaddersCurrentPos === "undefined") {
-    state.snakesLaddersCurrentPos = 1;
+  if (typeof state.snakesLaddersCurrentPos === "undefined" || state.snakesLaddersCurrentPos === null) {
+    state.snakesLaddersCurrentPos = 0;
   }
 
   beep({ frequency: 800, duration: 0.05, volume: 0.05 });
@@ -1663,10 +1663,10 @@ function rollSnakesLaddersDice() {
       beep({ frequency: 600, duration: 0.1, volume: 0.05 });
       render();
 
-      // Target = start pos (1) + sum of dice, capped at 12
-      const rawTarget = (state.snakesLaddersCurrentPos || 1) + finalDiceSum;
+      // Target = start pos (0) + sum of dice, capped at 12
+      const rawTarget = (state.snakesLaddersCurrentPos || 0) + finalDiceSum;
       const targetPos = Math.min(rawTarget, 12);
-      const startPos = state.snakesLaddersCurrentPos || 1;
+      const startPos = state.snakesLaddersCurrentPos || 0;
 
       setTimeout(() => {
         let stepPos = startPos;
@@ -1781,7 +1781,7 @@ function endSnakesLadders() {
   state.snakesLaddersDice1 = null;
   state.snakesLaddersDice2 = null;
   state.snakesLaddersRollCount = 0;
-  state.snakesLaddersCurrentPos = 1;
+  state.snakesLaddersCurrentPos = 0;
   render();
 }
 if (typeof window !== "undefined") {
@@ -1818,10 +1818,10 @@ function snakesLaddersModalMarkup() {
     };
     return coords[pos] || coords[1];
   };
-  const cPos = getPosCoords(state.snakesLaddersCurrentPos || 1);
+  const cPos = getPosCoords(state.snakesLaddersCurrentPos !== undefined ? state.snakesLaddersCurrentPos : 0);
   const catStyle = `transform: translate(${cPos.x}px, ${cPos.y}px);`;
 
-  const curPos = state.snakesLaddersCurrentPos || 1;
+  const curPos = state.snakesLaddersCurrentPos !== undefined ? state.snakesLaddersCurrentPos : 0;
 
   const cellClass = (n) => {
     let cls = 'sl-cell';
@@ -2921,7 +2921,28 @@ function renderTitle() {
     <main class="app phase-enter">
       ${heroMarkup()}
     </main>
-    
+    <!-- DEBUG BUTTON: remove when done testing -->
+    <button
+      id="debug-sl-btn"
+      onclick="window.__debugTriggerSL()"
+      style="
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 99999;
+        background: #1a1a2e;
+        color: #ff6b6b;
+        border: 3px dashed #ff6b6b;
+        padding: 10px 18px;
+        font-family: monospace;
+        font-size: 0.85rem;
+        font-weight: bold;
+        cursor: pointer;
+        border-radius: 8px;
+        letter-spacing: 0.05em;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      "
+    >🐍 [DEBUG] เปิดมินิเกมงู</button>
   `;
 }
 
